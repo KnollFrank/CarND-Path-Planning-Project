@@ -166,16 +166,28 @@ vector<double> getXY(double s, double d, const MapWaypoints &map_waypoints) {
   return {x,y};
 }
 
+void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
+  auto isCloserToEgoCar =
+      [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
+        double distance1 = distance(egoCar.car_x, egoCar.car_y, vehicle1.x, vehicle1.y);
+        double distance2 = distance(egoCar.car_x, egoCar.car_y, vehicle2.x, vehicle2.y);
+        return distance1 < distance2;
+      };
+
+  Vehicle vehicle = *min_element(vehicles.begin(), vehicles.end(),
+                                 isCloserToEgoCar);
+
+  cout << egoCar;
+  cout << vehicle << endl;
+}
+
 tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
                                            MapWaypoints &map_waypoints,
                                            EgoCar egoCar,
                                            const PreviousData &previousData,
                                            const vector<Vehicle> &vehicles) {
 
-  for(const Vehicle &vehicle: vehicles) {
-    cout << vehicle;
-  }
-  cout << endl;
+  printInfo(egoCar, vehicles);
 
   vector<double> next_x_vals;
   vector<double> next_y_vals;
