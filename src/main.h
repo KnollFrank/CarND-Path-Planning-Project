@@ -33,6 +33,17 @@ struct Vehicle {
   double vy;
   double s;
   double d;
+
+  friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
 };
+
+ostream& operator<<(ostream& os, const Vehicle& vehicle)
+{
+    os << "Vehicle(" << vehicle.id << "):" << endl;
+    os << "  (x, y) = (" << vehicle.x << ", " << vehicle.y << ")" << endl;
+    os << "  (vx, vy) = (" << vehicle.vx << ", " << vehicle.vy << ")" << endl;
+    os << "  (s, d) = (" << vehicle.s << ", " << vehicle.d << ")" << endl;
+    return os;
+}
 
 #endif /* MAIN_H_ */

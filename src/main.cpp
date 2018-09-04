@@ -172,6 +172,11 @@ tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
                                            const PreviousData &previousData,
                                            const vector<Vehicle> &vehicles) {
 
+  for(const Vehicle &vehicle: vehicles) {
+    cout << vehicle;
+  }
+  cout << endl;
+
   vector<double> next_x_vals;
   vector<double> next_y_vals;
   const int prev_size = previousData.previous_path_x.size();
@@ -186,7 +191,6 @@ tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
     float d = vehicles[i].d;
     // if(d > 4*lane && d < 4*(lane + 1))
     if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
-      // TODO: no magic indices, use defines instead.
       double vx = vehicles[i].vx;
       double vy = vehicles[i].vy;
       double check_speed = sqrt(vx * vx + vy * vy);
