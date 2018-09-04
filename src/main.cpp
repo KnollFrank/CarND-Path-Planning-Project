@@ -181,10 +181,7 @@ std::tuple<vector<double>, vector<double>> doit(
     vector<double> previous_path_y,
     double end_path_s,
     double end_path_d,
-    nlohmann::basic_json<std::map, std::vector,
-        std::__cxx11::basic_string<char, std::char_traits<char>,
-            std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &sensor_fusion) {
+    vector<vector<double>> sensor_fusion) {
 
   vector<double> next_x_vals;
   vector<double> next_y_vals;
