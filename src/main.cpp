@@ -8,6 +8,7 @@
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
+#include <tuple>
 #include "spline.h"
 
 using namespace std;
@@ -162,7 +163,7 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
   return {x,y};
 }
 
-void doit(
+std::tuple<vector<double>, vector<double>> doit(
     double &ref_vel,
     int &lane,
     vector<double> &map_waypoints_x,
@@ -173,9 +174,10 @@ void doit(
     nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &j,
-    vector<double> &next_x_vals, vector<double> &next_y_vals) {
+        std::allocator, nlohmann::adl_serializer> &j) {
 
+  vector<double> next_x_vals;
+  vector<double> next_y_vals;
   // j[1] is the data JSON object
 
   // Main car's localization Data
@@ -331,6 +333,8 @@ void doit(
     next_x_vals.push_back(x_point);
     next_y_vals.push_back(y_point);
   }
+
+  return std::make_tuple(next_x_vals, next_y_vals);
 }
 
 int main() {
@@ -394,16 +398,14 @@ int main() {
               vector<double> next_x_vals;
               vector<double> next_y_vals;
 
-              doit(ref_vel,
+              std::tie(next_x_vals, next_y_vals) = doit(ref_vel,
                   lane,
                   map_waypoints_x,
                   map_waypoints_y,
                   map_waypoints_s,
                   map_waypoints_dx,
                   map_waypoints_dy,
-                  j,
-                  next_x_vals,
-                  next_y_vals);
+                  j);
 
               json msgJson;
               msgJson["next_x"] = next_x_vals;
