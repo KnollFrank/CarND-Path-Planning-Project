@@ -176,10 +176,10 @@ std::tuple<vector<double>, vector<double>> doit2(
             std::allocator<char> >, bool, long, unsigned long, double,
         std::allocator, nlohmann::adl_serializer> &j,
     double car_x, double car_y, double car_s, double car_d, double car_yaw,
-    double car_speed) {
+    double car_speed,
+    nlohmann::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::adl_serializer> &previous_path_x) {
 
   // Previous path data given to the Planner
-  auto previous_path_x = j[1]["previous_path_x"];
   auto previous_path_y = j[1]["previous_path_y"];
   // Previous path's end s and d values
   double end_path_s = j[1]["end_path_s"];
@@ -352,9 +352,11 @@ std::tuple<vector<double>, vector<double>> doit(
   double car_yaw = j[1]["yaw"];
   double car_speed = j[1]["speed"];
 
+  auto previous_path_x = j[1]["previous_path_x"];
+
   return doit2(ref_vel, lane, map_waypoints_x, map_waypoints_y, map_waypoints_s,
                map_waypoints_dx, map_waypoints_dy, j, car_x, car_y, car_s,
-               car_d, car_yaw, car_speed);
+               car_d, car_yaw, car_speed, previous_path_x);
 }
 
 int main() {
