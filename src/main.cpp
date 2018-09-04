@@ -250,9 +250,10 @@ int main() {
 
               bool too_close = false;
 
-              for(int i=0; i< sensor_fusion.size(); i++) {
+              for(int i=0; i<sensor_fusion.size(); i++) {
                 float d = sensor_fusion[i][6];
-                if(d < 2+4*lane+2 && d > 2+4*lane-2) {
+                // if(d > 4*lane && d < 4*(lane + 1))
+                if(d > 2 + 4*lane - 2 && d < 2 + 4*lane + 2) {
                   // TODO: no magic indices, use defines instead.
                   double vx = sensor_fusion[i][3];
                   double vy = sensor_fusion[i][4];
@@ -263,6 +264,9 @@ int main() {
                   if(check_car_s > car_s && check_car_s - car_s < 30) {
                     // ref_vel = 29.5;
                     too_close = true;
+                    if(lane > 0) {
+                      lane = 0;
+                    }
                   }
                 }
               }
