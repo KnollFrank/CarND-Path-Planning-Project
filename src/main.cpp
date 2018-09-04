@@ -249,16 +249,19 @@ int main() {
               }
 
               bool too_close = false;
+              enum sensor_fusion_index {
+                ID=0, X=1, Y=2, VX=3, VY=4, S=5, D=6
+              };
 
               for(int i=0; i<sensor_fusion.size(); i++) {
-                float d = sensor_fusion[i][6];
+                float d = sensor_fusion[i][D];
                 // if(d > 4*lane && d < 4*(lane + 1))
                 if(d > 2 + 4*lane - 2 && d < 2 + 4*lane + 2) {
                   // TODO: no magic indices, use defines instead.
-                  double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
+                  double vx = sensor_fusion[i][VX];
+                  double vy = sensor_fusion[i][VY];
                   double check_speed = sqrt(vx*vx + vy*vy);
-                  double check_car_s = sensor_fusion[i][5];
+                  double check_car_s = sensor_fusion[i][S];
 
                   check_car_s += (double)prev_size*0.02*check_speed;
                   if(check_car_s > car_s && check_car_s - car_s < 30) {
