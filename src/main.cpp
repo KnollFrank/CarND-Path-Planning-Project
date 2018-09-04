@@ -171,16 +171,26 @@ std::tuple<vector<double>, vector<double>> doit2(
     vector<double> &map_waypoints_s,
     vector<double> &map_waypoints_dx,
     vector<double> &map_waypoints_dy,
+    double car_x,
+    double car_y,
+    double car_s,
+    double car_d,
+    double car_yaw,
+    double car_speed,
     nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &j,
-    double car_x, double car_y, double car_s, double car_d, double car_yaw,
-    double car_speed,
-    nlohmann::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::adl_serializer> &previous_path_x,
-    nlohmann::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::adl_serializer> &previous_path_y,
-    double end_path_s, double end_path_d,
-    nlohmann::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::adl_serializer> &sensor_fusion) {
+        std::allocator, nlohmann::adl_serializer> &previous_path_x,
+    nlohmann::basic_json<std::map, std::vector,
+        std::__cxx11::basic_string<char, std::char_traits<char>,
+            std::allocator<char> >, bool, long, unsigned long, double,
+        std::allocator, nlohmann::adl_serializer> &previous_path_y,
+    double end_path_s,
+    double end_path_d,
+    nlohmann::basic_json<std::map, std::vector,
+        std::__cxx11::basic_string<char, std::char_traits<char>,
+            std::allocator<char> >, bool, long, unsigned long, double,
+        std::allocator, nlohmann::adl_serializer> &sensor_fusion) {
 
   vector<double> next_x_vals;
   vector<double> next_y_vals;
@@ -358,8 +368,9 @@ std::tuple<vector<double>, vector<double>> doit(
   auto sensor_fusion = j[1]["sensor_fusion"];
 
   return doit2(ref_vel, lane, map_waypoints_x, map_waypoints_y, map_waypoints_s,
-               map_waypoints_dx, map_waypoints_dy, j, car_x, car_y, car_s,
-               car_d, car_yaw, car_speed, previous_path_x, previous_path_y, end_path_s, end_path_d, sensor_fusion);
+               map_waypoints_dx, map_waypoints_dy, car_x, car_y, car_s, car_d,
+               car_yaw, car_speed, previous_path_x, previous_path_y, end_path_s,
+               end_path_d, sensor_fusion);
 }
 
 int main() {
