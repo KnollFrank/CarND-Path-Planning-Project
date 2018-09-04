@@ -9,6 +9,7 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 #include <tuple>
+#include "main.h"
 #include "spline.h"
 
 using namespace std;
@@ -89,12 +90,6 @@ int NextWaypoint(double x, double y, double theta, const vector<double> &maps_x,
   return closestWaypoint;
 }
 
-struct MapWaypoints {
-  vector<double> map_waypoints_x;
-  vector<double> map_waypoints_y;
-  vector<double> map_waypoints_s;
-};
-
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 vector<double> getFrenet(double x, double y, double theta,
                          const vector<double> &maps_x,
@@ -171,35 +166,11 @@ vector<double> getXY(double s, double d, const MapWaypoints &map_waypoints) {
   return {x,y};
 }
 
-struct EgoCar {
-  double car_x;
-  double car_y;
-  double car_s;
-  double car_d;
-  double car_yaw;
-  double car_speed;
-};
-
-struct PreviousData {
-  vector<double> previous_path_x;
-  vector<double> previous_path_y;
-  double end_path_s;
-  double end_path_d;
-};
-
-struct Vehicle {
-  int id;
-  double x;
-  double y;
-  double vx;
-  double vy;
-  double s;
-  double d;
-};
-
-std::tuple<vector<double>, vector<double>> doit(
-    double &ref_vel, int &lane, MapWaypoints &map_waypoints, EgoCar egoCar,
-    const PreviousData &previousData, const vector<Vehicle> &vehicles) {
+tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
+                                           MapWaypoints &map_waypoints,
+                                           EgoCar egoCar,
+                                           const PreviousData &previousData,
+                                           const vector<Vehicle> &vehicles) {
 
   vector<double> next_x_vals;
   vector<double> next_y_vals;
@@ -330,7 +301,7 @@ std::tuple<vector<double>, vector<double>> doit(
     next_y_vals.push_back(y_point);
   }
 
-  return std::make_tuple(next_x_vals, next_y_vals);
+  return make_tuple(next_x_vals, next_y_vals);
 }
 
 int main() {
@@ -440,7 +411,7 @@ int main() {
                 vehicles.push_back(vehicle);
               }
 
-              std::tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
+              tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
 
               json msgJson;
               msgJson["next_x"] = next_x_vals;
