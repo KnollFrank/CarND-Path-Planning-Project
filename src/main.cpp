@@ -165,7 +165,7 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
 
 std::tuple<vector<double>, vector<double>> doit(
     double &ref_vel,
-    int lane,
+    int &lane,
     vector<double> &map_waypoints_x,
     vector<double> &map_waypoints_y,
     vector<double> &map_waypoints_s,
