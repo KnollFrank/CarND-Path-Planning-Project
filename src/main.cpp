@@ -89,6 +89,12 @@ int NextWaypoint(double x, double y, double theta, const vector<double> &maps_x,
   return closestWaypoint;
 }
 
+struct MapWaypoints {
+  vector<double> map_waypoints_x;
+  vector<double> map_waypoints_y;
+  vector<double> map_waypoints_s;
+};
+
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 vector<double> getFrenet(double x, double y, double theta,
                          const vector<double> &maps_x,
@@ -136,9 +142,11 @@ vector<double> getFrenet(double x, double y, double theta,
 }
 
 // Transform from Frenet s,d coordinates to Cartesian x,y
-vector<double> getXY(double s, double d, const vector<double> &maps_s,
-                     const vector<double> &maps_x,
-                     const vector<double> &maps_y) {
+vector<double> getXY(double s, double d, const MapWaypoints &map_waypoints) {
+  const vector<double> &maps_s = map_waypoints.map_waypoints_s;
+  const vector<double> &maps_x = map_waypoints.map_waypoints_x;
+  const vector<double> &maps_y = map_waypoints.map_waypoints_y;
+
   int prev_wp = -1;
 
   while (s > maps_s[prev_wp + 1] && (prev_wp < (int) (maps_s.size() - 1))) {
@@ -164,8 +172,7 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
 }
 
 std::tuple<vector<double>, vector<double>> doit(
-    double &ref_vel, int &lane, vector<double> &map_waypoints_x,
-    vector<double> &map_waypoints_y, vector<double> &map_waypoints_s,
+    double &ref_vel, int &lane, MapWaypoints &map_waypoints,
     double car_x, double car_y, double car_s, double car_d, double car_yaw,
     double car_speed, vector<double> previous_path_x,
     vector<double> previous_path_y, double end_path_s, double end_path_d,
@@ -248,12 +255,9 @@ std::tuple<vector<double>, vector<double>> doit(
     ptsy.push_back(ref_y);
   }
 
-  vector<double> next_wp0 = getXY(car_s + 30, 2 + 4 * lane, map_waypoints_s,
-                                  map_waypoints_x, map_waypoints_y);
-  vector<double> next_wp1 = getXY(car_s + 60, 2 + 4 * lane, map_waypoints_s,
-                                  map_waypoints_x, map_waypoints_y);
-  vector<double> next_wp2 = getXY(car_s + 90, 2 + 4 * lane, map_waypoints_s,
-                                  map_waypoints_x, map_waypoints_y);
+  vector<double> next_wp0 = getXY(car_s + 30, 2 + 4 * lane, map_waypoints);
+  vector<double> next_wp1 = getXY(car_s + 60, 2 + 4 * lane, map_waypoints);
+  vector<double> next_wp2 = getXY(car_s + 90, 2 + 4 * lane, map_waypoints);
 
   ptsx.push_back(next_wp0[0]);
   ptsx.push_back(next_wp1[0]);
@@ -316,9 +320,7 @@ int main() {
   uWS::Hub h;
 
   // Load up map values for waypoint's x,y,s and d normalized normal vectors
-  vector<double> map_waypoints_x;
-  vector<double> map_waypoints_y;
-  vector<double> map_waypoints_s;
+  MapWaypoints map_waypoints;
   vector<double> map_waypoints_dx;
   vector<double> map_waypoints_dy;
 
@@ -342,9 +344,9 @@ int main() {
     iss >> s;
     iss >> d_x;
     iss >> d_y;
-    map_waypoints_x.push_back(x);
-    map_waypoints_y.push_back(y);
-    map_waypoints_s.push_back(s);
+    map_waypoints.map_waypoints_x.push_back(x);
+    map_waypoints.map_waypoints_y.push_back(y);
+    map_waypoints.map_waypoints_s.push_back(s);
     map_waypoints_dx.push_back(d_x);
     map_waypoints_dy.push_back(d_y);
   }
@@ -353,7 +355,7 @@ int main() {
   double ref_vel = 0;
 
   h.onMessage(
-      [&ref_vel,&lane,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+      [&ref_vel,&lane,&map_waypoints,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
           uWS::OpCode opCode) {
         // "42" at the start of the message means there's a websocket message event.
         // The 4 signifies a websocket message
@@ -394,7 +396,7 @@ int main() {
               // Sensor Fusion Data, a list of all other cars on the same side of the road.
               auto sensor_fusion = j[1]["sensor_fusion"];
 
-              std::tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints_x, map_waypoints_y, map_waypoints_s,
+              std::tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints,
                   car_x, car_y, car_s, car_d,
                   car_yaw, car_speed, previous_path_x, previous_path_y, end_path_s,
                   end_path_d, sensor_fusion);
