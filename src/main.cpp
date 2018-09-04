@@ -173,7 +173,7 @@ std::tuple<vector<double>, vector<double>> doit(
 
   vector<double> next_x_vals;
   vector<double> next_y_vals;
-  int prev_size = previous_path_x.size();
+  const int prev_size = previous_path_x.size();
 
   if (prev_size > 0) {
     car_s = end_path_s;
