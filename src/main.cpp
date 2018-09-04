@@ -187,9 +187,19 @@ struct PreviousData {
   double end_path_d;
 };
 
+struct Vehicle {
+  int id;
+  double x;
+  double y;
+  double vx;
+  double vy;
+  double s;
+  double d;
+};
+
 std::tuple<vector<double>, vector<double>> doit(
     double &ref_vel, int &lane, MapWaypoints &map_waypoints, EgoCar egoCar,
-    const PreviousData &previousData, vector<vector<double>> sensor_fusion) {
+    const PreviousData &previousData, const vector<Vehicle> &vehicles) {
 
   vector<double> next_x_vals;
   vector<double> next_y_vals;
@@ -200,25 +210,16 @@ std::tuple<vector<double>, vector<double>> doit(
   }
 
   bool too_close = false;
-  enum sensor_fusion_index {
-    ID = 0,
-    X = 1,
-    Y = 2,
-    VX = 3,
-    VY = 4,
-    S = 5,
-    D = 6
-  };
 
-  for (int i = 0; i < sensor_fusion.size(); i++) {
-    float d = sensor_fusion[i][D];
+  for (int i = 0; i < vehicles.size(); i++) {
+    float d = vehicles[i].d;
     // if(d > 4*lane && d < 4*(lane + 1))
     if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
       // TODO: no magic indices, use defines instead.
-      double vx = sensor_fusion[i][VX];
-      double vy = sensor_fusion[i][VY];
+      double vx = vehicles[i].vx;
+      double vy = vehicles[i].vy;
       double check_speed = sqrt(vx * vx + vy * vy);
-      double check_car_s = sensor_fusion[i][S];
+      double check_car_s = vehicles[i].s;
 
       check_car_s += (double) prev_size * 0.02 * check_speed;
       if (check_car_s > egoCar.car_s && check_car_s - egoCar.car_s < 30) {
@@ -416,8 +417,30 @@ int main() {
               // Sensor Fusion Data, a list of all other cars on the same side of the road.
               auto sensor_fusion = j[1]["sensor_fusion"];
 
-              std::tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints,
-                  egoCar, previousData, sensor_fusion);
+              enum sensor_fusion_index {
+                ID = 0,
+                X = 1,
+                Y = 2,
+                VX = 3,
+                VY = 4,
+                S = 5,
+                D = 6
+              };
+
+              vector<Vehicle> vehicles;
+              for (int i = 0; i < sensor_fusion.size(); i++) {
+                Vehicle vehicle;
+                vehicle.id = sensor_fusion[i][ID];
+                vehicle.x = sensor_fusion[i][X];
+                vehicle.y = sensor_fusion[i][Y];
+                vehicle.vx = sensor_fusion[i][VX];
+                vehicle.vy = sensor_fusion[i][VY];
+                vehicle.s = sensor_fusion[i][S];
+                vehicle.d = sensor_fusion[i][D];
+                vehicles.push_back(vehicle);
+              }
+
+              std::tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
 
               json msgJson;
               msgJson["next_x"] = next_x_vals;
