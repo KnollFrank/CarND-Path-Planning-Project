@@ -291,6 +291,7 @@ int main() {
                 double shift_x = ptsx[i] - ref_x;
                 double shift_y = ptsy[i] - ref_y;
 
+                // TODO: reformulate as a matrix multiplication using Eigen
                 ptsx[i] = shift_x * cos(-ref_yaw) - shift_y*sin(-ref_yaw);
                 ptsy[i] = shift_x * sin(-ref_yaw) + shift_y*cos(-ref_yaw);
               }
@@ -323,6 +324,7 @@ int main() {
                 double x_ref = x_point;
                 double y_ref = y_point;
 
+                // TODO: reformulate as a matrix multiplication using Eigen
                 x_point = x_ref * cos(ref_yaw) - y_ref*sin(ref_yaw);
                 y_point = x_ref * sin(ref_yaw) + y_ref*cos(ref_yaw);
 
