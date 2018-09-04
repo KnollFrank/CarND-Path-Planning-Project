@@ -347,7 +347,8 @@ int main() {
 
               double x_add_on = 0;
 
-              for(int i=1; i < 50 - prev_size; i++) {
+              const int path_size = 50;
+              for(int i=1; i < path_size - prev_size; i++) {
                 double N = target_dist / (0.02*ref_vel/2.24);
                 double x_point = x_add_on + target_x/N;
                 double y_point = s(x_point);
