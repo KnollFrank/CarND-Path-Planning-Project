@@ -162,7 +162,7 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
   return {x,y};
 }
 
-json doit(
+void doit(
     double &ref_vel,
     int &lane,
     vector<double> &map_waypoints_x,
@@ -173,7 +173,8 @@ json doit(
     nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &j) {
+        std::allocator, nlohmann::adl_serializer> &j,
+    vector<double> &next_x_vals, vector<double> &next_y_vals) {
 
   // j[1] is the data JSON object
 
@@ -298,9 +299,6 @@ json doit(
 
   s.set_points(ptsx, ptsy);
 
-  vector<double> next_x_vals;
-  vector<double> next_y_vals;
-
   for (int i = 0; i < prev_size; i++) {
     next_x_vals.push_back(previous_path_x[i]);
     next_y_vals.push_back(previous_path_y[i]);
@@ -333,11 +331,6 @@ json doit(
     next_x_vals.push_back(x_point);
     next_y_vals.push_back(y_point);
   }
-
-  json msgJson;
-  msgJson["next_x"] = next_x_vals;
-  msgJson["next_y"] = next_y_vals;
-  return msgJson;
 }
 
 int main() {
@@ -398,14 +391,24 @@ int main() {
             string event = j[0].get<string>();
 
             if (event == "telemetry") {
-              json msgJson = doit(ref_vel,
+              vector<double> next_x_vals;
+              vector<double> next_y_vals;
+
+              doit(ref_vel,
                   lane,
                   map_waypoints_x,
                   map_waypoints_y,
                   map_waypoints_s,
                   map_waypoints_dx,
                   map_waypoints_dy,
-                  j);
+                  j,
+                  next_x_vals,
+                  next_y_vals);
+
+              json msgJson;
+              msgJson["next_x"] = next_x_vals;
+              msgJson["next_y"] = next_y_vals;
+
               auto msg = "42[\"control\","+ msgJson.dump()+"]";
 
               //this_thread::sleep_for(chrono::milliseconds(1000));
