@@ -180,18 +180,23 @@ struct EgoCar {
   double car_speed;
 };
 
+struct PreviousData {
+  vector<double> previous_path_x;
+  vector<double> previous_path_y;
+  double end_path_s;
+  double end_path_d;
+};
+
 std::tuple<vector<double>, vector<double>> doit(
     double &ref_vel, int &lane, MapWaypoints &map_waypoints, EgoCar egoCar,
-    vector<double> previous_path_x, vector<double> previous_path_y,
-    double end_path_s, double end_path_d,
-    vector<vector<double>> sensor_fusion) {
+    const PreviousData &previousData, vector<vector<double>> sensor_fusion) {
 
   vector<double> next_x_vals;
   vector<double> next_y_vals;
-  const int prev_size = previous_path_x.size();
+  const int prev_size = previousData.previous_path_x.size();
 
   if (prev_size > 0) {
-    egoCar.car_s = end_path_s;
+    egoCar.car_s = previousData.end_path_s;
   }
 
   bool too_close = false;
@@ -249,11 +254,11 @@ std::tuple<vector<double>, vector<double>> doit(
     ptsy.push_back(prev_car_y);
     ptsy.push_back(egoCar.car_y);
   } else {
-    ref_x = previous_path_x[prev_size - 1];
-    ref_y = previous_path_y[prev_size - 1];
+    ref_x = previousData.previous_path_x[prev_size - 1];
+    ref_y = previousData.previous_path_y[prev_size - 1];
 
-    double ref_x_prev = previous_path_x[prev_size - 2];
-    double ref_y_prev = previous_path_y[prev_size - 2];
+    double ref_x_prev = previousData.previous_path_x[prev_size - 2];
+    double ref_y_prev = previousData.previous_path_y[prev_size - 2];
     ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
 
     ptsx.push_back(ref_x_prev);
@@ -292,8 +297,8 @@ std::tuple<vector<double>, vector<double>> doit(
   s.set_points(ptsx, ptsy);
 
   for (int i = 0; i < prev_size; i++) {
-    next_x_vals.push_back(previous_path_x[i]);
-    next_y_vals.push_back(previous_path_y[i]);
+    next_x_vals.push_back(previousData.previous_path_x[i]);
+    next_y_vals.push_back(previousData.previous_path_y[i]);
   }
 
   double target_x = 30.0;
@@ -397,20 +402,22 @@ int main() {
               egoCar.car_yaw = j[1]["yaw"];
               egoCar.car_speed = j[1]["speed"];
 
+              PreviousData previousData;
               // Previous path data given to the Planner
-              auto previous_path_x = j[1]["previous_path_x"];
-              auto previous_path_y = j[1]["previous_path_y"];
+              vector<double> previous_path_x = j[1]["previous_path_x"];
+              previousData.previous_path_x = previous_path_x;
+              vector<double> previous_path_y = j[1]["previous_path_y"];
+              previousData.previous_path_y = previous_path_y;
 
               // Previous path's end s and d values
-              double end_path_s = j[1]["end_path_s"];
-              double end_path_d = j[1]["end_path_d"];
+              previousData.end_path_s = j[1]["end_path_s"];
+              previousData.end_path_d = j[1]["end_path_d"];
 
               // Sensor Fusion Data, a list of all other cars on the same side of the road.
               auto sensor_fusion = j[1]["sensor_fusion"];
 
               std::tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints,
-                  egoCar, previous_path_x, previous_path_y, end_path_s,
-                  end_path_d, sensor_fusion);
+                  egoCar, previousData, sensor_fusion);
 
               json msgJson;
               msgJson["next_x"] = next_x_vals;
