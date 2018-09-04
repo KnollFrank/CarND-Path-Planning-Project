@@ -171,11 +171,19 @@ vector<double> getXY(double s, double d, const MapWaypoints &map_waypoints) {
   return {x,y};
 }
 
+struct EgoCar {
+  double car_x;
+  double car_y;
+  double car_s;
+  double car_d;
+  double car_yaw;
+  double car_speed;
+};
+
 std::tuple<vector<double>, vector<double>> doit(
-    double &ref_vel, int &lane, MapWaypoints &map_waypoints,
-    double car_x, double car_y, double car_s, double car_d, double car_yaw,
-    double car_speed, vector<double> previous_path_x,
-    vector<double> previous_path_y, double end_path_s, double end_path_d,
+    double &ref_vel, int &lane, MapWaypoints &map_waypoints, EgoCar egoCar,
+    vector<double> previous_path_x, vector<double> previous_path_y,
+    double end_path_s, double end_path_d,
     vector<vector<double>> sensor_fusion) {
 
   vector<double> next_x_vals;
@@ -183,7 +191,7 @@ std::tuple<vector<double>, vector<double>> doit(
   const int prev_size = previous_path_x.size();
 
   if (prev_size > 0) {
-    car_s = end_path_s;
+    egoCar.car_s = end_path_s;
   }
 
   bool too_close = false;
@@ -208,7 +216,7 @@ std::tuple<vector<double>, vector<double>> doit(
       double check_car_s = sensor_fusion[i][S];
 
       check_car_s += (double) prev_size * 0.02 * check_speed;
-      if (check_car_s > car_s && check_car_s - car_s < 30) {
+      if (check_car_s > egoCar.car_s && check_car_s - egoCar.car_s < 30) {
         // ref_vel = 29.5;
         too_close = true;
         if (lane > 0) {
@@ -227,19 +235,19 @@ std::tuple<vector<double>, vector<double>> doit(
   vector<double> ptsx;
   vector<double> ptsy;
 
-  double ref_x = car_x;
-  double ref_y = car_y;
-  double ref_yaw = deg2rad(car_yaw);
+  double ref_x = egoCar.car_x;
+  double ref_y = egoCar.car_y;
+  double ref_yaw = deg2rad(egoCar.car_yaw);
 
   if (prev_size < 2) {
-    double prev_car_x = car_x - cos(car_yaw);
-    double prev_car_y = car_y - sin(car_yaw);
+    double prev_car_x = egoCar.car_x - cos(egoCar.car_yaw);
+    double prev_car_y = egoCar.car_y - sin(egoCar.car_yaw);
 
     ptsx.push_back(prev_car_x);
-    ptsx.push_back(car_x);
+    ptsx.push_back(egoCar.car_x);
 
     ptsy.push_back(prev_car_y);
-    ptsy.push_back(car_y);
+    ptsy.push_back(egoCar.car_y);
   } else {
     ref_x = previous_path_x[prev_size - 1];
     ref_y = previous_path_y[prev_size - 1];
@@ -255,9 +263,12 @@ std::tuple<vector<double>, vector<double>> doit(
     ptsy.push_back(ref_y);
   }
 
-  vector<double> next_wp0 = getXY(car_s + 30, 2 + 4 * lane, map_waypoints);
-  vector<double> next_wp1 = getXY(car_s + 60, 2 + 4 * lane, map_waypoints);
-  vector<double> next_wp2 = getXY(car_s + 90, 2 + 4 * lane, map_waypoints);
+  vector<double> next_wp0 = getXY(egoCar.car_s + 30, 2 + 4 * lane,
+                                  map_waypoints);
+  vector<double> next_wp1 = getXY(egoCar.car_s + 60, 2 + 4 * lane,
+                                  map_waypoints);
+  vector<double> next_wp2 = getXY(egoCar.car_s + 90, 2 + 4 * lane,
+                                  map_waypoints);
 
   ptsx.push_back(next_wp0[0]);
   ptsx.push_back(next_wp1[0]);
@@ -378,12 +389,13 @@ int main() {
               // j[1] is the data JSON object
 
               // Main car's localization Data
-              double car_x = j[1]["x"];
-              double car_y = j[1]["y"];
-              double car_s = j[1]["s"];
-              double car_d = j[1]["d"];
-              double car_yaw = j[1]["yaw"];
-              double car_speed = j[1]["speed"];
+              EgoCar egoCar;
+              egoCar.car_x = j[1]["x"];
+              egoCar.car_y = j[1]["y"];
+              egoCar.car_s = j[1]["s"];
+              egoCar.car_d = j[1]["d"];
+              egoCar.car_yaw = j[1]["yaw"];
+              egoCar.car_speed = j[1]["speed"];
 
               // Previous path data given to the Planner
               auto previous_path_x = j[1]["previous_path_x"];
@@ -397,8 +409,7 @@ int main() {
               auto sensor_fusion = j[1]["sensor_fusion"];
 
               std::tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints,
-                  car_x, car_y, car_s, car_d,
-                  car_yaw, car_speed, previous_path_x, previous_path_y, end_path_s,
+                  egoCar, previous_path_x, previous_path_y, end_path_s,
                   end_path_d, sensor_fusion);
 
               json msgJson;
