@@ -164,23 +164,11 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
 }
 
 std::tuple<vector<double>, vector<double>> doit(
-    double &ref_vel,
-    int &lane,
-    vector<double> &map_waypoints_x,
-    vector<double> &map_waypoints_y,
-    vector<double> &map_waypoints_s,
-    vector<double> &map_waypoints_dx,
-    vector<double> &map_waypoints_dy,
-    double car_x,
-    double car_y,
-    double car_s,
-    double car_d,
-    double car_yaw,
-    double car_speed,
-    vector<double> previous_path_x,
-    vector<double> previous_path_y,
-    double end_path_s,
-    double end_path_d,
+    double &ref_vel, int &lane, vector<double> &map_waypoints_x,
+    vector<double> &map_waypoints_y, vector<double> &map_waypoints_s,
+    double car_x, double car_y, double car_s, double car_d, double car_yaw,
+    double car_speed, vector<double> previous_path_x,
+    vector<double> previous_path_y, double end_path_s, double end_path_d,
     vector<vector<double>> sensor_fusion) {
 
   vector<double> next_x_vals;
@@ -407,9 +395,9 @@ int main() {
               auto sensor_fusion = j[1]["sensor_fusion"];
 
               std::tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints_x, map_waypoints_y, map_waypoints_s,
-                           map_waypoints_dx, map_waypoints_dy, car_x, car_y, car_s, car_d,
-                           car_yaw, car_speed, previous_path_x, previous_path_y, end_path_s,
-                           end_path_d, sensor_fusion);
+                  car_x, car_y, car_s, car_d,
+                  car_yaw, car_speed, previous_path_x, previous_path_y, end_path_s,
+                  end_path_d, sensor_fusion);
 
               json msgJson;
               msgJson["next_x"] = next_x_vals;
