@@ -323,9 +323,6 @@ Points createPath(double &ref_vel, int &lane, MapWaypoints &map_waypoints,
   double ref_y = egoCar.y;
   double ref_yaw = deg2rad(egoCar.yaw);
 
-  vector<double> ptsx;
-  vector<double> ptsy;
-
   Points points = createPoints(prev_size, egoCar, ref_x, previousData, ref_y,
                                ref_yaw, lane, map_waypoints);
 
