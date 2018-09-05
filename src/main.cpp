@@ -206,7 +206,9 @@ tuple<vector<double>, vector<double>> createPath(
       double check_speed = sqrt(vx * vx + vy * vy);
       double check_car_s = vehicles[i].s;
 
+      // TODO: replace magic number 0.02 with constant
       check_car_s += (double) prev_size * 0.02 * check_speed;
+      // TODO: replace magic number 30 with constant
       if (check_car_s > egoCar.s && check_car_s - egoCar.s < 30) {
         // ref_vel = 29.5;
         too_close = true;
@@ -254,6 +256,7 @@ tuple<vector<double>, vector<double>> createPath(
     ptsy.push_back(ref_y);
   }
 
+  // TODO: DRY: 2 + 4 * lane
   vector<double> next_wp0 = getXY(egoCar.s + 30, 2 + 4 * lane, map_waypoints);
   vector<double> next_wp1 = getXY(egoCar.s + 60, 2 + 4 * lane, map_waypoints);
   vector<double> next_wp2 = getXY(egoCar.s + 90, 2 + 4 * lane, map_waypoints);
