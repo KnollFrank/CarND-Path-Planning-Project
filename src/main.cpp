@@ -454,12 +454,7 @@ int main(int argc, char **argv) {
             if (event == "telemetry") {
               // j[1] is the data JSON object
 
-              // Main car's localization Data
-              EgoCar egoCar = createEgoCar(j);
-              PreviousData previousData = createPreviousData(j);
-
-              vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"]);
-              Points next_vals = createPath(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
+              Points next_vals = createPath(ref_vel, lane, map_waypoints, createEgoCar(j), createPreviousData(j), createVehicles(j[1]["sensor_fusion"]));
 
               json msgJson;
               msgJson["next_x"] = next_vals.ptsx;
