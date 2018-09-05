@@ -223,9 +223,10 @@ int updateLane(bool too_close, int lane) {
   return lane;
 }
 
-Points createPoints(const int prev_size, const EgoCar& egoCar, double &ref_x,
-                    const PreviousData& previousData, double& ref_y,
-                    double& ref_yaw, int& lane, const MapWaypoints &map_waypoints) {
+Points createPoints(const int prev_size, const EgoCar& egoCar,
+                    ReferencePoint &referencePoint,
+                    const PreviousData& previousData, int& lane,
+                    const MapWaypoints &map_waypoints) {
   Points points;
 
   if (prev_size < 2) {
@@ -236,15 +237,16 @@ Points createPoints(const int prev_size, const EgoCar& egoCar, double &ref_x,
     points.ptsy.push_back(prev_car_y);
     points.ptsy.push_back(egoCar.y);
   } else {
-    ref_x = previousData.previous_path_x[prev_size - 1];
-    ref_y = previousData.previous_path_y[prev_size - 1];
+    referencePoint.ref_x = previousData.previous_path_x[prev_size - 1];
+    referencePoint.ref_y = previousData.previous_path_y[prev_size - 1];
     double ref_x_prev = previousData.previous_path_x[prev_size - 2];
     double ref_y_prev = previousData.previous_path_y[prev_size - 2];
-    ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
+    referencePoint.ref_yaw = atan2(referencePoint.ref_y - ref_y_prev,
+                                   referencePoint.ref_x - ref_x_prev);
     points.ptsx.push_back(ref_x_prev);
-    points.ptsx.push_back(ref_x);
+    points.ptsx.push_back(referencePoint.ref_x);
     points.ptsy.push_back(ref_y_prev);
-    points.ptsy.push_back(ref_y);
+    points.ptsy.push_back(referencePoint.ref_y);
   }
   // TODO: DRY: 2 + 4 * lane
   vector<double> next_wp0 = getXY(egoCar.s + 30, 2 + 4 * lane, map_waypoints);
@@ -257,18 +259,20 @@ Points createPoints(const int prev_size, const EgoCar& egoCar, double &ref_x,
   points.ptsy.push_back(next_wp1[1]);
   points.ptsy.push_back(next_wp2[1]);
   for (int i = 0; i < points.ptsx.size(); i++) {
-    double shift_x = points.ptsx[i] - ref_x;
-    double shift_y = points.ptsy[i] - ref_y;
+    double shift_x = points.ptsx[i] - referencePoint.ref_x;
+    double shift_y = points.ptsy[i] - referencePoint.ref_y;
     // TODO: reformulate as a matrix multiplication using Eigen
-    points.ptsx[i] = shift_x * cos(-ref_yaw) - shift_y * sin(-ref_yaw);
-    points.ptsy[i] = shift_x * sin(-ref_yaw) + shift_y * cos(-ref_yaw);
+    points.ptsx[i] = shift_x * cos(-referencePoint.ref_yaw)
+        - shift_y * sin(-referencePoint.ref_yaw);
+    points.ptsy[i] = shift_x * sin(-referencePoint.ref_yaw)
+        + shift_y * cos(-referencePoint.ref_yaw);
   }
   return points;
 }
 
 Points createNextVals(const Points &points, const int prev_size,
-                      const PreviousData& previousData, double ref_yaw,
-                      double ref_x, double ref_y, double& ref_vel) {
+                      const PreviousData& previousData,
+                      ReferencePoint &referencePoint) {
   Points next_vals;
 
   tk::spline s;
@@ -283,17 +287,19 @@ Points createNextVals(const Points &points, const int prev_size,
   double x_add_on = 0;
   const int path_size = 50;
   for (int i = 1; i < path_size - prev_size; i++) {
-    double N = target_dist / (0.02 * ref_vel / 2.24);
+    double N = target_dist / (0.02 * referencePoint.ref_vel / 2.24);
     double x_point = x_add_on + target_x / N;
     double y_point = s(x_point);
     x_add_on = x_point;
     double x_ref = x_point;
     double y_ref = y_point;
     // TODO: reformulate as a matrix multiplication using Eigen
-    x_point = x_ref * cos(ref_yaw) - y_ref * sin(ref_yaw);
-    y_point = x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw);
-    x_point += ref_x;
-    y_point += ref_y;
+    x_point = x_ref * cos(referencePoint.ref_yaw)
+        - y_ref * sin(referencePoint.ref_yaw);
+    y_point = x_ref * sin(referencePoint.ref_yaw)
+        + y_ref * cos(referencePoint.ref_yaw);
+    x_point += referencePoint.ref_x;
+    y_point += referencePoint.ref_y;
     next_vals.ptsx.push_back(x_point);
     next_vals.ptsy.push_back(y_point);
   }
@@ -301,8 +307,9 @@ Points createNextVals(const Points &points, const int prev_size,
   return next_vals;
 }
 
-Points createPath(double &ref_vel, int &lane, const MapWaypoints &map_waypoints,
-                  EgoCar egoCar, const PreviousData &previousData,
+Points createPath(ReferencePoint &referencePoint, int &lane,
+                  const MapWaypoints &map_waypoints, EgoCar egoCar,
+                  const PreviousData &previousData,
                   const vector<Vehicle> &vehicles) {
 
   // printInfo(egoCar, vehicles);
@@ -315,17 +322,16 @@ Points createPath(double &ref_vel, int &lane, const MapWaypoints &map_waypoints,
 
   bool too_close = isTooClose(egoCar, vehicles, prev_size, lane);
   lane = updateLane(too_close, lane);
-  ref_vel = updateVelocity(too_close, ref_vel);
+  referencePoint.ref_vel = updateVelocity(too_close, referencePoint.ref_vel);
 
-  double ref_x = egoCar.x;
-  double ref_y = egoCar.y;
-  double ref_yaw = deg2rad(egoCar.yaw);
+  referencePoint.ref_x = egoCar.x;
+  referencePoint.ref_y = egoCar.y;
+  referencePoint.ref_yaw = deg2rad(egoCar.yaw);
 
-  Points points = createPoints(prev_size, egoCar, ref_x, previousData, ref_y,
-                               ref_yaw, lane, map_waypoints);
+  Points points = createPoints(prev_size, egoCar, referencePoint, previousData,
+                               lane, map_waypoints);
 
-  return createNextVals(points, prev_size, previousData, ref_yaw, ref_x, ref_y,
-                        ref_vel);
+  return createNextVals(points, prev_size, previousData, referencePoint);
 }
 
 EgoCar createEgoCar(
@@ -433,10 +439,11 @@ int main(int argc, char **argv) {
   }
 
   int lane = 1;
-  double ref_vel = 0;
+  ReferencePoint referencePoint;
+  referencePoint.ref_vel = 0;
 
   h.onMessage(
-      [&ref_vel,&lane,&map_waypoints,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+      [&referencePoint,&lane,&map_waypoints,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
           uWS::OpCode opCode) {
         // "42" at the start of the message means there's a websocket message event.
         // The 4 signifies a websocket message
@@ -454,7 +461,7 @@ int main(int argc, char **argv) {
             if (event == "telemetry") {
               // j[1] is the data JSON object
 
-              Points next_vals = createPath(ref_vel, lane, map_waypoints, createEgoCar(j), createPreviousData(j), createVehicles(j[1]["sensor_fusion"]));
+              Points next_vals = createPath(referencePoint, lane, map_waypoints, createEgoCar(j), createPreviousData(j), createVehicles(j[1]["sensor_fusion"]));
 
               json msgJson;
               msgJson["next_x"] = next_vals.ptsx;

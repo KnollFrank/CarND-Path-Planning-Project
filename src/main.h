@@ -64,4 +64,13 @@ struct Points {
   vector<double> ptsy;
 };
 
+struct ReferencePoint {
+  // TODO: remoce ref_ prefix
+  double ref_x;
+  double ref_y;
+  double ref_yaw;
+  double ref_vel;
+
+};
+
 #endif /* MAIN_H_ */
