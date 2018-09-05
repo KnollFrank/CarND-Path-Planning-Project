@@ -225,7 +225,7 @@ int updateLane(bool too_close, int lane) {
 
 Points createPoints(const int prev_size, const EgoCar& egoCar, double &ref_x,
                     const PreviousData& previousData, double& ref_y,
-                    double& ref_yaw, int& lane, MapWaypoints& map_waypoints) {
+                    double& ref_yaw, int& lane, const MapWaypoints &map_waypoints) {
   Points points;
 
   if (prev_size < 2) {
@@ -301,7 +301,7 @@ Points createNextVals(const Points &points, const int prev_size,
   return next_vals;
 }
 
-Points createPath(double &ref_vel, int &lane, MapWaypoints &map_waypoints,
+Points createPath(double &ref_vel, int &lane, const MapWaypoints &map_waypoints,
                   EgoCar egoCar, const PreviousData &previousData,
                   const vector<Vehicle> &vehicles) {
 
