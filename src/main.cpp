@@ -330,6 +330,21 @@ Points createPath(double &ref_vel, int &lane, MapWaypoints &map_waypoints,
                         ref_vel);
 }
 
+EgoCar createEgoCar(
+    nlohmann::basic_json<std::map, std::vector,
+        std::__cxx11::basic_string<char, std::char_traits<char>,
+            std::allocator<char> >, bool, long, unsigned long, double,
+        std::allocator, nlohmann::adl_serializer> &j) {
+  EgoCar egoCar;
+  egoCar.x = j[1]["x"];
+  egoCar.y = j[1]["y"];
+  egoCar.s = j[1]["s"];
+  egoCar.d = j[1]["d"];
+  egoCar.yaw = j[1]["yaw"];
+  egoCar.speed = j[1]["speed"];
+  return egoCar;
+}
+
 int main(int argc, char **argv) {
   if (argc > 1 && strcmp(argv[1], "test") == 0) {
     testing::InitGoogleTest(&argc, argv);
@@ -385,7 +400,7 @@ int main(int argc, char **argv) {
           auto s = hasData(data);
 
           if (s != "") {
-            auto j = json::parse(s);
+            nlohmann::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::adl_serializer> j = json::parse(s);
 
             string event = j[0].get<string>();
 
@@ -397,13 +412,7 @@ int main(int argc, char **argv) {
 
               // Main car's localization Data
               // TODO: extract mehtod createEgoCar
-              EgoCar egoCar;
-              egoCar.x = j[1]["x"];
-              egoCar.y = j[1]["y"];
-              egoCar.s = j[1]["s"];
-              egoCar.d = j[1]["d"];
-              egoCar.yaw = j[1]["yaw"];
-              egoCar.speed = j[1]["speed"];
+              EgoCar egoCar = createEgoCar(j);
 
               // TODO: exgtract method createPreviousData
               PreviousData previousData;
