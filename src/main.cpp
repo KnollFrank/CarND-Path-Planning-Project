@@ -11,6 +11,7 @@
 #include <tuple>
 #include "main.h"
 #include "spline.h"
+#include "tests.cpp"
 
 using namespace std;
 
@@ -318,7 +319,12 @@ tuple<vector<double>, vector<double>> createPath(
   return make_tuple(next_x_vals, next_y_vals);
 }
 
-int main() {
+int main(int argc, char **argv) {
+  if (argc > 1 && strcmp(argv[1], "test") == 0) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+  }
+
   uWS::Hub h;
 
   // Load up map values for waypoint's x,y,s and d normalized normal vectors
