@@ -215,11 +215,19 @@ double updateVelocity(bool too_close, double velocity) {
   return velocity;
 }
 
+int updateLane(bool too_close, int lane) {
+  if (too_close && lane > 0) {
+    lane = 0;
+  }
+
+  return lane;
+}
+
 tuple<vector<double>, vector<double>> createPath(
     double &ref_vel, int &lane, MapWaypoints &map_waypoints, EgoCar egoCar,
     const PreviousData &previousData, const vector<Vehicle> &vehicles) {
 
-  printInfo(egoCar, vehicles);
+  // printInfo(egoCar, vehicles);
 
   vector<double> next_x_vals;
   vector<double> next_y_vals;
@@ -230,9 +238,7 @@ tuple<vector<double>, vector<double>> createPath(
   }
 
   bool too_close = isTooClose(egoCar, vehicles, prev_size, lane);
-  if (too_close && lane > 0) {
-    lane = 0;
-  }
+  lane = updateLane(too_close, lane);
   ref_vel = updateVelocity(too_close, ref_vel);
 
   vector<double> ptsx;
