@@ -59,4 +59,9 @@ ostream& operator<<(ostream& os, const Vehicle& vehicle)
     return os;
 }
 
+struct Points {
+  vector<double> ptsx;
+  vector<double> ptsy;
+};
+
 #endif /* MAIN_H_ */

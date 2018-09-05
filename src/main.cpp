@@ -223,56 +223,87 @@ int updateLane(bool too_close, int lane) {
   return lane;
 }
 
-tuple<vector<double>, vector<double>> createPoints(const int prev_size,
-                                          const EgoCar& egoCar, double &ref_x,
-                                          const PreviousData& previousData,
-                                          double& ref_y, double& ref_yaw,
-                                          int& lane,
-                                          MapWaypoints& map_waypoints) {
-  vector<double> ptsx;
-  vector<double> ptsy;
+Points createPoints(const int prev_size, const EgoCar& egoCar, double &ref_x,
+                    const PreviousData& previousData, double& ref_y,
+                    double& ref_yaw, int& lane, MapWaypoints& map_waypoints) {
+  Points points;
 
   if (prev_size < 2) {
     double prev_car_x = egoCar.x - cos(egoCar.yaw);
     double prev_car_y = egoCar.y - sin(egoCar.yaw);
-    ptsx.push_back(prev_car_x);
-    ptsx.push_back(egoCar.x);
-    ptsy.push_back(prev_car_y);
-    ptsy.push_back(egoCar.y);
+    points.ptsx.push_back(prev_car_x);
+    points.ptsx.push_back(egoCar.x);
+    points.ptsy.push_back(prev_car_y);
+    points.ptsy.push_back(egoCar.y);
   } else {
     ref_x = previousData.previous_path_x[prev_size - 1];
     ref_y = previousData.previous_path_y[prev_size - 1];
     double ref_x_prev = previousData.previous_path_x[prev_size - 2];
     double ref_y_prev = previousData.previous_path_y[prev_size - 2];
     ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
-    ptsx.push_back(ref_x_prev);
-    ptsx.push_back(ref_x);
-    ptsy.push_back(ref_y_prev);
-    ptsy.push_back(ref_y);
+    points.ptsx.push_back(ref_x_prev);
+    points.ptsx.push_back(ref_x);
+    points.ptsy.push_back(ref_y_prev);
+    points.ptsy.push_back(ref_y);
   }
   // TODO: DRY: 2 + 4 * lane
   vector<double> next_wp0 = getXY(egoCar.s + 30, 2 + 4 * lane, map_waypoints);
   vector<double> next_wp1 = getXY(egoCar.s + 60, 2 + 4 * lane, map_waypoints);
   vector<double> next_wp2 = getXY(egoCar.s + 90, 2 + 4 * lane, map_waypoints);
-  ptsx.push_back(next_wp0[0]);
-  ptsx.push_back(next_wp1[0]);
-  ptsx.push_back(next_wp2[0]);
-  ptsy.push_back(next_wp0[1]);
-  ptsy.push_back(next_wp1[1]);
-  ptsy.push_back(next_wp2[1]);
-  for (int i = 0; i < ptsx.size(); i++) {
-    double shift_x = ptsx[i] - ref_x;
-    double shift_y = ptsy[i] - ref_y;
+  points.ptsx.push_back(next_wp0[0]);
+  points.ptsx.push_back(next_wp1[0]);
+  points.ptsx.push_back(next_wp2[0]);
+  points.ptsy.push_back(next_wp0[1]);
+  points.ptsy.push_back(next_wp1[1]);
+  points.ptsy.push_back(next_wp2[1]);
+  for (int i = 0; i < points.ptsx.size(); i++) {
+    double shift_x = points.ptsx[i] - ref_x;
+    double shift_y = points.ptsy[i] - ref_y;
     // TODO: reformulate as a matrix multiplication using Eigen
-    ptsx[i] = shift_x * cos(-ref_yaw) - shift_y * sin(-ref_yaw);
-    ptsy[i] = shift_x * sin(-ref_yaw) + shift_y * cos(-ref_yaw);
+    points.ptsx[i] = shift_x * cos(-ref_yaw) - shift_y * sin(-ref_yaw);
+    points.ptsy[i] = shift_x * sin(-ref_yaw) + shift_y * cos(-ref_yaw);
   }
-  return make_tuple(ptsx, ptsy);
+  return points;
 }
 
-tuple<vector<double>, vector<double>> createPath(
-    double &ref_vel, int &lane, MapWaypoints &map_waypoints, EgoCar egoCar,
-    const PreviousData &previousData, const vector<Vehicle> &vehicles) {
+Points createNextVals(const Points &points, const int prev_size,
+                      const PreviousData& previousData, double ref_yaw,
+                      double ref_x, double ref_y, double& ref_vel) {
+  Points next_vals;
+
+  tk::spline s;
+  s.set_points(points.ptsx, points.ptsy);
+  for (int i = 0; i < prev_size; i++) {
+    next_vals.ptsx.push_back(previousData.previous_path_x[i]);
+    next_vals.ptsy.push_back(previousData.previous_path_y[i]);
+  }
+  double target_x = 30.0;
+  double target_y = s(target_x);
+  double target_dist = sqrt(target_x * target_x + target_y * target_y);
+  double x_add_on = 0;
+  const int path_size = 50;
+  for (int i = 1; i < path_size - prev_size; i++) {
+    double N = target_dist / (0.02 * ref_vel / 2.24);
+    double x_point = x_add_on + target_x / N;
+    double y_point = s(x_point);
+    x_add_on = x_point;
+    double x_ref = x_point;
+    double y_ref = y_point;
+    // TODO: reformulate as a matrix multiplication using Eigen
+    x_point = x_ref * cos(ref_yaw) - y_ref * sin(ref_yaw);
+    y_point = x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw);
+    x_point += ref_x;
+    y_point += ref_y;
+    next_vals.ptsx.push_back(x_point);
+    next_vals.ptsy.push_back(y_point);
+  }
+
+  return next_vals;
+}
+
+Points createPath(double &ref_vel, int &lane, MapWaypoints &map_waypoints,
+                  EgoCar egoCar, const PreviousData &previousData,
+                  const vector<Vehicle> &vehicles) {
 
   // printInfo(egoCar, vehicles);
 
@@ -295,47 +326,11 @@ tuple<vector<double>, vector<double>> createPath(
   vector<double> ptsx;
   vector<double> ptsy;
 
-  tie(ptsx, ptsy) = createPoints(prev_size, egoCar, ref_x, previousData, ref_y, ref_yaw, lane,
-      map_waypoints);
+  Points points = createPoints(prev_size, egoCar, ref_x, previousData, ref_y,
+                               ref_yaw, lane, map_waypoints);
 
-  tk::spline s;
-
-  s.set_points(ptsx, ptsy);
-
-  for (int i = 0; i < prev_size; i++) {
-    next_x_vals.push_back(previousData.previous_path_x[i]);
-    next_y_vals.push_back(previousData.previous_path_y[i]);
-  }
-
-  double target_x = 30.0;
-  double target_y = s(target_x);
-  double target_dist = sqrt(target_x * target_x + target_y * target_y);
-
-  double x_add_on = 0;
-
-  const int path_size = 50;
-  for (int i = 1; i < path_size - prev_size; i++) {
-    double N = target_dist / (0.02 * ref_vel / 2.24);
-    double x_point = x_add_on + target_x / N;
-    double y_point = s(x_point);
-
-    x_add_on = x_point;
-
-    double x_ref = x_point;
-    double y_ref = y_point;
-
-    // TODO: reformulate as a matrix multiplication using Eigen
-    x_point = x_ref * cos(ref_yaw) - y_ref * sin(ref_yaw);
-    y_point = x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw);
-
-    x_point += ref_x;
-    y_point += ref_y;
-
-    next_x_vals.push_back(x_point);
-    next_y_vals.push_back(y_point);
-  }
-
-  return make_tuple(next_x_vals, next_y_vals);
+  return createNextVals(points, prev_size, previousData, ref_yaw, ref_x, ref_y,
+                        ref_vel);
 }
 
 int main(int argc, char **argv) {
@@ -390,7 +385,6 @@ int main(int argc, char **argv) {
         //auto sdata = string(data).substr(0, length);
         //cout << sdata << endl;
         if (length && length > 2 && data[0] == '4' && data[1] == '2') {
-
           auto s = hasData(data);
 
           if (s != "") {
@@ -405,6 +399,7 @@ int main(int argc, char **argv) {
               // j[1] is the data JSON object
 
               // Main car's localization Data
+              // TODO: extract mehtod createEgoCar
               EgoCar egoCar;
               egoCar.x = j[1]["x"];
               egoCar.y = j[1]["y"];
@@ -413,6 +408,7 @@ int main(int argc, char **argv) {
               egoCar.yaw = j[1]["yaw"];
               egoCar.speed = j[1]["speed"];
 
+              // TODO: exgtract method createPreviousData
               PreviousData previousData;
               // Previous path data given to the Planner
               vector<double> previous_path_x = j[1]["previous_path_x"];
@@ -437,6 +433,7 @@ int main(int argc, char **argv) {
                 D = 6
               };
 
+              // TODO: extract method createVehicles
               vector<Vehicle> vehicles;
               for (int i = 0; i < sensor_fusion.size(); i++) {
                 Vehicle vehicle;
@@ -450,11 +447,11 @@ int main(int argc, char **argv) {
                 vehicles.push_back(vehicle);
               }
 
-              tie(next_x_vals, next_y_vals) = createPath(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
+              Points next_vals = createPath(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
 
               json msgJson;
-              msgJson["next_x"] = next_x_vals;
-              msgJson["next_y"] = next_y_vals;
+              msgJson["next_x"] = next_vals.ptsx;
+              msgJson["next_y"] = next_vals.ptsy;
 
               auto msg = "42[\"control\","+ msgJson.dump()+"]";
 
