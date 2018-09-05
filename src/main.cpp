@@ -182,10 +182,8 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
-tuple<bool, int> isTooClose(const EgoCar& egoCar,
-                            const vector<Vehicle>& vehicles,
-                            const int prev_size, int lane) {
-  bool too_close = false;
+bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
+                const int prev_size, int lane) {
   for (int i = 0; i < vehicles.size(); i++) {
     float d = vehicles[i].d;
     // if(d > 4*lane && d < 4*(lane + 1))
@@ -199,14 +197,12 @@ tuple<bool, int> isTooClose(const EgoCar& egoCar,
       // TODO: replace magic number 30 with constant
       if (check_car_s > egoCar.s && check_car_s - egoCar.s < 30) {
         // ref_vel = 29.5;
-        too_close = true;
-        if (lane > 0) {
-          lane = 0;
-        }
+        return true;
       }
     }
   }
-  return make_tuple(too_close, lane);
+
+  return false;
 }
 
 double updateVelocity(bool too_close, double velocity) {
@@ -233,9 +229,10 @@ tuple<vector<double>, vector<double>> createPath(
     egoCar.s = previousData.end_path_s;
   }
 
-  bool too_close;
-  tie(too_close, lane) = isTooClose(egoCar, vehicles, prev_size, lane);
-
+  bool too_close = isTooClose(egoCar, vehicles, prev_size, lane);
+  if (too_close && lane > 0) {
+    lane = 0;
+  }
   ref_vel = updateVelocity(too_close, ref_vel);
 
   vector<double> ptsx;
