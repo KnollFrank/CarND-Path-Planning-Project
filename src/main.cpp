@@ -169,8 +169,8 @@ vector<double> getXY(double s, double d, const MapWaypoints &map_waypoints) {
 void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   auto isCloserToEgoCar =
       [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-        double distance1 = distance(egoCar.car_x, egoCar.car_y, vehicle1.x, vehicle1.y);
-        double distance2 = distance(egoCar.car_x, egoCar.car_y, vehicle2.x, vehicle2.y);
+        double distance1 = distance(egoCar.x, egoCar.y, vehicle1.x, vehicle1.y);
+        double distance2 = distance(egoCar.x, egoCar.y, vehicle2.x, vehicle2.y);
         return distance1 < distance2;
       };
 
@@ -194,7 +194,7 @@ tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
   const int prev_size = previousData.previous_path_x.size();
 
   if (prev_size > 0) {
-    egoCar.car_s = previousData.end_path_s;
+    egoCar.s = previousData.end_path_s;
   }
 
   bool too_close = false;
@@ -209,7 +209,7 @@ tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
       double check_car_s = vehicles[i].s;
 
       check_car_s += (double) prev_size * 0.02 * check_speed;
-      if (check_car_s > egoCar.car_s && check_car_s - egoCar.car_s < 30) {
+      if (check_car_s > egoCar.s && check_car_s - egoCar.s < 30) {
         // ref_vel = 29.5;
         too_close = true;
         if (lane > 0) {
@@ -228,19 +228,19 @@ tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
   vector<double> ptsx;
   vector<double> ptsy;
 
-  double ref_x = egoCar.car_x;
-  double ref_y = egoCar.car_y;
-  double ref_yaw = deg2rad(egoCar.car_yaw);
+  double ref_x = egoCar.x;
+  double ref_y = egoCar.y;
+  double ref_yaw = deg2rad(egoCar.yaw);
 
   if (prev_size < 2) {
-    double prev_car_x = egoCar.car_x - cos(egoCar.car_yaw);
-    double prev_car_y = egoCar.car_y - sin(egoCar.car_yaw);
+    double prev_car_x = egoCar.x - cos(egoCar.yaw);
+    double prev_car_y = egoCar.y - sin(egoCar.yaw);
 
     ptsx.push_back(prev_car_x);
-    ptsx.push_back(egoCar.car_x);
+    ptsx.push_back(egoCar.x);
 
     ptsy.push_back(prev_car_y);
-    ptsy.push_back(egoCar.car_y);
+    ptsy.push_back(egoCar.y);
   } else {
     ref_x = previousData.previous_path_x[prev_size - 1];
     ref_y = previousData.previous_path_y[prev_size - 1];
@@ -256,11 +256,11 @@ tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
     ptsy.push_back(ref_y);
   }
 
-  vector<double> next_wp0 = getXY(egoCar.car_s + 30, 2 + 4 * lane,
+  vector<double> next_wp0 = getXY(egoCar.s + 30, 2 + 4 * lane,
                                   map_waypoints);
-  vector<double> next_wp1 = getXY(egoCar.car_s + 60, 2 + 4 * lane,
+  vector<double> next_wp1 = getXY(egoCar.s + 60, 2 + 4 * lane,
                                   map_waypoints);
-  vector<double> next_wp2 = getXY(egoCar.car_s + 90, 2 + 4 * lane,
+  vector<double> next_wp2 = getXY(egoCar.s + 90, 2 + 4 * lane,
                                   map_waypoints);
 
   ptsx.push_back(next_wp0[0]);
@@ -383,12 +383,12 @@ int main() {
 
               // Main car's localization Data
               EgoCar egoCar;
-              egoCar.car_x = j[1]["x"];
-              egoCar.car_y = j[1]["y"];
-              egoCar.car_s = j[1]["s"];
-              egoCar.car_d = j[1]["d"];
-              egoCar.car_yaw = j[1]["yaw"];
-              egoCar.car_speed = j[1]["speed"];
+              egoCar.x = j[1]["x"];
+              egoCar.y = j[1]["y"];
+              egoCar.s = j[1]["s"];
+              egoCar.d = j[1]["d"];
+              egoCar.yaw = j[1]["yaw"];
+              egoCar.speed = j[1]["speed"];
 
               PreviousData previousData;
               // Previous path data given to the Planner

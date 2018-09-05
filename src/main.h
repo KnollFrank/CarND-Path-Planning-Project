@@ -11,12 +11,12 @@ struct MapWaypoints {
 
 struct EgoCar {
   // TODO: remove car_ prefix
-  double car_x;
-  double car_y;
-  double car_s;
-  double car_d;
-  double car_yaw;
-  double car_speed;
+  double x;
+  double y;
+  double s;
+  double d;
+  double yaw;
+  double speed;
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 };
@@ -24,10 +24,10 @@ struct EgoCar {
 ostream& operator<<(ostream& os, const EgoCar& egoCar)
 {
     os << "EgoCar:" << endl;
-    os << "  (x, y) = (" << egoCar.car_x << ", " << egoCar.car_y << ")" << endl;
-    os << "  (s, d) = (" << egoCar.car_s << ", " << egoCar.car_d << ")" << endl;
-    os << "  yaw = " << egoCar.car_yaw << endl;
-    os << "  speed = " << egoCar.car_speed << endl;
+    os << "  (x, y) = (" << egoCar.x << ", " << egoCar.y << ")" << endl;
+    os << "  (s, d) = (" << egoCar.s << ", " << egoCar.d << ")" << endl;
+    os << "  yaw = " << egoCar.yaw << endl;
+    os << "  speed = " << egoCar.speed << endl;
     return os;
 }
 
