@@ -181,11 +181,9 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
-tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
-                                           MapWaypoints &map_waypoints,
-                                           EgoCar egoCar,
-                                           const PreviousData &previousData,
-                                           const vector<Vehicle> &vehicles) {
+tuple<vector<double>, vector<double>> createPath(
+    double &ref_vel, int &lane, MapWaypoints &map_waypoints, EgoCar egoCar,
+    const PreviousData &previousData, const vector<Vehicle> &vehicles) {
 
   printInfo(egoCar, vehicles);
 
@@ -256,12 +254,9 @@ tuple<vector<double>, vector<double>> doit(double &ref_vel, int &lane,
     ptsy.push_back(ref_y);
   }
 
-  vector<double> next_wp0 = getXY(egoCar.s + 30, 2 + 4 * lane,
-                                  map_waypoints);
-  vector<double> next_wp1 = getXY(egoCar.s + 60, 2 + 4 * lane,
-                                  map_waypoints);
-  vector<double> next_wp2 = getXY(egoCar.s + 90, 2 + 4 * lane,
-                                  map_waypoints);
+  vector<double> next_wp0 = getXY(egoCar.s + 30, 2 + 4 * lane, map_waypoints);
+  vector<double> next_wp1 = getXY(egoCar.s + 60, 2 + 4 * lane, map_waypoints);
+  vector<double> next_wp2 = getXY(egoCar.s + 90, 2 + 4 * lane, map_waypoints);
 
   ptsx.push_back(next_wp0[0]);
   ptsx.push_back(next_wp1[0]);
@@ -427,7 +422,7 @@ int main() {
                 vehicles.push_back(vehicle);
               }
 
-              tie(next_x_vals, next_y_vals) = doit(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
+              tie(next_x_vals, next_y_vals) = createPath(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
 
               json msgJson;
               msgJson["next_x"] = next_x_vals;
