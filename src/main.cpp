@@ -237,16 +237,16 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
     points.ptsy.push_back(prev_car_y);
     points.ptsy.push_back(egoCar.y);
   } else {
-    referencePoint.ref_x = previousData.previous_path_x[prev_size - 1];
-    referencePoint.ref_y = previousData.previous_path_y[prev_size - 1];
+    referencePoint.x = previousData.previous_path_x[prev_size - 1];
+    referencePoint.y = previousData.previous_path_y[prev_size - 1];
     double ref_x_prev = previousData.previous_path_x[prev_size - 2];
     double ref_y_prev = previousData.previous_path_y[prev_size - 2];
-    referencePoint.ref_yaw = atan2(referencePoint.ref_y - ref_y_prev,
-                                   referencePoint.ref_x - ref_x_prev);
+    referencePoint.yaw = atan2(referencePoint.y - ref_y_prev,
+                                   referencePoint.x - ref_x_prev);
     points.ptsx.push_back(ref_x_prev);
-    points.ptsx.push_back(referencePoint.ref_x);
+    points.ptsx.push_back(referencePoint.x);
     points.ptsy.push_back(ref_y_prev);
-    points.ptsy.push_back(referencePoint.ref_y);
+    points.ptsy.push_back(referencePoint.y);
   }
   // TODO: DRY: 2 + 4 * lane
   vector<double> next_wp0 = getXY(egoCar.s + 30, 2 + 4 * lane, map_waypoints);
@@ -259,13 +259,13 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
   points.ptsy.push_back(next_wp1[1]);
   points.ptsy.push_back(next_wp2[1]);
   for (int i = 0; i < points.ptsx.size(); i++) {
-    double shift_x = points.ptsx[i] - referencePoint.ref_x;
-    double shift_y = points.ptsy[i] - referencePoint.ref_y;
+    double shift_x = points.ptsx[i] - referencePoint.x;
+    double shift_y = points.ptsy[i] - referencePoint.y;
     // TODO: reformulate as a matrix multiplication using Eigen
-    points.ptsx[i] = shift_x * cos(-referencePoint.ref_yaw)
-        - shift_y * sin(-referencePoint.ref_yaw);
-    points.ptsy[i] = shift_x * sin(-referencePoint.ref_yaw)
-        + shift_y * cos(-referencePoint.ref_yaw);
+    points.ptsx[i] = shift_x * cos(-referencePoint.yaw)
+        - shift_y * sin(-referencePoint.yaw);
+    points.ptsy[i] = shift_x * sin(-referencePoint.yaw)
+        + shift_y * cos(-referencePoint.yaw);
   }
   return points;
 }
@@ -287,19 +287,19 @@ Points createNextVals(const Points &points, const int prev_size,
   double x_add_on = 0;
   const int path_size = 50;
   for (int i = 1; i < path_size - prev_size; i++) {
-    double N = target_dist / (0.02 * referencePoint.ref_vel / 2.24);
+    double N = target_dist / (0.02 * referencePoint.vel / 2.24);
     double x_point = x_add_on + target_x / N;
     double y_point = s(x_point);
     x_add_on = x_point;
     double x_ref = x_point;
     double y_ref = y_point;
     // TODO: reformulate as a matrix multiplication using Eigen
-    x_point = x_ref * cos(referencePoint.ref_yaw)
-        - y_ref * sin(referencePoint.ref_yaw);
-    y_point = x_ref * sin(referencePoint.ref_yaw)
-        + y_ref * cos(referencePoint.ref_yaw);
-    x_point += referencePoint.ref_x;
-    y_point += referencePoint.ref_y;
+    x_point = x_ref * cos(referencePoint.yaw)
+        - y_ref * sin(referencePoint.yaw);
+    y_point = x_ref * sin(referencePoint.yaw)
+        + y_ref * cos(referencePoint.yaw);
+    x_point += referencePoint.x;
+    y_point += referencePoint.y;
     next_vals.ptsx.push_back(x_point);
     next_vals.ptsy.push_back(y_point);
   }
@@ -322,11 +322,11 @@ Points createPath(ReferencePoint &referencePoint, int &lane,
 
   bool too_close = isTooClose(egoCar, vehicles, prev_size, lane);
   lane = updateLane(too_close, lane);
-  referencePoint.ref_vel = updateVelocity(too_close, referencePoint.ref_vel);
+  referencePoint.vel = updateVelocity(too_close, referencePoint.vel);
 
-  referencePoint.ref_x = egoCar.x;
-  referencePoint.ref_y = egoCar.y;
-  referencePoint.ref_yaw = deg2rad(egoCar.yaw);
+  referencePoint.x = egoCar.x;
+  referencePoint.y = egoCar.y;
+  referencePoint.yaw = deg2rad(egoCar.yaw);
 
   Points points = createPoints(prev_size, egoCar, referencePoint, previousData,
                                lane, map_waypoints);
@@ -440,7 +440,7 @@ int main(int argc, char **argv) {
 
   int lane = 1;
   ReferencePoint referencePoint;
-  referencePoint.ref_vel = 0;
+  referencePoint.vel = 0;
 
   h.onMessage(
       [&referencePoint,&lane,&map_waypoints,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,

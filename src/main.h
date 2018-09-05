@@ -10,7 +10,6 @@ struct MapWaypoints {
 };
 
 struct EgoCar {
-  // TODO: remove car_ prefix
   double x;
   double y;
   double s;
@@ -65,12 +64,10 @@ struct Points {
 };
 
 struct ReferencePoint {
-  // TODO: remoce ref_ prefix
-  double ref_x;
-  double ref_y;
-  double ref_yaw;
-  double ref_vel;
-
+  double x;
+  double y;
+  double yaw;
+  double vel;
 };
 
 #endif /* MAIN_H_ */
