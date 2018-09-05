@@ -223,6 +223,53 @@ int updateLane(bool too_close, int lane) {
   return lane;
 }
 
+tuple<vector<double>, vector<double>> createPoints(const int prev_size,
+                                          const EgoCar& egoCar, double &ref_x,
+                                          const PreviousData& previousData,
+                                          double& ref_y, double& ref_yaw,
+                                          int& lane,
+                                          MapWaypoints& map_waypoints) {
+  vector<double> ptsx;
+  vector<double> ptsy;
+
+  if (prev_size < 2) {
+    double prev_car_x = egoCar.x - cos(egoCar.yaw);
+    double prev_car_y = egoCar.y - sin(egoCar.yaw);
+    ptsx.push_back(prev_car_x);
+    ptsx.push_back(egoCar.x);
+    ptsy.push_back(prev_car_y);
+    ptsy.push_back(egoCar.y);
+  } else {
+    ref_x = previousData.previous_path_x[prev_size - 1];
+    ref_y = previousData.previous_path_y[prev_size - 1];
+    double ref_x_prev = previousData.previous_path_x[prev_size - 2];
+    double ref_y_prev = previousData.previous_path_y[prev_size - 2];
+    ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
+    ptsx.push_back(ref_x_prev);
+    ptsx.push_back(ref_x);
+    ptsy.push_back(ref_y_prev);
+    ptsy.push_back(ref_y);
+  }
+  // TODO: DRY: 2 + 4 * lane
+  vector<double> next_wp0 = getXY(egoCar.s + 30, 2 + 4 * lane, map_waypoints);
+  vector<double> next_wp1 = getXY(egoCar.s + 60, 2 + 4 * lane, map_waypoints);
+  vector<double> next_wp2 = getXY(egoCar.s + 90, 2 + 4 * lane, map_waypoints);
+  ptsx.push_back(next_wp0[0]);
+  ptsx.push_back(next_wp1[0]);
+  ptsx.push_back(next_wp2[0]);
+  ptsy.push_back(next_wp0[1]);
+  ptsy.push_back(next_wp1[1]);
+  ptsy.push_back(next_wp2[1]);
+  for (int i = 0; i < ptsx.size(); i++) {
+    double shift_x = ptsx[i] - ref_x;
+    double shift_y = ptsy[i] - ref_y;
+    // TODO: reformulate as a matrix multiplication using Eigen
+    ptsx[i] = shift_x * cos(-ref_yaw) - shift_y * sin(-ref_yaw);
+    ptsy[i] = shift_x * sin(-ref_yaw) + shift_y * cos(-ref_yaw);
+  }
+  return make_tuple(ptsx, ptsy);
+}
+
 tuple<vector<double>, vector<double>> createPath(
     double &ref_vel, int &lane, MapWaypoints &map_waypoints, EgoCar egoCar,
     const PreviousData &previousData, const vector<Vehicle> &vehicles) {
@@ -241,58 +288,15 @@ tuple<vector<double>, vector<double>> createPath(
   lane = updateLane(too_close, lane);
   ref_vel = updateVelocity(too_close, ref_vel);
 
-  vector<double> ptsx;
-  vector<double> ptsy;
-
   double ref_x = egoCar.x;
   double ref_y = egoCar.y;
   double ref_yaw = deg2rad(egoCar.yaw);
 
-  if (prev_size < 2) {
-    double prev_car_x = egoCar.x - cos(egoCar.yaw);
-    double prev_car_y = egoCar.y - sin(egoCar.yaw);
+  vector<double> ptsx;
+  vector<double> ptsy;
 
-    ptsx.push_back(prev_car_x);
-    ptsx.push_back(egoCar.x);
-
-    ptsy.push_back(prev_car_y);
-    ptsy.push_back(egoCar.y);
-  } else {
-    ref_x = previousData.previous_path_x[prev_size - 1];
-    ref_y = previousData.previous_path_y[prev_size - 1];
-
-    double ref_x_prev = previousData.previous_path_x[prev_size - 2];
-    double ref_y_prev = previousData.previous_path_y[prev_size - 2];
-    ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
-
-    ptsx.push_back(ref_x_prev);
-    ptsx.push_back(ref_x);
-
-    ptsy.push_back(ref_y_prev);
-    ptsy.push_back(ref_y);
-  }
-
-  // TODO: DRY: 2 + 4 * lane
-  vector<double> next_wp0 = getXY(egoCar.s + 30, 2 + 4 * lane, map_waypoints);
-  vector<double> next_wp1 = getXY(egoCar.s + 60, 2 + 4 * lane, map_waypoints);
-  vector<double> next_wp2 = getXY(egoCar.s + 90, 2 + 4 * lane, map_waypoints);
-
-  ptsx.push_back(next_wp0[0]);
-  ptsx.push_back(next_wp1[0]);
-  ptsx.push_back(next_wp2[0]);
-
-  ptsy.push_back(next_wp0[1]);
-  ptsy.push_back(next_wp1[1]);
-  ptsy.push_back(next_wp2[1]);
-
-  for (int i = 0; i < ptsx.size(); i++) {
-    double shift_x = ptsx[i] - ref_x;
-    double shift_y = ptsy[i] - ref_y;
-
-    // TODO: reformulate as a matrix multiplication using Eigen
-    ptsx[i] = shift_x * cos(-ref_yaw) - shift_y * sin(-ref_yaw);
-    ptsy[i] = shift_x * sin(-ref_yaw) + shift_y * cos(-ref_yaw);
-  }
+  tie(ptsx, ptsy) = createPoints(prev_size, egoCar, ref_x, previousData, ref_y, ref_yaw, lane,
+      map_waypoints);
 
   tk::spline s;
 
