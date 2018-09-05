@@ -363,6 +363,7 @@ PreviousData createPreviousData(
   return previousData;
 }
 
+// Sensor Fusion Data, a list of all other cars on the same side of the road.
 vector<Vehicle> createVehicles(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
@@ -462,10 +463,7 @@ int main(int argc, char **argv) {
               EgoCar egoCar = createEgoCar(j);
               PreviousData previousData = createPreviousData(j);
 
-              // Sensor Fusion Data, a list of all other cars on the same side of the road.
-              nlohmann::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::adl_serializer> sensor_fusion = j[1]["sensor_fusion"];
-
-              vector<Vehicle> vehicles = createVehicles(sensor_fusion);
+              vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"]);
               Points next_vals = createPath(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
 
               json msgJson;
