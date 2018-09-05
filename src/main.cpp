@@ -182,6 +182,33 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
+tuple<bool, int> isTooClose(const EgoCar& egoCar,
+                            const vector<Vehicle>& vehicles,
+                            const int prev_size, int lane) {
+  bool too_close = false;
+  for (int i = 0; i < vehicles.size(); i++) {
+    float d = vehicles[i].d;
+    // if(d > 4*lane && d < 4*(lane + 1))
+    if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
+      double vx = vehicles[i].vx;
+      double vy = vehicles[i].vy;
+      double check_speed = sqrt(vx * vx + vy * vy);
+      double check_car_s = vehicles[i].s;
+      // TODO: replace magic number 0.02 with constant
+      check_car_s += (double) ((prev_size)) * 0.02 * check_speed;
+      // TODO: replace magic number 30 with constant
+      if (check_car_s > egoCar.s && check_car_s - egoCar.s < 30) {
+        // ref_vel = 29.5;
+        too_close = true;
+        if (lane > 0) {
+          lane = 0;
+        }
+      }
+    }
+  }
+  return make_tuple(too_close, lane);
+}
+
 tuple<vector<double>, vector<double>> createPath(
     double &ref_vel, int &lane, MapWaypoints &map_waypoints, EgoCar egoCar,
     const PreviousData &previousData, const vector<Vehicle> &vehicles) {
@@ -196,29 +223,8 @@ tuple<vector<double>, vector<double>> createPath(
     egoCar.s = previousData.end_path_s;
   }
 
-  bool too_close = false;
-
-  for (int i = 0; i < vehicles.size(); i++) {
-    float d = vehicles[i].d;
-    // if(d > 4*lane && d < 4*(lane + 1))
-    if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
-      double vx = vehicles[i].vx;
-      double vy = vehicles[i].vy;
-      double check_speed = sqrt(vx * vx + vy * vy);
-      double check_car_s = vehicles[i].s;
-
-      // TODO: replace magic number 0.02 with constant
-      check_car_s += (double) prev_size * 0.02 * check_speed;
-      // TODO: replace magic number 30 with constant
-      if (check_car_s > egoCar.s && check_car_s - egoCar.s < 30) {
-        // ref_vel = 29.5;
-        too_close = true;
-        if (lane > 0) {
-          lane = 0;
-        }
-      }
-    }
-  }
+  bool too_close;
+  tie(too_close, lane) = isTooClose(egoCar, vehicles, prev_size, lane);
 
   if (too_close) {
     ref_vel -= .224;
