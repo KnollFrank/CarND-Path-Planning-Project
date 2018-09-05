@@ -307,8 +307,6 @@ Points createPath(double &ref_vel, int &lane, MapWaypoints &map_waypoints,
 
   // printInfo(egoCar, vehicles);
 
-  vector<double> next_x_vals;
-  vector<double> next_y_vals;
   const int prev_size = previousData.previous_path_x.size();
 
   if (prev_size > 0) {
@@ -454,9 +452,6 @@ int main(int argc, char **argv) {
             string event = j[0].get<string>();
 
             if (event == "telemetry") {
-              vector<double> next_x_vals;
-              vector<double> next_y_vals;
-
               // j[1] is the data JSON object
 
               // Main car's localization Data
