@@ -345,6 +345,24 @@ EgoCar createEgoCar(
   return egoCar;
 }
 
+PreviousData createPreviousData(
+    nlohmann::basic_json<std::map, std::vector,
+        std::__cxx11::basic_string<char, std::char_traits<char>,
+            std::allocator<char> >, bool, long, unsigned long, double,
+        std::allocator, nlohmann::adl_serializer> &j) {
+  PreviousData previousData;
+  // Previous path data given to the Planner
+  vector<double> previous_path_x = j[1]["previous_path_x"];
+  previousData.previous_path_x = previous_path_x;
+  vector<double> previous_path_y = j[1]["previous_path_y"];
+  previousData.previous_path_y = previous_path_y;
+
+  // Previous path's end s and d values
+  previousData.end_path_s = j[1]["end_path_s"];
+  previousData.end_path_d = j[1]["end_path_d"];
+  return previousData;
+}
+
 int main(int argc, char **argv) {
   if (argc > 1 && strcmp(argv[1], "test") == 0) {
     testing::InitGoogleTest(&argc, argv);
@@ -411,20 +429,8 @@ int main(int argc, char **argv) {
               // j[1] is the data JSON object
 
               // Main car's localization Data
-              // TODO: extract mehtod createEgoCar
               EgoCar egoCar = createEgoCar(j);
-
-              // TODO: exgtract method createPreviousData
-              PreviousData previousData;
-              // Previous path data given to the Planner
-              vector<double> previous_path_x = j[1]["previous_path_x"];
-              previousData.previous_path_x = previous_path_x;
-              vector<double> previous_path_y = j[1]["previous_path_y"];
-              previousData.previous_path_y = previous_path_y;
-
-              // Previous path's end s and d values
-              previousData.end_path_s = j[1]["end_path_s"];
-              previousData.end_path_d = j[1]["end_path_d"];
+              PreviousData previousData = createPreviousData(j);
 
               // Sensor Fusion Data, a list of all other cars on the same side of the road.
               auto sensor_fusion = j[1]["sensor_fusion"];
