@@ -59,8 +59,8 @@ ostream& operator<<(ostream& os, const Vehicle& vehicle)
 }
 
 struct Points {
-  vector<double> ptsx;
-  vector<double> ptsy;
+  vector<double> xs;
+  vector<double> ys;
 };
 
 struct ReferencePoint {
