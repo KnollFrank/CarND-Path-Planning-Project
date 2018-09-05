@@ -331,7 +331,7 @@ Points createPath(double &ref_vel, int &lane, MapWaypoints &map_waypoints,
 }
 
 EgoCar createEgoCar(
-    nlohmann::basic_json<std::map, std::vector,
+    const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
         std::allocator, nlohmann::adl_serializer> &j) {
@@ -346,7 +346,7 @@ EgoCar createEgoCar(
 }
 
 PreviousData createPreviousData(
-    nlohmann::basic_json<std::map, std::vector,
+    const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
         std::allocator, nlohmann::adl_serializer> &j) {
@@ -361,6 +361,36 @@ PreviousData createPreviousData(
   previousData.end_path_s = j[1]["end_path_s"];
   previousData.end_path_d = j[1]["end_path_d"];
   return previousData;
+}
+
+vector<Vehicle> createVehicles(
+    const nlohmann::basic_json<std::map, std::vector,
+        std::__cxx11::basic_string<char, std::char_traits<char>,
+            std::allocator<char> >, bool, long, unsigned long, double,
+        std::allocator, nlohmann::adl_serializer> &sensor_fusion) {
+  enum sensor_fusion_index {
+    ID = 0,
+    X = 1,
+    Y = 2,
+    VX = 3,
+    VY = 4,
+    S = 5,
+    D = 6
+  };
+
+  vector<Vehicle> vehicles;
+  for (int i = 0; i < sensor_fusion.size(); i++) {
+    Vehicle vehicle;
+    vehicle.id = sensor_fusion[i][ID];
+    vehicle.x = sensor_fusion[i][X];
+    vehicle.y = sensor_fusion[i][Y];
+    vehicle.vx = sensor_fusion[i][VX];
+    vehicle.vy = sensor_fusion[i][VY];
+    vehicle.s = sensor_fusion[i][S];
+    vehicle.d = sensor_fusion[i][D];
+    vehicles.push_back(vehicle);
+  }
+  return vehicles;
 }
 
 int main(int argc, char **argv) {
@@ -433,32 +463,9 @@ int main(int argc, char **argv) {
               PreviousData previousData = createPreviousData(j);
 
               // Sensor Fusion Data, a list of all other cars on the same side of the road.
-              auto sensor_fusion = j[1]["sensor_fusion"];
+              nlohmann::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::adl_serializer> sensor_fusion = j[1]["sensor_fusion"];
 
-              enum sensor_fusion_index {
-                ID = 0,
-                X = 1,
-                Y = 2,
-                VX = 3,
-                VY = 4,
-                S = 5,
-                D = 6
-              };
-
-              // TODO: extract method createVehicles
-              vector<Vehicle> vehicles;
-              for (int i = 0; i < sensor_fusion.size(); i++) {
-                Vehicle vehicle;
-                vehicle.id = sensor_fusion[i][ID];
-                vehicle.x = sensor_fusion[i][X];
-                vehicle.y = sensor_fusion[i][Y];
-                vehicle.vx = sensor_fusion[i][VX];
-                vehicle.vy = sensor_fusion[i][VY];
-                vehicle.s = sensor_fusion[i][S];
-                vehicle.d = sensor_fusion[i][D];
-                vehicles.push_back(vehicle);
-              }
-
+              vector<Vehicle> vehicles = createVehicles(sensor_fusion);
               Points next_vals = createPath(ref_vel, lane, map_waypoints, egoCar, previousData, vehicles);
 
               json msgJson;
