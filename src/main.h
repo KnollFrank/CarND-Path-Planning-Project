@@ -9,11 +9,35 @@ struct MapWaypoints {
   vector<double> map_waypoints_s;
 };
 
-struct EgoCar {
+struct Point {
   double x;
   double y;
+
+  friend ostream& operator<<(ostream& os, const Point& point);
+};
+
+ostream& operator<<(ostream& os, const Point& point)
+{
+    os << "Point(x = " << point.x << ", y = " << point.y << ")";
+    return os;
+}
+
+struct Frenet {
   double s;
   double d;
+
+  friend ostream& operator<<(ostream& os, const Frenet& frenet);
+};
+
+ostream& operator<<(ostream& os, const Frenet& frenet)
+{
+    os << "Frenet(s = " << frenet.s << ", d = " << frenet.d << ")";
+    return os;
+}
+
+struct EgoCar {
+  Point pos_cart;
+  Frenet pos_frenet;
   double yaw;
   double speed;
 
@@ -23,8 +47,8 @@ struct EgoCar {
 ostream& operator<<(ostream& os, const EgoCar& egoCar)
 {
     os << "EgoCar:" << endl;
-    os << "  (x, y) = (" << egoCar.x << ", " << egoCar.y << ")" << endl;
-    os << "  (s, d) = (" << egoCar.s << ", " << egoCar.d << ")" << endl;
+    os << "  pos_cart = " << egoCar.pos_cart << endl;
+    os << "  pos_frenet = " << egoCar.pos_frenet << endl;
     os << "  yaw = " << egoCar.yaw << endl;
     os << "  speed = " << egoCar.speed << endl;
     return os;
@@ -33,18 +57,15 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar)
 struct PreviousData {
   vector<double> previous_path_x;
   vector<double> previous_path_y;
-  double end_path_s;
-  double end_path_d;
+  Frenet end_path;
 };
 
 struct Vehicle {
   int id;
-  double x;
-  double y;
+  Point pos_cart;
   double vx;
   double vy;
-  double s;
-  double d;
+  Frenet pos_frenet;
 
   friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
 };
@@ -52,9 +73,9 @@ struct Vehicle {
 ostream& operator<<(ostream& os, const Vehicle& vehicle)
 {
     os << "Vehicle(" << vehicle.id << "):" << endl;
-    os << "  (x, y) = (" << vehicle.x << ", " << vehicle.y << ")" << endl;
+    os << "  pos_cart = " << vehicle.pos_cart << endl;
     os << "  (vx, vy) = (" << vehicle.vx << ", " << vehicle.vy << ")" << endl;
-    os << "  (s, d) = (" << vehicle.s << ", " << vehicle.d << ")" << endl;
+    os << "  pos_frenet = " << vehicle.pos_frenet << endl;
     return os;
 }
 
@@ -64,8 +85,7 @@ struct Points {
 };
 
 struct ReferencePoint {
-  double x;
-  double y;
+  Point point;
   double yaw;
   double vel;
 };
