@@ -295,12 +295,15 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
   Point next_wp0 = getXY(egoCar.pos_frenet.s + 30, middle_of_lane, map_waypoints);
   Point next_wp1 = getXY(egoCar.pos_frenet.s + 60, middle_of_lane, map_waypoints);
   Point next_wp2 = getXY(egoCar.pos_frenet.s + 90, middle_of_lane, map_waypoints);
+
   points.xs.push_back(next_wp0.x);
   points.xs.push_back(next_wp1.x);
   points.xs.push_back(next_wp2.x);
+
   points.ys.push_back(next_wp0.y);
   points.ys.push_back(next_wp1.y);
   points.ys.push_back(next_wp2.y);
+
   for (int i = 0; i < points.xs.size(); i++) {
     double shift_x = points.xs[i] - refPoint.point.x;
     double shift_y = points.ys[i] - refPoint.point.y;
