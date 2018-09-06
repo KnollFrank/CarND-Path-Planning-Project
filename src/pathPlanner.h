@@ -83,8 +83,10 @@ string hasData(string s) {
   return "";
 }
 
-double distance(double x1, double y1, double x2, double y2) {
-  return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+double distance(Point p1, Point p2) {
+  double dx = p2.x - p1.x;
+  double dy = p2.y - p1.y;
+  return sqrt(dx * dx + dy * dy);
 }
 
 int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
@@ -95,7 +97,7 @@ int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
   for (int i = 0; i < map_waypoints.map_waypoints_x.size(); i++) {
     double map_x = map_waypoints.map_waypoints_x[i];
     double map_y = map_waypoints.map_waypoints_y[i];
-    double dist = distance(point.x, point.y, map_x, map_y);
+    double dist = distance(point, Point { map_x, map_y });
     if (dist < closestLen) {
       closestLen = dist;
       closestWaypoint = i;
@@ -105,7 +107,8 @@ int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
   return closestWaypoint;
 }
 
-int NextWaypoint(const Point &point, double theta, const MapWaypoints &map_waypoints) {
+int NextWaypoint(const Point &point, double theta,
+                 const MapWaypoints &map_waypoints) {
 
   int closestWaypoint = ClosestWaypoint(point, map_waypoints);
 
@@ -150,14 +153,16 @@ Frenet getFrenet(const Point &point, double theta,
   double proj_x = proj_norm * n_x;
   double proj_y = proj_norm * n_y;
 
-  double frenet_d = distance(x_x, x_y, proj_x, proj_y);
+  double frenet_d = distance(Point { x_x, x_y }, Point { proj_x, proj_y });
 
   //see if d value is positive or negative by comparing it to a center point
 
   double center_x = 1000 - maps_x[prev_wp];
   double center_y = 2000 - maps_y[prev_wp];
-  double centerToPos = distance(center_x, center_y, x_x, x_y);
-  double centerToRef = distance(center_x, center_y, proj_x, proj_y);
+  double centerToPos = distance(Point { center_x, center_y },
+                                Point { x_x, x_y });
+  double centerToRef = distance(Point { center_x, center_y }, Point { proj_x,
+                                    proj_y });
 
   if (centerToPos <= centerToRef) {
     frenet_d *= -1;
@@ -166,10 +171,11 @@ Frenet getFrenet(const Point &point, double theta,
   // calculate s value
   double frenet_s = 0;
   for (int i = 0; i < prev_wp; i++) {
-    frenet_s += distance(maps_x[i], maps_y[i], maps_x[i + 1], maps_y[i + 1]);
+    frenet_s += distance(Point { maps_x[i], maps_y[i] }, Point { maps_x[i + 1],
+                             maps_y[i + 1] });
   }
 
-  frenet_s += distance(0, 0, proj_x, proj_y);
+  frenet_s += distance(Point { 0, 0 }, Point { proj_x, proj_y });
 
   return Frenet { frenet_s, frenet_d };
 }
@@ -207,8 +213,8 @@ Point getXY(double s, double d, const MapWaypoints &map_waypoints) {
 void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   auto isCloserToEgoCar =
       [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-        double distance1 = distance(egoCar.pos_cart.x, egoCar.pos_cart.y, vehicle1.pos_cart.x, vehicle1.pos_cart.y);
-        double distance2 = distance(egoCar.pos_cart.x, egoCar.pos_cart.y, vehicle2.pos_cart.x, vehicle2.pos_cart.y);
+        double distance1 = distance(egoCar.pos_cart, vehicle1.pos_cart);
+        double distance2 = distance(egoCar.pos_cart, vehicle2.pos_cart);
         return distance1 < distance2;
       };
 
