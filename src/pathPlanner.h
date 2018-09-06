@@ -233,7 +233,8 @@ bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
       // TODO: replace magic number 0.02 with constant
       check_car_s += (double) prev_size * 0.02 * check_speed;
       // TODO: replace magic number 30 with constant
-      if (check_car_s > egoCar.pos_frenet.s && check_car_s - egoCar.pos_frenet.s < 30) {
+      if (check_car_s > egoCar.pos_frenet.s
+          && check_car_s - egoCar.pos_frenet.s < 30) {
         // ref_vel = 29.5;
         return true;
       }
@@ -278,16 +279,20 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
     refPoint.point.y = previousData.previous_path_y[prev_size - 1];
     double ref_x_prev = previousData.previous_path_x[prev_size - 2];
     double ref_y_prev = previousData.previous_path_y[prev_size - 2];
-    refPoint.yaw = atan2(refPoint.point.y - ref_y_prev, refPoint.point.x - ref_x_prev);
+    refPoint.yaw = atan2(refPoint.point.y - ref_y_prev,
+                         refPoint.point.x - ref_x_prev);
     points.xs.push_back(ref_x_prev);
     points.xs.push_back(refPoint.point.x);
     points.ys.push_back(ref_y_prev);
     points.ys.push_back(refPoint.point.y);
   }
   // TODO: DRY: 2 + 4 * lane
-  vector<double> next_wp0 = getXY(egoCar.pos_frenet.s + 30, 2 + 4 * lane, map_waypoints);
-  vector<double> next_wp1 = getXY(egoCar.pos_frenet.s + 60, 2 + 4 * lane, map_waypoints);
-  vector<double> next_wp2 = getXY(egoCar.pos_frenet.s + 90, 2 + 4 * lane, map_waypoints);
+  vector<double> next_wp0 = getXY(egoCar.pos_frenet.s + 30, 2 + 4 * lane,
+                                  map_waypoints);
+  vector<double> next_wp1 = getXY(egoCar.pos_frenet.s + 60, 2 + 4 * lane,
+                                  map_waypoints);
+  vector<double> next_wp2 = getXY(egoCar.pos_frenet.s + 90, 2 + 4 * lane,
+                                  map_waypoints);
   points.xs.push_back(next_wp0[0]);
   points.xs.push_back(next_wp1[0]);
   points.xs.push_back(next_wp2[0]);
@@ -357,8 +362,7 @@ Points createPath(ReferencePoint &refPoint, int &lane,
   refPoint.vel = updateVelocity(too_close, refPoint.vel);
 
   // TODO: define and use operator= instead
-  refPoint.point.x = egoCar.pos_cart.x;
-  refPoint.point.y = egoCar.pos_cart.y;
+  refPoint.point = egoCar.pos_cart;
   refPoint.yaw = deg2rad(egoCar.yaw);
 
   Points points = createPoints(prev_size, egoCar, refPoint, previousData, lane,

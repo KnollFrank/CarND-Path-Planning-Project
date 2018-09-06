@@ -12,7 +12,8 @@ TEST(PathPlanningTest, ShouldCreatePath) {
   vector<Vehicle> vehicles;
 
   // WHEN
-  Points path = createPath(refPoint, lane, read_map_waypoints(), egoCar, previousData, vehicles);
+  Points path = createPath(refPoint, lane, read_map_waypoints(), egoCar,
+                           previousData, vehicles);
 
   // THEN
   ASSERT_TRUE(true);
