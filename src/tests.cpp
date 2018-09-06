@@ -63,9 +63,18 @@ void assert_car_drives_straight_ahead(const Points &path,
       std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
 
+void drive(const Point &dst, EgoCar &egoCar, double dt,
+           const MapWaypoints &map_waypoints) {
+  Point &src = egoCar.pos_cart;
+  egoCar.speed = distance(src, dst) / dt * 2.24;
+  egoCar.pos_cart = dst;
+  egoCar.pos_frenet = getFrenet(dst, 0, map_waypoints);
+  // egoCar.yaw = ?;
 }
 
-TEST(PathPlanningTest, should_ego_drive_in_same_lane) {
+}
+
+TEST(PathPlanningTest, should_drive_in_same_lane) {
 // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
   ReferencePoint refPoint;
@@ -77,11 +86,51 @@ TEST(PathPlanningTest, should_ego_drive_in_same_lane) {
   PreviousData previousData;
   vector<Vehicle> vehicles;
 
+  double dt = 0.02;
+
 // WHEN
   Points path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
-                           vehicles);
+                           vehicles, dt);
 
 // THEN
   test::assert_car_drives_in_middle_of_lane(path, 1, map_waypoints);
   test::assert_car_drives_straight_ahead(path, map_waypoints);
+}
+
+TEST(PathPlanningTest, should_drive_with_max_50_mph ) {
+// GIVEN
+  MapWaypoints map_waypoints = read_map_waypoints();
+  ReferencePoint refPoint;
+  refPoint.vel = 0;
+  int lane = 1;
+  Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
+  EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
+
+  PreviousData previousData;
+  vector<Vehicle> vehicles;
+
+  double dt = 0.02;
+
+  // WHEN
+  for (int j = 0; j < 1000; j++) {
+    Points path = createPath(refPoint, lane, map_waypoints, egoCar,
+                             previousData, vehicles, dt);
+    vector<Point> points = test::getPoints(path, map_waypoints);
+    for (int i = 0; i < points.size() - 10; i++) {
+      test::drive(points[i], egoCar, dt, map_waypoints);
+      cout << "speed: " << egoCar.speed << endl;
+      ASSERT_LT(egoCar.speed, 51);
+    }
+
+    previousData.previous_path_x.clear();
+    previousData.previous_path_y.clear();
+    for (int i = points.size() - 10; i < points.size(); i++) {
+      previousData.previous_path_x.push_back(path.xs[i]);
+      previousData.previous_path_y.push_back(path.ys[i]);
+    }
+    previousData.end_path = getFrenet(points[points.size() - 10 - 1], 0,
+                                      map_waypoints);
+  }
+
+// THEN
 }

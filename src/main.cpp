@@ -1,4 +1,5 @@
 #include "pathPlanner.h"
+#include "gtest/gtest.h"
 #include "tests.cpp"
 
 int main(int argc, char **argv) {
@@ -14,9 +15,10 @@ int main(int argc, char **argv) {
   int lane = 1;
   ReferencePoint refPoint;
   refPoint.vel = 0;
+  double dt = 0.02;
 
   h.onMessage(
-      [&refPoint,&lane,&map_waypoints](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+      [dt, &refPoint,&lane,&map_waypoints](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
           uWS::OpCode opCode) {
         // "42" at the start of the message means there's a websocket message event.
         // The 4 signifies a websocket message
@@ -34,7 +36,7 @@ int main(int argc, char **argv) {
             if (event == "telemetry") {
               // j[1] is the data JSON object
 
-              Points next_vals = createPath(refPoint, lane, map_waypoints, createEgoCar(j), createPreviousData(j), createVehicles(j[1]["sensor_fusion"]));
+              Points next_vals = createPath(refPoint, lane, map_waypoints, createEgoCar(j), createPreviousData(j), createVehicles(j[1]["sensor_fusion"]), dt);
 
               json msgJson;
               msgJson["next_x"] = next_vals.xs;

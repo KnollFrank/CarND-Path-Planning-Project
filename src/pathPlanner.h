@@ -226,7 +226,7 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
 }
 
 bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
-                const int prev_size, int lane) {
+                const int prev_size, int lane, double dt) {
   for (int i = 0; i < vehicles.size(); i++) {
     float d = vehicles[i].pos_frenet.d;
     // if(d > 4*lane && d < 4*(lane + 1))
@@ -235,8 +235,7 @@ bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
       double vy = vehicles[i].vy;
       double check_speed = sqrt(vx * vx + vy * vy);
       double check_car_s = vehicles[i].pos_frenet.s;
-      // TODO: replace magic number 0.02 with constant
-      check_car_s += (double) prev_size * 0.02 * check_speed;
+      check_car_s += (double) prev_size * dt * check_speed;
       // TODO: replace magic number 30 with constant
       if (check_car_s > egoCar.pos_frenet.s
           && check_car_s - egoCar.pos_frenet.s < 30) {
@@ -250,7 +249,7 @@ bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
 }
 
 double updateVelocity(bool too_close, double velocity) {
-  if (too_close) {
+  if (too_close || velocity > 50) {
     velocity -= .224;
   } else if (velocity < 49.5) {
     velocity += .224;
@@ -319,7 +318,7 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
 
 Points createNextVals(const Points &points, const int prev_size,
                       const PreviousData& previousData,
-                      ReferencePoint &refPoint) {
+                      ReferencePoint &refPoint, double dt) {
   Points next_vals;
 
   tk::spline s;
@@ -334,7 +333,7 @@ Points createNextVals(const Points &points, const int prev_size,
   double x_add_on = 0;
   const int path_size = 50;
   for (int i = 1; i < path_size - prev_size; i++) {
-    double N = target_dist / (0.02 * refPoint.vel / 2.24);
+    double N = target_dist / (dt * refPoint.vel / 2.24);
     double x_point = x_add_on + target_x / N;
     double y_point = s(x_point);
     x_add_on = x_point;
@@ -355,7 +354,8 @@ Points createNextVals(const Points &points, const int prev_size,
 Points createPath(ReferencePoint &refPoint, int &lane,
                   const MapWaypoints &map_waypoints, EgoCar egoCar,
                   const PreviousData &previousData,
-                  const vector<Vehicle> &vehicles) {
+                  const vector<Vehicle> &vehicles,
+                  double dt) {
 
   // printInfo(egoCar, vehicles);
 
@@ -365,7 +365,7 @@ Points createPath(ReferencePoint &refPoint, int &lane,
     egoCar.pos_frenet.s = previousData.end_path.s;
   }
 
-  bool too_close = isTooClose(egoCar, vehicles, prev_size, lane);
+  bool too_close = isTooClose(egoCar, vehicles, prev_size, lane, dt);
   lane = updateLane(too_close, lane);
   refPoint.vel = updateVelocity(too_close, refPoint.vel);
 
@@ -376,7 +376,7 @@ Points createPath(ReferencePoint &refPoint, int &lane,
   Points points = createPoints(prev_size, egoCar, refPoint, previousData, lane,
                                map_waypoints);
 
-  return createNextVals(points, prev_size, previousData, refPoint);
+  return createNextVals(points, prev_size, previousData, refPoint, dt);
 }
 
 EgoCar createEgoCar(
