@@ -71,7 +71,7 @@ TEST(PathPlanningTest, should_ego_drive_in_same_lane) {
   ReferencePoint refPoint;
   refPoint.vel = 0;
   int lane = 1;
-  Frenet pos = Frenet { 124.8336, 2. + 4. * lane };
+  Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
 
   PreviousData previousData;

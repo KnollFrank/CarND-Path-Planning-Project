@@ -267,6 +267,10 @@ int updateLane(bool too_close, int lane) {
   return lane;
 }
 
+double getMiddleOfLane(int lane) {
+  return 2 + 4 * lane;
+}
+
 Points createPoints(const int prev_size, const EgoCar& egoCar,
                     ReferencePoint &refPoint, const PreviousData& previousData,
                     int& lane, const MapWaypoints &map_waypoints) {
@@ -291,10 +295,9 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
     points.ys.push_back(ref_y_prev);
     points.ys.push_back(refPoint.point.y);
   }
-  const double middle_of_lane = 2 + 4 * lane;
-  Point next_wp0 = getXY(egoCar.pos_frenet.s + 30, middle_of_lane, map_waypoints);
-  Point next_wp1 = getXY(egoCar.pos_frenet.s + 60, middle_of_lane, map_waypoints);
-  Point next_wp2 = getXY(egoCar.pos_frenet.s + 90, middle_of_lane, map_waypoints);
+  Point next_wp0 = getXY(egoCar.pos_frenet.s + 30, getMiddleOfLane(lane), map_waypoints);
+  Point next_wp1 = getXY(egoCar.pos_frenet.s + 60, getMiddleOfLane(lane), map_waypoints);
+  Point next_wp2 = getXY(egoCar.pos_frenet.s + 90, getMiddleOfLane(lane), map_waypoints);
 
   points.xs.push_back(next_wp0.x);
   points.xs.push_back(next_wp1.x);
