@@ -375,10 +375,8 @@ EgoCar createEgoCar(
             std::allocator<char> >, bool, long, unsigned long, double,
         std::allocator, nlohmann::adl_serializer> &j) {
   EgoCar egoCar;
-  egoCar.pos_cart.x = j[1]["x"];
-  egoCar.pos_cart.y = j[1]["y"];
-  egoCar.pos_frenet.s = j[1]["s"];
-  egoCar.pos_frenet.d = j[1]["d"];
+  egoCar.pos_cart = Point { j[1]["x"], j[1]["y"] };
+  egoCar.pos_frenet = Frenet { j[1]["s"], j[1]["d"] };
   egoCar.yaw = j[1]["yaw"];
   egoCar.speed = j[1]["speed"];
   return egoCar;
