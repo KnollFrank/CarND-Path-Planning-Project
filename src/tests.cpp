@@ -35,8 +35,6 @@ TEST(PathPlanningTest, should_ego_drive_in_same_lane) {
                            vehicles);
 
 // THEN
-  ASSERT_GT(path.xs.size(), 0);
-  Frenet frenet = getFrenet(path.xs[0], path.ys[0], 0, map_waypoints);
+  Frenet frenet = getFrenet(Point { path.xs[0], path.ys[0] }, 0, map_waypoints);
   ASSERT_NEAR(6.0, frenet.d, 0.0001);
-  ASSERT_FALSE(test::collision(path, vehicles));
 }

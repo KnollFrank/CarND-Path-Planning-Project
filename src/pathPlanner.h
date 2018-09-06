@@ -87,16 +87,15 @@ double distance(double x1, double y1, double x2, double y2) {
   return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
-int ClosestWaypoint(double x, double y, const vector<double> &maps_x,
-                    const vector<double> &maps_y) {
+int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
 
   double closestLen = 100000;  //large number
   int closestWaypoint = 0;
 
-  for (int i = 0; i < maps_x.size(); i++) {
-    double map_x = maps_x[i];
-    double map_y = maps_y[i];
-    double dist = distance(x, y, map_x, map_y);
+  for (int i = 0; i < map_waypoints.map_waypoints_x.size(); i++) {
+    double map_x = map_waypoints.map_waypoints_x[i];
+    double map_y = map_waypoints.map_waypoints_y[i];
+    double dist = distance(point.x, point.y, map_x, map_y);
     if (dist < closestLen) {
       closestLen = dist;
       closestWaypoint = i;
@@ -106,22 +105,21 @@ int ClosestWaypoint(double x, double y, const vector<double> &maps_x,
   return closestWaypoint;
 }
 
-int NextWaypoint(double x, double y, double theta, const vector<double> &maps_x,
-                 const vector<double> &maps_y) {
+int NextWaypoint(const Point &point, double theta, const MapWaypoints &map_waypoints) {
 
-  int closestWaypoint = ClosestWaypoint(x, y, maps_x, maps_y);
+  int closestWaypoint = ClosestWaypoint(point, map_waypoints);
 
-  double map_x = maps_x[closestWaypoint];
-  double map_y = maps_y[closestWaypoint];
+  double map_x = map_waypoints.map_waypoints_x[closestWaypoint];
+  double map_y = map_waypoints.map_waypoints_y[closestWaypoint];
 
-  double heading = atan2((map_y - y), (map_x - x));
+  double heading = atan2((map_y - point.y), (map_x - point.x));
 
   double angle = fabs(theta - heading);
   angle = min(2 * pi() - angle, angle);
 
   if (angle > pi() / 4) {
     closestWaypoint++;
-    if (closestWaypoint == maps_x.size()) {
+    if (closestWaypoint == map_waypoints.map_waypoints_x.size()) {
       closestWaypoint = 0;
     }
   }
@@ -130,11 +128,11 @@ int NextWaypoint(double x, double y, double theta, const vector<double> &maps_x,
 }
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
-Frenet getFrenet(double x, double y, double theta,
+Frenet getFrenet(const Point &point, double theta,
                  const MapWaypoints &map_waypoints) {
   const vector<double> &maps_x = map_waypoints.map_waypoints_x;
   const vector<double> &maps_y = map_waypoints.map_waypoints_y;
-  int next_wp = NextWaypoint(x, y, theta, maps_x, maps_y);
+  int next_wp = NextWaypoint(point, theta, map_waypoints);
 
   int prev_wp;
   prev_wp = next_wp - 1;
@@ -144,8 +142,8 @@ Frenet getFrenet(double x, double y, double theta,
 
   double n_x = maps_x[next_wp] - maps_x[prev_wp];
   double n_y = maps_y[next_wp] - maps_y[prev_wp];
-  double x_x = x - maps_x[prev_wp];
-  double x_y = y - maps_y[prev_wp];
+  double x_x = point.x - maps_x[prev_wp];
+  double x_y = point.y - maps_y[prev_wp];
 
   // find the projection of x onto n
   double proj_norm = (x_x * n_x + x_y * n_y) / (n_x * n_x + n_y * n_y);
