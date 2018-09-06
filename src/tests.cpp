@@ -3,6 +3,25 @@
 
 namespace test {
 
+template<class T, typename unop>
+vector<T> map2(vector<T> v, unop op) {
+  vector<T> result(v.size());
+  transform(v.begin(), v.end(), result.begin(), op);
+  return result;
+}
+
+vector<Frenet> asFrenets(const vector<Point> &points,
+                         const MapWaypoints &map_waypoints) {
+
+  // TODO: reformulate using map2
+  vector<Frenet> result(points.size());
+  transform(points.begin(), points.end(), result.begin(),
+            [&map_waypoints](const Point &point) {
+              return getFrenet(point, 0, map_waypoints);
+            });
+  return result;
+}
+
 bool collision(const Points &egoPath, const vector<Vehicle> &vehicles) {
   return false;
 }
@@ -16,6 +35,31 @@ EgoCar createEgoCar(const Frenet &pos, const MapWaypoints &map_waypoints) {
   return egoCar;
 }
 
+void assert_car_drives_in_middle_of_lane(const vector<Point> &points, int lane,
+                                         const MapWaypoints &map_waypoints) {
+  for (const Frenet &frenet : asFrenets(points, map_waypoints)) {
+    ASSERT_NEAR(2 + 4 * lane, frenet.d, 0.001);
+  }
+}
+
+vector<Point> getPoints(const Points &path, const MapWaypoints &map_waypoints) {
+  vector<Point> points;
+  for (int i = 0; i < path.xs.size(); i++) {
+    points.push_back(Point { path.xs[i], path.ys[i] });
+  }
+  return points;
+}
+
+void assert_car_drives_straight_ahead(const Points &path,
+                                      const MapWaypoints &map_waypoints) {
+  vector<Frenet> frenets = asFrenets(getPoints(path, map_waypoints), map_waypoints);
+  // TODO: reformulate using map2
+  vector<double> result(frenets.size());
+  transform(frenets.begin(), frenets.end(), result.begin(),
+            [](const Frenet &frenet) {return frenet.s;});
+  ASSERT_TRUE(std::is_sorted(result.begin(), result.end()));
+}
+
 }
 
 TEST(PathPlanningTest, should_ego_drive_in_same_lane) {
@@ -24,7 +68,7 @@ TEST(PathPlanningTest, should_ego_drive_in_same_lane) {
   ReferencePoint refPoint;
   refPoint.vel = 0;
   int lane = 1;
-  Frenet pos = Frenet { 124.8336, 6 };
+  Frenet pos = Frenet { 124.8336, 2. + 4. * lane };
   EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
 
   PreviousData previousData;
@@ -35,6 +79,7 @@ TEST(PathPlanningTest, should_ego_drive_in_same_lane) {
                            vehicles);
 
 // THEN
-  Frenet frenet = getFrenet(Point { path.xs[0], path.ys[0] }, 0, map_waypoints);
-  ASSERT_NEAR(pos.d, frenet.d, 0.0001);
+  vector<Point> points = test::getPoints(path, map_waypoints);
+  test::assert_car_drives_in_middle_of_lane(points, 1, map_waypoints);
+  test::assert_car_drives_straight_ahead(path, map_waypoints);
 }
