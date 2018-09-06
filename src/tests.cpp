@@ -113,6 +113,7 @@ void drive(ReferencePoint &refPoint, int &lane,
                        previousData);
   }
 }
+}
 
 TEST(PathPlanningTest, should_drive_in_same_lane) {
 // GIVEN
@@ -128,17 +129,17 @@ TEST(PathPlanningTest, should_drive_in_same_lane) {
 
   double dt = 0.02;
 
-// WHEN
+  // WHEN
   Points path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
                            vehicles, dt);
 
-// THEN
+  // THEN
   test::assert_car_drives_in_middle_of_lane(path, 1, map_waypoints);
   test::assert_car_drives_straight_ahead(path, map_waypoints);
 }
 
 TEST(PathPlanningTest, should_drive_with_max_50_mph ) {
-// GIVEN
+  // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
   ReferencePoint refPoint;
   refPoint.vel = 0;
@@ -154,7 +155,6 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph ) {
   // WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
               [&egoCar]() {ASSERT_LT(egoCar.speed, 50);});
-}
 
-// THEN
+  // THEN
 }
