@@ -153,7 +153,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph ) {
 
   // WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              [&egoCar]() {ASSERT_LT(egoCar.speed, 51);});
+              [&egoCar]() {ASSERT_LT(egoCar.speed, 50);});
 }
 
 // THEN
