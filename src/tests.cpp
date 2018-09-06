@@ -47,11 +47,18 @@ void assert_car_drives_in_middle_of_lane(const Points &path, int lane,
   }
 }
 
-void assert_car_drives_straight_ahead(const Points &path,
-                                      const MapWaypoints &map_waypoints) {
-  vector<double> distancesAlongRoad = map2<Frenet, double>(
+vector<double> getDistancesAlongRoad(const Points &path,
+                                     const MapWaypoints &map_waypoints) {
+
+  return map2<Frenet, double>(
       asFrenets(getPoints(path, map_waypoints), map_waypoints),
       [](const Frenet &frenet) {return frenet.s;});
+}
+
+void assert_car_drives_straight_ahead(const Points &path,
+                                      const MapWaypoints &map_waypoints) {
+  vector<double> distancesAlongRoad = getDistancesAlongRoad(path,
+                                                            map_waypoints);
   ASSERT_TRUE(
       std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
