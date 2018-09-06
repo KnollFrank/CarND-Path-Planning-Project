@@ -63,7 +63,7 @@ void assert_car_drives_straight_ahead(const Points &path,
       std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
 
-void drive(const Point &dst, EgoCar &egoCar, double dt,
+void drive2Dst(const Point &dst, EgoCar &egoCar, double dt,
            const MapWaypoints &map_waypoints) {
   Point &src = egoCar.pos_cart;
   egoCar.speed = distance(src, dst) / dt * 2.24;
@@ -116,19 +116,19 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph ) {
     Points path = createPath(refPoint, lane, map_waypoints, egoCar,
                              previousData, vehicles, dt);
     vector<Point> points = test::getPoints(path, map_waypoints);
-    for (int i = 0; i < points.size() - 10; i++) {
-      test::drive(points[i], egoCar, dt, map_waypoints);
-      cout << "speed: " << egoCar.speed << endl;
+    int numberOfUnprocessedElements = 10;
+    for (int i = 0; i < points.size() - numberOfUnprocessedElements; i++) {
+      test::drive2Dst(points[i], egoCar, dt, map_waypoints);
       ASSERT_LT(egoCar.speed, 51);
     }
 
     previousData.previous_path_x.clear();
     previousData.previous_path_y.clear();
-    for (int i = points.size() - 10; i < points.size(); i++) {
+    for (int i = points.size() - numberOfUnprocessedElements; i < points.size(); i++) {
       previousData.previous_path_x.push_back(path.xs[i]);
       previousData.previous_path_y.push_back(path.ys[i]);
     }
-    previousData.end_path = getFrenet(points[points.size() - 10 - 1], 0,
+    previousData.end_path = getFrenet(points[points.size() - numberOfUnprocessedElements - 1], 0,
                                       map_waypoints);
   }
 
