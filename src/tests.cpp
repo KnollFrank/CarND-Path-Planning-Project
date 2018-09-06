@@ -7,7 +7,7 @@ bool collision(const Points &egoPath, const vector<Vehicle> &vehicles) {
   return false;
 }
 
-EgoCar createEgoCar(Frenet pos, const MapWaypoints & map_waypoints) {
+EgoCar createEgoCar(const Frenet &pos, const MapWaypoints &map_waypoints) {
   EgoCar egoCar;
   egoCar.pos_frenet = pos;
   egoCar.pos_cart = getXY(pos.s, pos.d, map_waypoints);
@@ -36,5 +36,5 @@ TEST(PathPlanningTest, should_ego_drive_in_same_lane) {
 
 // THEN
   Frenet frenet = getFrenet(Point { path.xs[0], path.ys[0] }, 0, map_waypoints);
-  ASSERT_NEAR(6.0, frenet.d, 0.0001);
+  ASSERT_NEAR(pos.d, frenet.d, 0.0001);
 }
