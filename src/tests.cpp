@@ -63,8 +63,8 @@ void assert_car_drives_straight_ahead(const Points &path,
       std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
 
-void drive2Dst(const Point &dst, EgoCar &egoCar, double dt,
-           const MapWaypoints &map_waypoints) {
+void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
+                 const MapWaypoints &map_waypoints) {
   Point &src = egoCar.pos_cart;
   egoCar.speed = distance(src, dst) / dt * 2.24;
   egoCar.pos_cart = dst;
@@ -72,6 +72,46 @@ void drive2Dst(const Point &dst, EgoCar &egoCar, double dt,
   // egoCar.yaw = ?;
 }
 
+void drive2Points(const vector<Point>& points, int numberOfUnprocessedElements,
+                  double dt, const MapWaypoints& map_waypoints,
+                  const function<void(void)>& check, EgoCar& egoCar) {
+  for (int i = 0; i < points.size() - numberOfUnprocessedElements; i++) {
+    drive2Point(points[i], egoCar, dt, map_waypoints);
+    check();
+  }
+}
+
+void updatePreviousData(const vector<Point>& points,
+                        int numberOfUnprocessedElements, const Points& path,
+                        const MapWaypoints& map_waypoints,
+                        PreviousData& previousData) {
+  previousData.previous_path_x.clear();
+  previousData.previous_path_y.clear();
+  for (int i = points.size() - numberOfUnprocessedElements; i < points.size();
+      i++) {
+    previousData.previous_path_x.push_back(path.xs[i]);
+    previousData.previous_path_y.push_back(path.ys[i]);
+  }
+  previousData.end_path = getFrenet(
+      points[points.size() - numberOfUnprocessedElements - 1], 0,
+      map_waypoints);
+}
+
+void drive(ReferencePoint &refPoint, int &lane,
+           const MapWaypoints &map_waypoints, EgoCar &egoCar,
+           PreviousData &previousData, const vector<Vehicle> &vehicles,
+           double dt, const function<void(void)> &check) {
+  for (int j = 0; j < 1000; j++) {
+    Points path = createPath(refPoint, lane, map_waypoints, egoCar,
+                             previousData, vehicles, dt);
+    vector<Point> points = test::getPoints(path, map_waypoints);
+    int numberOfUnprocessedElements = 10;
+    drive2Points(points, numberOfUnprocessedElements, dt, map_waypoints, check,
+                 egoCar);
+
+    updatePreviousData(points, numberOfUnprocessedElements, path, map_waypoints,
+                       previousData);
+  }
 }
 
 TEST(PathPlanningTest, should_drive_in_same_lane) {
@@ -112,25 +152,9 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph ) {
   double dt = 0.02;
 
   // WHEN
-  for (int j = 0; j < 1000; j++) {
-    Points path = createPath(refPoint, lane, map_waypoints, egoCar,
-                             previousData, vehicles, dt);
-    vector<Point> points = test::getPoints(path, map_waypoints);
-    int numberOfUnprocessedElements = 10;
-    for (int i = 0; i < points.size() - numberOfUnprocessedElements; i++) {
-      test::drive2Dst(points[i], egoCar, dt, map_waypoints);
-      ASSERT_LT(egoCar.speed, 51);
-    }
-
-    previousData.previous_path_x.clear();
-    previousData.previous_path_y.clear();
-    for (int i = points.size() - numberOfUnprocessedElements; i < points.size(); i++) {
-      previousData.previous_path_x.push_back(path.xs[i]);
-      previousData.previous_path_y.push_back(path.ys[i]);
-    }
-    previousData.end_path = getFrenet(points[points.size() - numberOfUnprocessedElements - 1], 0,
-                                      map_waypoints);
-  }
+  test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
+              [&egoCar]() {ASSERT_LT(egoCar.speed, 51);});
+}
 
 // THEN
 }

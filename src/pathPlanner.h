@@ -294,9 +294,12 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
     points.ys.push_back(ref_y_prev);
     points.ys.push_back(refPoint.point.y);
   }
-  Point next_wp0 = getXY(egoCar.pos_frenet.s + 30, getMiddleOfLane(lane), map_waypoints);
-  Point next_wp1 = getXY(egoCar.pos_frenet.s + 60, getMiddleOfLane(lane), map_waypoints);
-  Point next_wp2 = getXY(egoCar.pos_frenet.s + 90, getMiddleOfLane(lane), map_waypoints);
+  Point next_wp0 = getXY(egoCar.pos_frenet.s + 30, getMiddleOfLane(lane),
+                         map_waypoints);
+  Point next_wp1 = getXY(egoCar.pos_frenet.s + 60, getMiddleOfLane(lane),
+                         map_waypoints);
+  Point next_wp2 = getXY(egoCar.pos_frenet.s + 90, getMiddleOfLane(lane),
+                         map_waypoints);
 
   points.xs.push_back(next_wp0.x);
   points.xs.push_back(next_wp1.x);
@@ -352,10 +355,9 @@ Points createNextVals(const Points &points, const int prev_size,
 }
 
 Points createPath(ReferencePoint &refPoint, int &lane,
-                  const MapWaypoints &map_waypoints, EgoCar egoCar,
+                  const MapWaypoints &map_waypoints, EgoCar &egoCar,
                   const PreviousData &previousData,
-                  const vector<Vehicle> &vehicles,
-                  double dt) {
+                  const vector<Vehicle> &vehicles, double dt) {
 
   // printInfo(egoCar, vehicles);
 
