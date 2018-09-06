@@ -3,23 +3,27 @@
 
 namespace test {
 
-template<class T, typename unop>
-vector<T> map2(vector<T> v, unop op) {
-  vector<T> result(v.size());
+template<typename T, typename R, typename unop>
+vector<R> map2(vector<T> v, unop op) {
+  vector<R> result(v.size());
   transform(v.begin(), v.end(), result.begin(), op);
   return result;
+}
+
+vector<Point> getPoints(const Points &path, const MapWaypoints &map_waypoints) {
+  vector<Point> points;
+  for (int i = 0; i < path.xs.size(); i++) {
+    points.push_back(Point { path.xs[i], path.ys[i] });
+  }
+  return points;
 }
 
 vector<Frenet> asFrenets(const vector<Point> &points,
                          const MapWaypoints &map_waypoints) {
 
-  // TODO: reformulate using map2
-  vector<Frenet> result(points.size());
-  transform(points.begin(), points.end(), result.begin(),
-            [&map_waypoints](const Point &point) {
-              return getFrenet(point, 0, map_waypoints);
-            });
-  return result;
+  return map2<Point, Frenet>(points, [&map_waypoints](const Point &point) {
+    return getFrenet(point, 0, map_waypoints);
+  });
 }
 
 bool collision(const Points &egoPath, const vector<Vehicle> &vehicles) {
@@ -35,29 +39,21 @@ EgoCar createEgoCar(const Frenet &pos, const MapWaypoints &map_waypoints) {
   return egoCar;
 }
 
-void assert_car_drives_in_middle_of_lane(const vector<Point> &points, int lane,
+void assert_car_drives_in_middle_of_lane(const Points &path, int lane,
                                          const MapWaypoints &map_waypoints) {
-  for (const Frenet &frenet : asFrenets(points, map_waypoints)) {
+  for (const Frenet &frenet : asFrenets(getPoints(path, map_waypoints),
+                                        map_waypoints)) {
     ASSERT_NEAR(2 + 4 * lane, frenet.d, 0.001);
   }
 }
 
-vector<Point> getPoints(const Points &path, const MapWaypoints &map_waypoints) {
-  vector<Point> points;
-  for (int i = 0; i < path.xs.size(); i++) {
-    points.push_back(Point { path.xs[i], path.ys[i] });
-  }
-  return points;
-}
-
 void assert_car_drives_straight_ahead(const Points &path,
                                       const MapWaypoints &map_waypoints) {
-  vector<Frenet> frenets = asFrenets(getPoints(path, map_waypoints), map_waypoints);
-  // TODO: reformulate using map2
-  vector<double> result(frenets.size());
-  transform(frenets.begin(), frenets.end(), result.begin(),
-            [](const Frenet &frenet) {return frenet.s;});
-  ASSERT_TRUE(std::is_sorted(result.begin(), result.end()));
+  vector<double> distancesAlongRoad = map2<Frenet, double>(
+      asFrenets(getPoints(path, map_waypoints), map_waypoints),
+      [](const Frenet &frenet) {return frenet.s;});
+  ASSERT_TRUE(
+      std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
 
 }
@@ -79,7 +75,6 @@ TEST(PathPlanningTest, should_ego_drive_in_same_lane) {
                            vehicles);
 
 // THEN
-  vector<Point> points = test::getPoints(path, map_waypoints);
-  test::assert_car_drives_in_middle_of_lane(points, 1, map_waypoints);
+  test::assert_car_drives_in_middle_of_lane(path, 1, map_waypoints);
   test::assert_car_drives_straight_ahead(path, map_waypoints);
 }
