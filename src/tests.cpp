@@ -52,7 +52,7 @@ vector<Frenet> asFrenets(const vector<Point> &points,
 }
 
 bool isCollision(const EgoCar &egoCar, const Vehicle &vehicle) {
-  return distance(egoCar.getPos_cart(), vehicle.pos_cart) <= 2 * carRadius;
+  return distance(egoCar.getPos_cart(), vehicle.getPos_cart()) <= 2 * carRadius;
 }
 
 bool isCollision(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
@@ -159,6 +159,7 @@ void driveEgoCar(ReferencePoint &refPoint, int &lane,
                  const MapWaypoints &map_waypoints, EgoCar &egoCar,
                  PreviousData &previousData, vector<Vehicle> &vehicles,
                  double dt, const function<void(void)> &check) {
+
   Points path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
                            vehicles, dt);
   vector<Point> points = test::getPoints(path, map_waypoints);
@@ -185,8 +186,7 @@ Vehicle createVehicle(int id, const Frenet &pos, const Frenet &v,
                       const MapWaypoints &map_waypoints) {
   Vehicle vehicle;
   vehicle.id = id;
-  vehicle.pos_frenet = pos;
-  vehicle.pos_cart = getXY(pos, map_waypoints);
+  vehicle.setPos_frenet(pos, map_waypoints);
   vehicle.vel = createCartVectorConnectingStartAndEnd(
       pos, Frenet { pos.s + v.s, pos.d + v.d }, map_waypoints);
   return vehicle;

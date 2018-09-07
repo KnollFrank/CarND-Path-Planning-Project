@@ -66,21 +66,15 @@ class EgoCar {
   double speed;
 
   void setPos(const Point pos_cart, const Frenet pos_frenet);
-
   void setPos_cart(const Point pos, const MapWaypoints &map_waypoints);
-
   Point getPos_cart() const;
-
   void setPos_frenet(const Frenet pos, const MapWaypoints &map_waypoints);
-
   Frenet getPos_frenet() const;
+  friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
  private:
   Point pos_cart;
   Frenet pos_frenet;
-
- public:
-  friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 };
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
@@ -98,14 +92,23 @@ struct PreviousData {
   Frenet end_path;
 };
 
-// TODO: analog zu EgoCar getter und setter für pos_cart und pos_frenet einführen.
-struct Vehicle {
+class Vehicle {
+
+ public:
+  void setPos(const Point pos_cart, const Frenet pos_frenet);
+  void setPos_cart(const Point pos, const MapWaypoints &map_waypoints);
+  Point getPos_cart() const;
+  void setPos_frenet(const Frenet pos, const MapWaypoints &map_waypoints);
+  Frenet getPos_frenet() const;
+
   int id;
-  Point pos_cart;
-  Frenet pos_frenet;
   Point vel;
 
   friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
+
+ private:
+  Point pos_cart;
+  Frenet pos_frenet;
 };
 
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {

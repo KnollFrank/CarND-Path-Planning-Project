@@ -25,6 +25,29 @@ Frenet EgoCar::getPos_frenet() const {
   return pos_frenet;
 }
 
+void Vehicle::setPos(const Point pos_cart, const Frenet pos_frenet) {
+  this->pos_cart = pos_cart;
+  this->pos_frenet = pos_frenet;
+}
+
+void Vehicle::setPos_cart(const Point pos, const MapWaypoints &map_waypoints) {
+  pos_cart = pos;
+  pos_frenet = getFrenet(pos, 0, map_waypoints);
+}
+
+Point Vehicle::getPos_cart() const {
+  return pos_cart;
+}
+
+void Vehicle::setPos_frenet(const Frenet pos, const MapWaypoints &map_waypoints) {
+  pos_frenet = pos;
+  pos_cart = getXY(pos, map_waypoints);
+}
+
+Frenet Vehicle::getPos_frenet() const {
+  return pos_frenet;
+}
+
 int main(int argc, char **argv) {
   if (argc > 1 && strcmp(argv[1], "test") == 0) {
     testing::InitGoogleTest(&argc, argv);

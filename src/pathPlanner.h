@@ -213,8 +213,8 @@ Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
 void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   auto isCloserToEgoCar =
       [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-        double distance1 = distance(egoCar.getPos_cart(), vehicle1.pos_cart);
-        double distance2 = distance(egoCar.getPos_cart(), vehicle2.pos_cart);
+        double distance1 = distance(egoCar.getPos_cart(), vehicle1.getPos_cart());
+        double distance2 = distance(egoCar.getPos_cart(), vehicle2.getPos_cart());
         return distance1 < distance2;
       };
 
@@ -228,14 +228,14 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
 bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
                 const int prev_size, int lane, double dt) {
   for (int i = 0; i < vehicles.size(); i++) {
-    float d = vehicles[i].pos_frenet.d;
+    float d = vehicles[i].getPos_frenet().d;
     // if(d > 4*lane && d < 4*(lane + 1))
     // TODO: extract function "bool isVehicleInLane(vehicle, lane)"
     if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
       double vx = vehicles[i].vel.x;
       double vy = vehicles[i].vel.y;
       double check_speed = sqrt(vx * vx + vy * vy);
-      double check_car_s = vehicles[i].pos_frenet.s;
+      double check_car_s = vehicles[i].getPos_frenet().s;
       check_car_s += (double) prev_size * dt * check_speed;
       // TODO: replace magic number 30 with constant
       if (check_car_s > egoCar.getPos_frenet().s
@@ -370,7 +370,9 @@ Points createPath(ReferencePoint &refPoint, int &lane,
   const int prev_size = previousData.previous_path_x.size();
 
   if (prev_size > 0) {
-    egoCar.setPos_frenet(Frenet { previousData.end_path.s, egoCar.getPos_frenet().d }, map_waypoints);
+    egoCar.setPos_frenet(Frenet { previousData.end_path.s,
+                             egoCar.getPos_frenet().d },
+                         map_waypoints);
   }
 
   bool too_close = isTooClose(egoCar, vehicles, prev_size, lane, dt);
@@ -392,7 +394,8 @@ EgoCar createEgoCar(
             std::allocator<char> >, bool, long, unsigned long, double,
         std::allocator, nlohmann::adl_serializer> &j) {
   EgoCar egoCar;
-  egoCar.setPos(Point { j[1]["x"], j[1]["y"] }, Frenet { j[1]["s"], j[1]["d"] });
+  egoCar.setPos(Point { j[1]["x"], j[1]["y"] },
+                Frenet { j[1]["s"], j[1]["d"] });
   egoCar.yaw_deg = j[1]["yaw"];
   egoCar.speed = j[1]["speed"];
   return egoCar;
@@ -436,9 +439,9 @@ vector<Vehicle> createVehicles(
   for (int i = 0; i < sensor_fusion.size(); i++) {
     Vehicle vehicle;
     vehicle.id = sensor_fusion[i][ID];
-    vehicle.pos_cart = Point { sensor_fusion[i][X], sensor_fusion[i][Y] };
+    vehicle.setPos(Point { sensor_fusion[i][X], sensor_fusion[i][Y] }, Frenet {
+                       sensor_fusion[i][S], sensor_fusion[i][D] });
     vehicle.vel = Point { sensor_fusion[i][VX], sensor_fusion[i][VY] };
-    vehicle.pos_frenet = Frenet { sensor_fusion[i][S], sensor_fusion[i][D] };
     vehicles.push_back(vehicle);
   }
   return vehicles;
