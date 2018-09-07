@@ -144,14 +144,13 @@ void drive(ReferencePoint &refPoint, int &lane,
   }
 }
 
-Vehicle createVehicle(int id, const Frenet &pos,
+Vehicle createVehicle(int id, const Frenet &pos, const Frenet &v,
                       const MapWaypoints &map_waypoints) {
   Vehicle vehicle;
   vehicle.id = id;
   vehicle.pos_frenet = pos;
   vehicle.pos_cart = getXY(pos, map_waypoints);
-  vehicle.vx = 0;
-  vehicle.vy = 0;
+  vehicle.v = getXY(v, map_waypoints);
   return vehicle;
 }
 
@@ -201,10 +200,6 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 // THEN
 }
 
-TEST(PathPlanningTest, should_not_collide) {
-
-}
-
 TEST(PathPlanningTest, should_collide) {
   // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
@@ -213,10 +208,35 @@ TEST(PathPlanningTest, should_collide) {
   Vehicle vehicle = test::createVehicle(0,
                                         Frenet { posCar.s + test::carRadius / 2,
                                             posCar.d },
-                                        map_waypoints);
+                                        Frenet { 0, 0 }, map_waypoints);
 
   // WHEN
 
   // THEN
   ASSERT_TRUE(test::isCollision(egoCar, vehicle));
+}
+
+TEST(PathPlanningTest, should_not_collide) {
+  TODO: hier weitermachen
+  // GIVEN
+  MapWaypoints map_waypoints = read_map_waypoints();
+  ReferencePoint refPoint;
+  double dt = 0.02;
+  PreviousData previousData;
+  refPoint.vel = 0;
+  int lane = 1;
+  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
+  EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
+  Vehicle vehicle = test::createVehicle(
+      0, Frenet { posCar.s + 5 * (2 * test::carRadius), posCar.d }, Frenet { 5,
+          0 },
+      map_waypoints);
+  vector<Vehicle> vehicles = { vehicle };
+
+  // WHEN
+  test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
+              [&egoCar]() { {ASSERT_LT(egoCar.speed, 50);}});
+
+  // THEN
+
 }

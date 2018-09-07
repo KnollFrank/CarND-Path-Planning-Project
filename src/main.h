@@ -86,9 +86,8 @@ struct PreviousData {
 struct Vehicle {
   int id;
   Point pos_cart;
-  double vx;
-  double vy;
   Frenet pos_frenet;
+  Point v;
 
   friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
 };
@@ -96,7 +95,7 @@ struct Vehicle {
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   os << "Vehicle(" << vehicle.id << "):" << endl;
   os << "  pos_cart = " << vehicle.pos_cart << endl;
-  os << "  (vx, vy) = (" << vehicle.vx << ", " << vehicle.vy << ")" << endl;
+  os << "  (vx, vy) = (" << vehicle.v.x << ", " << vehicle.v.y << ")" << endl;
   os << "  pos_frenet = " << vehicle.pos_frenet << endl;
   return os;
 }

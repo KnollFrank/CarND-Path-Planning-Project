@@ -232,8 +232,8 @@ bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
     // if(d > 4*lane && d < 4*(lane + 1))
     // TODO: extract function "bool isVehicleInLane(vehicle, lane)"
     if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
-      double vx = vehicles[i].vx;
-      double vy = vehicles[i].vy;
+      double vx = vehicles[i].v.x;
+      double vy = vehicles[i].v.y;
       double check_speed = sqrt(vx * vx + vy * vy);
       double check_car_s = vehicles[i].pos_frenet.s;
       check_car_s += (double) prev_size * dt * check_speed;
@@ -436,12 +436,9 @@ vector<Vehicle> createVehicles(
   for (int i = 0; i < sensor_fusion.size(); i++) {
     Vehicle vehicle;
     vehicle.id = sensor_fusion[i][ID];
-    vehicle.pos_cart.x = sensor_fusion[i][X];
-    vehicle.pos_cart.y = sensor_fusion[i][Y];
-    vehicle.vx = sensor_fusion[i][VX];
-    vehicle.vy = sensor_fusion[i][VY];
-    vehicle.pos_frenet.s = sensor_fusion[i][S];
-    vehicle.pos_frenet.d = sensor_fusion[i][D];
+    vehicle.pos_cart = Point { sensor_fusion[i][X], sensor_fusion[i][Y] };
+    vehicle.v = Point { sensor_fusion[i][VX], sensor_fusion[i][VY] };
+    vehicle.pos_frenet = Frenet { sensor_fusion[i][S], sensor_fusion[i][D] };
     vehicles.push_back(vehicle);
   }
   return vehicles;
