@@ -98,6 +98,7 @@ struct PreviousData {
   Frenet end_path;
 };
 
+// TODO: analog zu EgoCar getter und setter für pos_cart und pos_frenet einführen.
 struct Vehicle {
   int id;
   Point pos_cart;
