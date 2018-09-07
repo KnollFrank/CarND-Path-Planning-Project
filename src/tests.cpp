@@ -55,9 +55,7 @@ bool isCollision(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
 
 EgoCar createEgoCar(const Frenet &pos, const MapWaypoints &map_waypoints) {
   EgoCar egoCar;
-  egoCar.setPos(pos);
-  // TODO: rausschmeißen
-  egoCar.setPos(getXY(pos, map_waypoints));
+  egoCar.setPos_frenet(pos, map_waypoints);
   egoCar.yaw_deg = 0;
   egoCar.speed = 0;
   return egoCar;
@@ -103,10 +101,8 @@ void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
 
   const Point &src = egoCar.getPos_cart();
   egoCar.speed = distance(src, dst) / dt * 2.24;
-  egoCar.setPos(dst);
-  double yaw_rad = atan2(dst.y - src.y, dst.x - src.x);
-  egoCar.yaw_deg = rad2deg(yaw_rad);
-  egoCar.setPos(getFrenet(dst, yaw_rad, map_waypoints));
+  egoCar.setPos_cart(dst, map_waypoints);
+  egoCar.yaw_deg = rad2deg(atan2(dst.y - src.y, dst.x - src.x));
 
   check_and_assert_no_collision(check, egoCar, vehicles);
 }

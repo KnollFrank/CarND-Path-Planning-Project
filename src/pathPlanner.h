@@ -370,7 +370,7 @@ Points createPath(ReferencePoint &refPoint, int &lane,
   const int prev_size = previousData.previous_path_x.size();
 
   if (prev_size > 0) {
-    egoCar.setPos(Frenet { previousData.end_path.s, egoCar.getPos_frenet().d });
+    egoCar.setPos_frenet(Frenet { previousData.end_path.s, egoCar.getPos_frenet().d }, map_waypoints);
   }
 
   bool too_close = isTooClose(egoCar, vehicles, prev_size, lane, dt);
