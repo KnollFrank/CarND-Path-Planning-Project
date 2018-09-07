@@ -63,7 +63,7 @@ class EgoCar {
 
  public:
   double yaw_deg;
-  double speed;
+  double speed; // [mph]
 
   void setPos(const Point &pos_cart, const Frenet &pos_frenet);
 

@@ -18,7 +18,7 @@ namespace test {
 
 #define GTEST_COUT std::cerr
 
-const double carRadius = 5;
+const double carRadius = 2;
 
 template<typename T, typename R, typename unop>
 vector<R> map2(vector<T> v, unop op) {
@@ -92,10 +92,10 @@ void check_and_assert_no_collision(const function<void(void)>& check,
   check();
 }
 
-void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
-                 const MapWaypoints &map_waypoints,
-                 const vector<Vehicle> &vehicles,
-                 const function<void(void)>& check) {
+void drive2PointOfEgoCar(const Point &dst, EgoCar &egoCar, double dt,
+                         const MapWaypoints &map_waypoints,
+                         const vector<Vehicle> &vehicles,
+                         const function<void(void)>& check) {
 
   check_and_assert_no_collision(check, egoCar, vehicles);
 
@@ -103,6 +103,7 @@ void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
   egoCar.speed = distance(src, dst) / dt * 2.24;
   egoCar.setPos_cart(dst, map_waypoints);
   egoCar.yaw_deg = rad2deg(atan2(dst.y - src.y, dst.x - src.x));
+  GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet();
 
   check_and_assert_no_collision(check, egoCar, vehicles);
 }
@@ -114,14 +115,27 @@ void driveVehicle(Vehicle &vehicle, double dt,
       Frenet { vehicle.getPos_frenet().s + dt * vel_frenet.s, vehicle
           .getPos_frenet().d + dt * vel_frenet.d },
       map_waypoints);
+  GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet();
 }
 
-void drive2Points(const vector<Point>& points, int numberOfUnprocessedElements,
-                  double dt, const MapWaypoints& map_waypoints,
-                  const function<void(void)>& check, EgoCar& egoCar,
-                  const vector<Vehicle> &vehicles) {
+void driveVehicles(vector<Vehicle> &vehicles, double dt,
+                   const MapWaypoints &map_waypoints) {
+  for (Vehicle &vehicle : vehicles) {
+    driveVehicle(vehicle, dt, map_waypoints);
+  }
+}
+
+void drive2PointsOfEgoCarAndDriveVehicles(const vector<Point>& points,
+                                          int numberOfUnprocessedElements,
+                                          double dt,
+                                          const MapWaypoints& map_waypoints,
+                                          const function<void(void)>& check,
+                                          EgoCar& egoCar,
+                                          vector<Vehicle> &vehicles) {
   for (int i = 0; i < points.size() - numberOfUnprocessedElements; i++) {
-    drive2Point(points[i], egoCar, dt, map_waypoints, vehicles, check);
+    driveVehicles(vehicles, dt, map_waypoints);
+    drive2PointOfEgoCar(points[i], egoCar, dt, map_waypoints, vehicles, check);
+    GTEST_COUT<< endl;
   }
 }
 
@@ -145,24 +159,18 @@ bool oneRoundDriven(const EgoCar &egoCar) {
   return egoCar.getPos_frenet().s > 6900;
 }
 
-void driveVehicles(vector<Vehicle> &vehicles, double dt,
-                   const MapWaypoints &map_waypoints) {
-  for (Vehicle &vehicle : vehicles) {
-    driveVehicle(vehicle, dt, map_waypoints);
-  }
-}
-
-void driveEgoCar(ReferencePoint &refPoint, int &lane,
-                 const MapWaypoints &map_waypoints, EgoCar &egoCar,
-                 PreviousData &previousData, vector<Vehicle> &vehicles,
-                 double dt, const function<void(void)> &check) {
+void driveEgoCarAndVehicles(ReferencePoint &refPoint, int &lane,
+                            const MapWaypoints &map_waypoints, EgoCar &egoCar,
+                            PreviousData &previousData,
+                            vector<Vehicle> &vehicles, double dt,
+                            const function<void(void)> &check) {
 
   Points path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
                            vehicles, dt);
   vector<Point> points = test::getPoints(path, map_waypoints);
   int numberOfUnprocessedElements = 10;
-  drive2Points(points, numberOfUnprocessedElements, dt, map_waypoints, check,
-               egoCar, vehicles);
+  drive2PointsOfEgoCarAndDriveVehicles(points, numberOfUnprocessedElements, dt,
+                                       map_waypoints, check, egoCar, vehicles);
   updatePreviousData(points, numberOfUnprocessedElements, path, map_waypoints,
                      previousData, egoCar);
 }
@@ -173,9 +181,8 @@ void drive(ReferencePoint &refPoint, int &lane,
            const function<void(void)> &check) {
 
   for (int i = 0; i < 1000 && !oneRoundDriven(egoCar); i++) {
-    driveVehicles(vehicles, dt, map_waypoints);
-    driveEgoCar(refPoint, lane, map_waypoints, egoCar, previousData, vehicles,
-                dt, check);
+    driveEgoCarAndVehicles(refPoint, lane, map_waypoints, egoCar, previousData,
+                           vehicles, dt, check);
   }
 }
 
@@ -261,7 +268,7 @@ TEST(PathPlanningTest, should_not_collide) {
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
   Vehicle vehicle = test::createVehicle(
-      0, Frenet { posCar.s - 10 * (2 * test::carRadius), posCar.d }, Frenet { 5,
+      0, Frenet { posCar.s + 10 * (2 * test::carRadius), posCar.d }, Frenet { 5,
           0 },
       map_waypoints);
   vector<Vehicle> vehicles = { vehicle };
@@ -272,6 +279,4 @@ TEST(PathPlanningTest, should_not_collide) {
                 ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
 
   // THEN
-  // EgoCar: {pos_cart = {x = 909.48000000000002, y = 1128.6700000000001}, pos_frenet = {s = 124.8336, d = 6.1648329999999998}, yaw = 0, speed = 0}
-
 }
