@@ -44,7 +44,7 @@ vector<Frenet> asFrenets(const vector<Point> &points,
 }
 
 bool isCollision(const EgoCar &egoCar, const Vehicle &vehicle) {
-  return distance(egoCar.pos_cart, vehicle.pos_cart) <= 2 * carRadius;
+  return distance(egoCar.getPos_cart(), vehicle.pos_cart) <= 2 * carRadius;
 }
 
 bool isCollision(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
@@ -55,8 +55,9 @@ bool isCollision(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
 
 EgoCar createEgoCar(const Frenet &pos, const MapWaypoints &map_waypoints) {
   EgoCar egoCar;
-  egoCar.pos_frenet = pos;
-  egoCar.pos_cart = getXY(pos, map_waypoints);
+  egoCar.setPos(pos);
+  // TODO: rausschmeißen
+  egoCar.setPos(getXY(pos, map_waypoints));
   egoCar.yaw_deg = 0;
   egoCar.speed = 0;
   return egoCar;
@@ -100,12 +101,12 @@ void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
 
   check_and_assert_no_collision(check, egoCar, vehicles);
 
-  Point &src = egoCar.pos_cart;
+  const Point &src = egoCar.getPos_cart();
   egoCar.speed = distance(src, dst) / dt * 2.24;
-  egoCar.pos_cart = dst;
+  egoCar.setPos(dst);
   double yaw_rad = atan2(dst.y - src.y, dst.x - src.x);
   egoCar.yaw_deg = rad2deg(yaw_rad);
-  egoCar.pos_frenet = getFrenet(dst, yaw_rad, map_waypoints);
+  egoCar.setPos(getFrenet(dst, yaw_rad, map_waypoints));
 
   check_and_assert_no_collision(check, egoCar, vehicles);
 }
@@ -136,7 +137,7 @@ void updatePreviousData(const vector<Point>& points,
 }
 
 bool oneRoundDriven(const EgoCar &egoCar) {
-  return egoCar.pos_frenet.s > 6900;
+  return egoCar.getPos_frenet().s > 6900;
 }
 
 void drive(ReferencePoint &refPoint, int &lane,

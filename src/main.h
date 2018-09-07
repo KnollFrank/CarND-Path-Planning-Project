@@ -59,14 +59,50 @@ ostream& operator<<(ostream& os, const Frenet& frenet) {
   return os;
 }
 
-struct EgoCar {
-  Point pos_cart;
-  Frenet pos_frenet;
+class EgoCar {
+
+ public:
   double yaw_deg;
   double speed;
 
+  void setPos(Point pos_cart, Frenet pos_frenet);
+
+  void setPos(Point pos);
+
+  Point getPos_cart() const;
+
+  void setPos(Frenet pos);
+
+  Frenet getPos_frenet() const;
+
+ private:
+  Point pos_cart;
+  Frenet pos_frenet;
+
+ public:
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 };
+
+void EgoCar::setPos(Point pos_cart, Frenet pos_frenet) {
+  this->pos_cart = pos_cart;
+  this->pos_frenet = pos_frenet;
+}
+
+void EgoCar::setPos(Point pos) {
+  pos_cart = pos;
+}
+
+Point EgoCar::getPos_cart() const {
+  return pos_cart;
+}
+
+void EgoCar::setPos(Frenet pos) {
+  pos_frenet = pos;
+}
+
+Frenet EgoCar::getPos_frenet() const {
+  return pos_frenet;
+}
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   os << "EgoCar:" << endl;
@@ -95,7 +131,8 @@ struct Vehicle {
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   os << "Vehicle(" << vehicle.id << "):" << endl;
   os << "  pos_cart = " << vehicle.pos_cart << endl;
-  os << "  (vx, vy) = (" << vehicle.vel.x << ", " << vehicle.vel.y << ")" << endl;
+  os << "  (vx, vy) = (" << vehicle.vel.x << ", " << vehicle.vel.y << ")"
+     << endl;
   os << "  pos_frenet = " << vehicle.pos_frenet << endl;
   return os;
 }
@@ -108,7 +145,7 @@ struct Points {
 struct ReferencePoint {
   Point point;
   double yaw_rad;
-  double vel; // [mph]
+  double vel;  // [mph]
 };
 
 #endif /* MAIN_H_ */
