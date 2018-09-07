@@ -109,7 +109,7 @@ void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
 
 void driveVehicle(Vehicle &vehicle, double dt,
                   const MapWaypoints &map_waypoints) {
-  Frenet vel_frenet = vehicle.getVel_frenet(map_waypoints);
+  const Frenet vel_frenet = vehicle.getVel_frenet(map_waypoints);
   vehicle.setPos_frenet(
       Frenet { vehicle.getPos_frenet().s + dt * vel_frenet.s, vehicle
           .getPos_frenet().d + dt * vel_frenet.d },
