@@ -16,6 +16,8 @@
 
 namespace test {
 
+const double carRadius = 5;
+
 template<typename T, typename R, typename unop>
 vector<R> map2(vector<T> v, unop op) {
   vector<R> result(v.size());
@@ -40,7 +42,6 @@ vector<Frenet> asFrenets(const vector<Point> &points,
 }
 
 bool isCollision(const Point &carPos, const Vehicle &vehicle) {
-  const double carRadius = 5;
   return distance(carPos, vehicle.pos_cart) <= 2 * carRadius;
 }
 
@@ -142,6 +143,17 @@ void drive(ReferencePoint &refPoint, int &lane,
   }
 }
 
+Vehicle createVehicle(int id, const Frenet &pos,
+                      const MapWaypoints &map_waypoints) {
+  Vehicle vehicle;
+  vehicle.id = id;
+  vehicle.pos_frenet = pos;
+  vehicle.pos_cart = getXY(pos, map_waypoints);
+  vehicle.vx = 0;
+  vehicle.vy = 0;
+  return vehicle;
+}
+
 }
 
 TEST(PathPlanningTest, should_drive_in_same_lane) {
@@ -193,39 +205,17 @@ TEST(PathPlanningTest, should_node_collide) {
 }
 
 TEST(PathPlanningTest, should_collide) {
-// GIVEN
+  // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
-  ReferencePoint refPoint;
-  refPoint.vel = 0;
-  int lane = 1;
-  Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
+  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(1) };
+  EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
+  Vehicle vehicle = test::createVehicle(0,
+                                        Frenet { posCar.s + test::carRadius / 2,
+                                            posCar.d },
+                                        map_waypoints);
 
-  PreviousData previousData;
+  // WHEN
 
-  vector<Vehicle> vehicles;
-  Vehicle vehicle;
-  vehicle.id = 0;
-  vehicle.pos_frenet = pos;
-  vehicle.pos_cart = getXY(pos, map_waypoints);
-  vehicle.vx = 0;
-  vehicle.vy = 0;
-  vehicles.push_back(vehicle);
-
-  double dt = 0.02;
-
-// WHEN
-  ASSERT_TRUE(test::isCollision(egoCar.pos_cart, vehicles[0]));
-
-//  test::drive(
-//      refPoint,
-//      lane,
-//      map_waypoints,
-//      egoCar,
-//      previousData,
-//      vehicles,
-//      dt,
-//      [&egoCar, &vehicles]() { {ASSERT_TRUE(test::isCollision(egoCar.pos_cart, vehicles));}});
-
-// THEN
+  // THEN
+  ASSERT_TRUE(test::isCollision(egoCar.pos_cart, vehicle));
 }
