@@ -16,7 +16,8 @@ Point EgoCar::getPos_cart() const {
   return pos_cart;
 }
 
-void EgoCar::setPos_frenet(const Frenet pos, const MapWaypoints &map_waypoints) {
+void EgoCar::setPos_frenet(const Frenet pos,
+                           const MapWaypoints &map_waypoints) {
   pos_frenet = pos;
   pos_cart = getXY(pos, map_waypoints);
 }
@@ -39,13 +40,35 @@ Point Vehicle::getPos_cart() const {
   return pos_cart;
 }
 
-void Vehicle::setPos_frenet(const Frenet pos, const MapWaypoints &map_waypoints) {
+void Vehicle::setPos_frenet(const Frenet pos,
+                            const MapWaypoints &map_waypoints) {
   pos_frenet = pos;
   pos_cart = getXY(pos, map_waypoints);
 }
 
 Frenet Vehicle::getPos_frenet() const {
   return pos_frenet;
+}
+
+void Vehicle::setVel_cart(const Point vel) {
+  this->vel = vel;
+}
+
+Point Vehicle::getVel_cart() const {
+  return vel;
+}
+
+// TODO: "const Frenet &vel" as reference. Dito other setters and getters in project.
+void Vehicle::setVel_frenet(const Frenet vel, const MapWaypoints &map_waypoints) {
+  const Frenet &src = getPos_frenet();
+  const Frenet &dst = Frenet { src.s + vel.s, src.d + vel.d };
+  this->vel = createCartVectorConnectingStartAndEnd(src, dst, map_waypoints);
+}
+
+Frenet Vehicle::getVel_frenet(const MapWaypoints &map_waypoints) const {
+  const Point &src = getPos_cart();
+  const Point &dst = Point { src.x + vel.x, src.y + vel.y };
+  return createFrenetVectorConnectingStartAndEnd(src, dst, map_waypoints);
 }
 
 int main(int argc, char **argv) {

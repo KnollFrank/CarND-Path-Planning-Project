@@ -66,10 +66,13 @@ class EgoCar {
   double speed;
 
   void setPos(const Point pos_cart, const Frenet pos_frenet);
+
   void setPos_cart(const Point pos, const MapWaypoints &map_waypoints);
   Point getPos_cart() const;
+
   void setPos_frenet(const Frenet pos, const MapWaypoints &map_waypoints);
   Frenet getPos_frenet() const;
+
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
  private:
@@ -96,10 +99,18 @@ class Vehicle {
 
  public:
   void setPos(const Point pos_cart, const Frenet pos_frenet);
+
   void setPos_cart(const Point pos, const MapWaypoints &map_waypoints);
   Point getPos_cart() const;
+
   void setPos_frenet(const Frenet pos, const MapWaypoints &map_waypoints);
   Frenet getPos_frenet() const;
+
+  void setVel_cart(const Point vel);
+  Point getVel_cart() const;
+
+  void setVel_frenet(const Frenet vel, const MapWaypoints &map_waypoints);
+  Frenet getVel_frenet(const MapWaypoints &map_waypoints) const;
 
   int id;
   Point vel;

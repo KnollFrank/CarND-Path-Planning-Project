@@ -27,14 +27,6 @@ vector<R> map2(vector<T> v, unop op) {
   return result;
 }
 
-Point createCartVectorConnectingStartAndEnd(const Frenet &start,
-                                            const Frenet &end,
-                                            const MapWaypoints &map_waypoints) {
-  Point start_cart = getXY(start, map_waypoints);
-  Point end_cart = getXY(end, map_waypoints);
-  return Point { end_cart.x - start_cart.x, end_cart.y - start_cart.y };
-}
-
 vector<Point> getPoints(const Points &path, const MapWaypoints &map_waypoints) {
   vector<Point> points;
   for (int i = 0; i < path.xs.size(); i++) {

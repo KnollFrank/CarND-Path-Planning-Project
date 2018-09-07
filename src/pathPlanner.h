@@ -210,6 +210,22 @@ Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
   return Point { x, y };
 }
 
+Point createCartVectorConnectingStartAndEnd(const Frenet &start,
+                                            const Frenet &end,
+                                            const MapWaypoints &map_waypoints) {
+  Point start_cart = getXY(start, map_waypoints);
+  Point end_cart = getXY(end, map_waypoints);
+  return Point { end_cart.x - start_cart.x, end_cart.y - start_cart.y };
+}
+
+Frenet createFrenetVectorConnectingStartAndEnd(
+    const Point &start, const Point &end, const MapWaypoints &map_waypoints) {
+
+  Frenet start_frenet = getFrenet(start, 0, map_waypoints);
+  Frenet end_frenet = getFrenet(end, 0, map_waypoints);
+  return Frenet { end_frenet.s - start_frenet.s, end_frenet.d - start_frenet.d };
+}
+
 void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   auto isCloserToEgoCar =
       [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
