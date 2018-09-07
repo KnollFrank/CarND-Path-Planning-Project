@@ -27,6 +27,14 @@ vector<R> map2(vector<T> v, unop op) {
   return result;
 }
 
+Point createCartVectorConnectingStartAndEnd(const Frenet &start,
+                                            const Frenet &end,
+                                            const MapWaypoints &map_waypoints) {
+  Point start_cart = getXY(start, map_waypoints);
+  Point end_cart = getXY(end, map_waypoints);
+  return Point { end_cart.x - start_cart.x, end_cart.y - start_cart.y };
+}
+
 vector<Point> getPoints(const Points &path, const MapWaypoints &map_waypoints) {
   vector<Point> points;
   for (int i = 0; i < path.xs.size(); i++) {
@@ -107,6 +115,10 @@ void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
   check_and_assert_no_collision(check, egoCar, vehicles);
 }
 
+void driveVehicle(Vehicle &vehicle, double dt,
+                  const MapWaypoints &map_waypoints) {
+}
+
 void drive2Points(const vector<Point>& points, int numberOfUnprocessedElements,
                   double dt, const MapWaypoints& map_waypoints,
                   const function<void(void)>& check, EgoCar& egoCar,
@@ -136,29 +148,37 @@ bool oneRoundDriven(const EgoCar &egoCar) {
   return egoCar.getPos_frenet().s > 6900;
 }
 
-void drive(ReferencePoint &refPoint, int &lane,
-           const MapWaypoints &map_waypoints, EgoCar &egoCar,
-           PreviousData &previousData, const vector<Vehicle> &vehicles,
-           double dt, const function<void(void)> &check) {
-
-  for (int i = 0; i < 1000 && !oneRoundDriven(egoCar); i++) {
-    Points path = createPath(refPoint, lane, map_waypoints, egoCar,
-                             previousData, vehicles, dt);
-    vector<Point> points = test::getPoints(path, map_waypoints);
-    int numberOfUnprocessedElements = 10;
-    drive2Points(points, numberOfUnprocessedElements, dt, map_waypoints, check,
-                 egoCar, vehicles);
-    updatePreviousData(points, numberOfUnprocessedElements, path, map_waypoints,
-                       previousData, egoCar);
+void driveVehicles(vector<Vehicle> &vehicles, double dt,
+                   const MapWaypoints &map_waypoints) {
+  for (Vehicle &vehicle : vehicles) {
+    driveVehicle(vehicle, dt, map_waypoints);
   }
 }
 
-Point createCartVectorConnectingStartAndEnd(const Frenet &start,
-                                            const Frenet &end,
-                                            const MapWaypoints &map_waypoints) {
-  Point start_cart = getXY(start, map_waypoints);
-  Point end_cart = getXY(end, map_waypoints);
-  return Point { end_cart.x - start_cart.x, end_cart.y - start_cart.y };
+void driveEgoCar(ReferencePoint &refPoint, int &lane,
+                 const MapWaypoints &map_waypoints, EgoCar &egoCar,
+                 PreviousData &previousData, vector<Vehicle> &vehicles,
+                 double dt, const function<void(void)> &check) {
+  Points path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
+                           vehicles, dt);
+  vector<Point> points = test::getPoints(path, map_waypoints);
+  int numberOfUnprocessedElements = 10;
+  drive2Points(points, numberOfUnprocessedElements, dt, map_waypoints, check,
+               egoCar, vehicles);
+  updatePreviousData(points, numberOfUnprocessedElements, path, map_waypoints,
+                     previousData, egoCar);
+}
+
+void drive(ReferencePoint &refPoint, int &lane,
+           const MapWaypoints &map_waypoints, EgoCar &egoCar,
+           PreviousData &previousData, vector<Vehicle> &vehicles, double dt,
+           const function<void(void)> &check) {
+
+  for (int i = 0; i < 1000 && !oneRoundDriven(egoCar); i++) {
+    driveVehicles(vehicles, dt, map_waypoints);
+    driveEgoCar(refPoint, lane, map_waypoints, egoCar, previousData, vehicles,
+                dt, check);
+  }
 }
 
 Vehicle createVehicle(int id, const Frenet &pos, const Frenet &v,
@@ -242,11 +262,9 @@ TEST(PathPlanningTest, should_not_collide) {
   double dt = 0.02;
   PreviousData previousData;
   int lane = 1;
-  Frenet posCar = Frenet { 124.8336 + 10 * (2 * test::carRadius),
-      getMiddleOfLane(lane) };
+  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
   Vehicle vehicle = test::createVehicle(
-      // TODO: Geschwindigkeitsvektor des Vehicles umsetzen, d.h. Vehicle fahren lassen.
       0, Frenet { posCar.s - 10 * (2 * test::carRadius), posCar.d }, Frenet { 5,
           0 },
       map_waypoints);
