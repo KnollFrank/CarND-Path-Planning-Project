@@ -2,12 +2,12 @@
 #include "gtest/gtest.h"
 #include "tests.cpp"
 
-void EgoCar::setPos(const Point pos_cart, const Frenet pos_frenet) {
+void EgoCar::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
   this->pos_cart = pos_cart;
   this->pos_frenet = pos_frenet;
 }
 
-void EgoCar::setPos_cart(const Point pos, const MapWaypoints &map_waypoints) {
+void EgoCar::setPos_cart(const Point &pos, const MapWaypoints &map_waypoints) {
   pos_cart = pos;
   pos_frenet = getFrenet(pos, 0, map_waypoints);
 }
@@ -16,7 +16,7 @@ Point EgoCar::getPos_cart() const {
   return pos_cart;
 }
 
-void EgoCar::setPos_frenet(const Frenet pos,
+void EgoCar::setPos_frenet(const Frenet &pos,
                            const MapWaypoints &map_waypoints) {
   pos_frenet = pos;
   pos_cart = getXY(pos, map_waypoints);
@@ -26,12 +26,12 @@ Frenet EgoCar::getPos_frenet() const {
   return pos_frenet;
 }
 
-void Vehicle::setPos(const Point pos_cart, const Frenet pos_frenet) {
+void Vehicle::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
   this->pos_cart = pos_cart;
   this->pos_frenet = pos_frenet;
 }
 
-void Vehicle::setPos_cart(const Point pos, const MapWaypoints &map_waypoints) {
+void Vehicle::setPos_cart(const Point &pos, const MapWaypoints &map_waypoints) {
   pos_cart = pos;
   pos_frenet = getFrenet(pos, 0, map_waypoints);
 }
@@ -40,7 +40,7 @@ Point Vehicle::getPos_cart() const {
   return pos_cart;
 }
 
-void Vehicle::setPos_frenet(const Frenet pos,
+void Vehicle::setPos_frenet(const Frenet &pos,
                             const MapWaypoints &map_waypoints) {
   pos_frenet = pos;
   pos_cart = getXY(pos, map_waypoints);
@@ -50,7 +50,7 @@ Frenet Vehicle::getPos_frenet() const {
   return pos_frenet;
 }
 
-void Vehicle::setVel_cart(const Point vel) {
+void Vehicle::setVel_cart(const Point &vel) {
   this->vel = vel;
 }
 
@@ -58,8 +58,7 @@ Point Vehicle::getVel_cart() const {
   return vel;
 }
 
-// TODO: "const Frenet &vel" as reference. Dito other setters and getters in project.
-void Vehicle::setVel_frenet(const Frenet vel, const MapWaypoints &map_waypoints) {
+void Vehicle::setVel_frenet(const Frenet &vel, const MapWaypoints &map_waypoints) {
   const Frenet &src = getPos_frenet();
   const Frenet &dst = Frenet { src.s + vel.s, src.d + vel.d };
   this->vel = createCartVectorConnectingStartAndEnd(src, dst, map_waypoints);
