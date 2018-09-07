@@ -181,14 +181,14 @@ Frenet getFrenet(const Point &point, double theta,
 }
 
 // Transform from Frenet s,d coordinates to Cartesian x,y
-Point getXY(double s, double d, const MapWaypoints &map_waypoints) {
+Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
   const vector<double> &maps_s = map_waypoints.map_waypoints_s;
   const vector<double> &maps_x = map_waypoints.map_waypoints_x;
   const vector<double> &maps_y = map_waypoints.map_waypoints_y;
 
   int prev_wp = -1;
 
-  while (s > maps_s[prev_wp + 1] && (prev_wp < (int) (maps_s.size() - 1))) {
+  while (pos.s > maps_s[prev_wp + 1] && (prev_wp < (int) (maps_s.size() - 1))) {
     prev_wp++;
   }
 
@@ -197,15 +197,15 @@ Point getXY(double s, double d, const MapWaypoints &map_waypoints) {
   double heading = atan2(maps_y[wp2] - maps_y[prev_wp],
                          maps_x[wp2] - maps_x[prev_wp]);
   // the x,y,s along the segment
-  double seg_s = (s - maps_s[prev_wp]);
+  double seg_s = (pos.s - maps_s[prev_wp]);
 
   double seg_x = maps_x[prev_wp] + seg_s * cos(heading);
   double seg_y = maps_y[prev_wp] + seg_s * sin(heading);
 
   double perp_heading = heading - pi() / 2;
 
-  double x = seg_x + d * cos(perp_heading);
-  double y = seg_y + d * sin(perp_heading);
+  double x = seg_x + pos.d * cos(perp_heading);
+  double y = seg_y + pos.d * sin(perp_heading);
 
   return Point { x, y };
 }
@@ -230,6 +230,7 @@ bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
   for (int i = 0; i < vehicles.size(); i++) {
     float d = vehicles[i].pos_frenet.d;
     // if(d > 4*lane && d < 4*(lane + 1))
+    // TODO: extract function "bool isVehicleInLane(vehicle, lane)"
     if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
       double vx = vehicles[i].vx;
       double vy = vehicles[i].vy;
@@ -294,12 +295,15 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
     points.ys.push_back(ref_y_prev);
     points.ys.push_back(refPoint.point.y);
   }
-  Point next_wp0 = getXY(egoCar.pos_frenet.s + 30, getMiddleOfLane(lane),
-                         map_waypoints);
-  Point next_wp1 = getXY(egoCar.pos_frenet.s + 60, getMiddleOfLane(lane),
-                         map_waypoints);
-  Point next_wp2 = getXY(egoCar.pos_frenet.s + 90, getMiddleOfLane(lane),
-                         map_waypoints);
+  Point next_wp0 = getXY(
+      Frenet { egoCar.pos_frenet.s + 30, getMiddleOfLane(lane) },
+      map_waypoints);
+  Point next_wp1 = getXY(
+      Frenet { egoCar.pos_frenet.s + 60, getMiddleOfLane(lane) },
+      map_waypoints);
+  Point next_wp2 = getXY(
+      Frenet { egoCar.pos_frenet.s + 90, getMiddleOfLane(lane) },
+      map_waypoints);
 
   points.xs.push_back(next_wp0.x);
   points.xs.push_back(next_wp1.x);
