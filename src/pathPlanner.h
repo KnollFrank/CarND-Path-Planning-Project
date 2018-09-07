@@ -107,7 +107,7 @@ int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
   return closestWaypoint;
 }
 
-int NextWaypoint(const Point &point, double theta,
+int NextWaypoint(const Point &point, double theta_rad,
                  const MapWaypoints &map_waypoints) {
 
   int closestWaypoint = ClosestWaypoint(point, map_waypoints);
@@ -115,9 +115,9 @@ int NextWaypoint(const Point &point, double theta,
   double map_x = map_waypoints.map_waypoints_x[closestWaypoint];
   double map_y = map_waypoints.map_waypoints_y[closestWaypoint];
 
-  double heading = atan2((map_y - point.y), (map_x - point.x));
+  double heading = atan2(map_y - point.y, map_x - point.x);
 
-  double angle = fabs(theta - heading);
+  double angle = fabs(theta_rad - heading);
   angle = min(2 * pi() - angle, angle);
 
   if (angle > pi() / 4) {
@@ -131,11 +131,11 @@ int NextWaypoint(const Point &point, double theta,
 }
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
-Frenet getFrenet(const Point &point, double theta,
+Frenet getFrenet(const Point &point, double theta_rad,
                  const MapWaypoints &map_waypoints) {
   const vector<double> &maps_x = map_waypoints.map_waypoints_x;
   const vector<double> &maps_y = map_waypoints.map_waypoints_y;
-  int next_wp = NextWaypoint(point, theta, map_waypoints);
+  int next_wp = NextWaypoint(point, theta_rad, map_waypoints);
 
   int prev_wp;
   prev_wp = next_wp - 1;
@@ -232,8 +232,8 @@ bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
     // if(d > 4*lane && d < 4*(lane + 1))
     // TODO: extract function "bool isVehicleInLane(vehicle, lane)"
     if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
-      double vx = vehicles[i].v.x;
-      double vy = vehicles[i].v.y;
+      double vx = vehicles[i].vel.x;
+      double vy = vehicles[i].vel.y;
       double check_speed = sqrt(vx * vx + vy * vy);
       double check_car_s = vehicles[i].pos_frenet.s;
       check_car_s += (double) prev_size * dt * check_speed;
@@ -277,8 +277,8 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
   Points points;
 
   if (prev_size < 2) {
-    double prev_car_x = egoCar.pos_cart.x - cos(egoCar.yaw);
-    double prev_car_y = egoCar.pos_cart.y - sin(egoCar.yaw);
+    double prev_car_x = egoCar.pos_cart.x - cos(deg2rad(egoCar.yaw_deg));
+    double prev_car_y = egoCar.pos_cart.y - sin(deg2rad(egoCar.yaw_deg));
     points.xs.push_back(prev_car_x);
     points.xs.push_back(egoCar.pos_cart.x);
     points.ys.push_back(prev_car_y);
@@ -288,8 +288,8 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
     refPoint.point.y = previousData.previous_path_y[prev_size - 1];
     double ref_x_prev = previousData.previous_path_x[prev_size - 2];
     double ref_y_prev = previousData.previous_path_y[prev_size - 2];
-    refPoint.yaw = atan2(refPoint.point.y - ref_y_prev,
-                         refPoint.point.x - ref_x_prev);
+    refPoint.yaw_rad = atan2(refPoint.point.y - ref_y_prev,
+                             refPoint.point.x - ref_x_prev);
     points.xs.push_back(ref_x_prev);
     points.xs.push_back(refPoint.point.x);
     points.ys.push_back(ref_y_prev);
@@ -317,8 +317,10 @@ Points createPoints(const int prev_size, const EgoCar& egoCar,
     double shift_x = points.xs[i] - refPoint.point.x;
     double shift_y = points.ys[i] - refPoint.point.y;
     // TODO: reformulate as a matrix multiplication using Eigen
-    points.xs[i] = shift_x * cos(-refPoint.yaw) - shift_y * sin(-refPoint.yaw);
-    points.ys[i] = shift_x * sin(-refPoint.yaw) + shift_y * cos(-refPoint.yaw);
+    points.xs[i] = shift_x * cos(-refPoint.yaw_rad)
+        - shift_y * sin(-refPoint.yaw_rad);
+    points.ys[i] = shift_x * sin(-refPoint.yaw_rad)
+        + shift_y * cos(-refPoint.yaw_rad);
   }
   return points;
 }
@@ -347,8 +349,8 @@ Points createNextVals(const Points &points, const int prev_size,
     double x_ref = x_point;
     double y_ref = y_point;
     // TODO: reformulate as a matrix multiplication using Eigen
-    x_point = x_ref * cos(refPoint.yaw) - y_ref * sin(refPoint.yaw);
-    y_point = x_ref * sin(refPoint.yaw) + y_ref * cos(refPoint.yaw);
+    x_point = x_ref * cos(refPoint.yaw_rad) - y_ref * sin(refPoint.yaw_rad);
+    y_point = x_ref * sin(refPoint.yaw_rad) + y_ref * cos(refPoint.yaw_rad);
     x_point += refPoint.point.x;
     y_point += refPoint.point.y;
     next_vals.xs.push_back(x_point);
@@ -359,7 +361,7 @@ Points createNextVals(const Points &points, const int prev_size,
 }
 
 Points createPath(ReferencePoint &refPoint, int &lane,
-                  const MapWaypoints &map_waypoints, EgoCar &egoCar,
+                  const MapWaypoints &map_waypoints, EgoCar egoCar,
                   const PreviousData &previousData,
                   const vector<Vehicle> &vehicles, double dt) {
 
@@ -375,9 +377,8 @@ Points createPath(ReferencePoint &refPoint, int &lane,
   lane = updateLane(too_close, lane);
   refPoint.vel = updateVelocity(too_close, refPoint.vel);
 
-  // TODO: define and use operator= instead
   refPoint.point = egoCar.pos_cart;
-  refPoint.yaw = deg2rad(egoCar.yaw);
+  refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
   Points points = createPoints(prev_size, egoCar, refPoint, previousData, lane,
                                map_waypoints);
@@ -393,7 +394,7 @@ EgoCar createEgoCar(
   EgoCar egoCar;
   egoCar.pos_cart = Point { j[1]["x"], j[1]["y"] };
   egoCar.pos_frenet = Frenet { j[1]["s"], j[1]["d"] };
-  egoCar.yaw = j[1]["yaw"];
+  egoCar.yaw_deg = j[1]["yaw"];
   egoCar.speed = j[1]["speed"];
   return egoCar;
 }
@@ -437,7 +438,7 @@ vector<Vehicle> createVehicles(
     Vehicle vehicle;
     vehicle.id = sensor_fusion[i][ID];
     vehicle.pos_cart = Point { sensor_fusion[i][X], sensor_fusion[i][Y] };
-    vehicle.v = Point { sensor_fusion[i][VX], sensor_fusion[i][VY] };
+    vehicle.vel = Point { sensor_fusion[i][VX], sensor_fusion[i][VY] };
     vehicle.pos_frenet = Frenet { sensor_fusion[i][S], sensor_fusion[i][D] };
     vehicles.push_back(vehicle);
   }

@@ -62,7 +62,7 @@ ostream& operator<<(ostream& os, const Frenet& frenet) {
 struct EgoCar {
   Point pos_cart;
   Frenet pos_frenet;
-  double yaw;
+  double yaw_deg;
   double speed;
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
@@ -72,7 +72,7 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   os << "EgoCar:" << endl;
   os << "  pos_cart = " << egoCar.pos_cart << endl;
   os << "  pos_frenet = " << egoCar.pos_frenet << endl;
-  os << "  yaw = " << egoCar.yaw << endl;
+  os << "  yaw = " << egoCar.yaw_deg << "°" << endl;
   os << "  speed = " << egoCar.speed << endl;
   return os;
 }
@@ -87,7 +87,7 @@ struct Vehicle {
   int id;
   Point pos_cart;
   Frenet pos_frenet;
-  Point v;
+  Point vel;
 
   friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
 };
@@ -95,7 +95,7 @@ struct Vehicle {
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   os << "Vehicle(" << vehicle.id << "):" << endl;
   os << "  pos_cart = " << vehicle.pos_cart << endl;
-  os << "  (vx, vy) = (" << vehicle.v.x << ", " << vehicle.v.y << ")" << endl;
+  os << "  (vx, vy) = (" << vehicle.vel.x << ", " << vehicle.vel.y << ")" << endl;
   os << "  pos_frenet = " << vehicle.pos_frenet << endl;
   return os;
 }
@@ -107,7 +107,7 @@ struct Points {
 
 struct ReferencePoint {
   Point point;
-  double yaw;
+  double yaw_rad;
   double vel; // [mph]
 };
 
