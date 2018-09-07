@@ -109,6 +109,11 @@ void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
 
 void driveVehicle(Vehicle &vehicle, double dt,
                   const MapWaypoints &map_waypoints) {
+  Frenet vel_frenet = vehicle.getVel_frenet(map_waypoints);
+  vehicle.setPos_frenet(
+      Frenet { vehicle.getPos_frenet().s + dt * vel_frenet.s, vehicle
+          .getPos_frenet().d + dt * vel_frenet.d },
+      map_waypoints);
 }
 
 void drive2Points(const vector<Point>& points, int numberOfUnprocessedElements,
@@ -179,8 +184,7 @@ Vehicle createVehicle(int id, const Frenet &pos, const Frenet &v,
   Vehicle vehicle;
   vehicle.id = id;
   vehicle.setPos_frenet(pos, map_waypoints);
-  vehicle.vel = createCartVectorConnectingStartAndEnd(
-      pos, Frenet { pos.s + v.s, pos.d + v.d }, map_waypoints);
+  vehicle.setVel_frenet(v, map_waypoints);
   return vehicle;
 }
 

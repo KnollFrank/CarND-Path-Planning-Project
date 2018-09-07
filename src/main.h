@@ -113,11 +113,11 @@ class Vehicle {
   Frenet getVel_frenet(const MapWaypoints &map_waypoints) const;
 
   int id;
-  Point vel;
 
   friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
 
  private:
+  Point vel;
   Point pos_cart;
   Frenet pos_frenet;
 };
