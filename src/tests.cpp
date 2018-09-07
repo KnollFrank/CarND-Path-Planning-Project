@@ -41,14 +41,14 @@ vector<Frenet> asFrenets(const vector<Point> &points,
   });
 }
 
-bool isCollision(const Point &carPos, const Vehicle &vehicle) {
-  return distance(carPos, vehicle.pos_cart) <= 2 * carRadius;
+bool isCollision(const EgoCar &egoCar, const Vehicle &vehicle) {
+  return distance(egoCar.pos_cart, vehicle.pos_cart) <= 2 * carRadius;
 }
 
-bool isCollision(const Point &carPos, const vector<Vehicle> &vehicles) {
+bool isCollision(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   return std::any_of(
       vehicles.cbegin(), vehicles.cend(),
-      [&carPos](const Vehicle &vehicle) {return isCollision(carPos, vehicle);});
+      [&egoCar](const Vehicle &vehicle) {return isCollision(egoCar, vehicle);});
 }
 
 EgoCar createEgoCar(const Frenet &pos, const MapWaypoints &map_waypoints) {
@@ -88,7 +88,8 @@ void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
                  const MapWaypoints &map_waypoints,
                  const vector<Vehicle> &vehicles,
                  const function<void(void)>& check) {
-  ASSERT_FALSE(isCollision(egoCar.pos_cart, vehicles))<< "COLLISION";
+
+  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION";
   check();
 
   Point &src = egoCar.pos_cart;
@@ -97,7 +98,7 @@ void drive2Point(const Point &dst, EgoCar &egoCar, double dt,
   egoCar.pos_frenet = getFrenet(dst, 0, map_waypoints);
   // egoCar.yaw = ?;
 
-  ASSERT_FALSE(isCollision(egoCar.pos_cart, vehicles)) << "COLLISION";
+  ASSERT_FALSE(isCollision(egoCar, vehicles)) << "COLLISION";
   check();
 }
 
@@ -200,7 +201,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 // THEN
 }
 
-TEST(PathPlanningTest, should_node_collide) {
+TEST(PathPlanningTest, should_not_collide) {
 
 }
 
@@ -217,5 +218,5 @@ TEST(PathPlanningTest, should_collide) {
   // WHEN
 
   // THEN
-  ASSERT_TRUE(test::isCollision(egoCar.pos_cart, vehicle));
+  ASSERT_TRUE(test::isCollision(egoCar, vehicle));
 }
