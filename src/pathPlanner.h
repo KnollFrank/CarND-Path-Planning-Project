@@ -249,13 +249,15 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
+bool isVehicleInLane(const Vehicle &vehicle, int lane) {
+  float d = vehicle.getPos_frenet().d;
+  return d > 4*lane && d < 4*(lane + 1);
+}
+
 bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
                 const int prev_size, int lane, double dt) {
   for (int i = 0; i < vehicles.size(); i++) {
-    float d = vehicles[i].getPos_frenet().d;
-    // if(d > 4*lane && d < 4*(lane + 1))
-    // TODO: extract function "bool isVehicleInLane(vehicle, lane)"
-    if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
+    if (isVehicleInLane(vehicles[i], lane)) {
       double vx = vehicles[i].getVel_cart_m_per_s().x;
       double vy = vehicles[i].getVel_cart_m_per_s().y;
       double check_speed = sqrt(vx * vx + vy * vy);
