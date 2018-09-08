@@ -31,6 +31,14 @@ double rad2deg(double x) {
   return x * 180 / pi();
 }
 
+double mph2meter_per_sec(double t) {
+  return t/2.24;
+}
+
+double meter_per_sec2mph(double t) {
+  return t*2.24;
+}
+
 // Load up map values for waypoint's x,y,s and d normalized normal vectors
 MapWaypoints read_map_waypoints() {
   // Load up map values for waypoint's x,y,s and d normalized normal vectors
@@ -358,7 +366,7 @@ Points createNextVals(const Points &points, const int prev_size,
   double x_add_on = 0;
   const int path_size = 50;
   for (int i = 1; i < path_size - prev_size; i++) {
-    double N = target_dist / (dt * refPoint.vel_mph / 2.24);
+    double N = target_dist / (dt * mph2meter_per_sec(refPoint.vel_mph));
     double x_point = x_add_on + target_x / N;
     double y_point = s(x_point);
     x_add_on = x_point;
