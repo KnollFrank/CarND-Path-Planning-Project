@@ -59,11 +59,12 @@ ostream& operator<<(ostream& os, const Frenet& frenet) {
   return os;
 }
 
+// TODO: merge EgoCar and Vehicle, because they are essentially the same thing.
 class EgoCar {
 
  public:
   double yaw_deg;
-  double speed; // [mph]
+  double speed;  // [mph]
 
   void setPos(const Point &pos_cart, const Frenet &pos_frenet);
 

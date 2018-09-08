@@ -19,6 +19,7 @@ namespace test {
 #define GTEST_COUT std::cerr
 
 const double carRadius = 2;
+const double carSize = 2 * carRadius;
 
 template<typename T, typename R, typename unop>
 vector<R> map2(vector<T> v, unop op) {
@@ -44,7 +45,7 @@ vector<Frenet> asFrenets(const vector<Point> &points,
 }
 
 bool isCollision(const EgoCar &egoCar, const Vehicle &vehicle) {
-  return distance(egoCar.getPos_cart(), vehicle.getPos_cart()) <= 2 * carRadius;
+  return distance(egoCar.getPos_cart(), vehicle.getPos_cart()) <= carSize;
 }
 
 bool isCollision(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
@@ -88,7 +89,8 @@ void assert_car_drives_straight_ahead(const Points &path,
 void check_and_assert_no_collision(const function<void(void)>& check,
                                    const EgoCar &egoCar,
                                    const vector<Vehicle> &vehicles) {
-  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar << vehicles[0];
+  ASSERT_FALSE(isCollision(egoCar, vehicles)) << "COLLISION:" << endl << egoCar
+      << vehicles[0];
   check();
 }
 
@@ -103,7 +105,7 @@ void drive2PointOfEgoCar(const Point &dst, EgoCar &egoCar, double dt,
   egoCar.speed = distance(src, dst) / dt * 2.24;
   egoCar.setPos_cart(dst, map_waypoints);
   egoCar.yaw_deg = rad2deg(atan2(dst.y - src.y, dst.x - src.x));
-  GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet();
+  // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet();
 
   check_and_assert_no_collision(check, egoCar, vehicles);
 }
@@ -115,7 +117,7 @@ void driveVehicle(Vehicle &vehicle, double dt,
       Frenet { vehicle.getPos_frenet().s + dt * vel_frenet.s, vehicle
           .getPos_frenet().d + dt * vel_frenet.d },
       map_waypoints);
-  GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet();
+  // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet();
 }
 
 void driveVehicles(vector<Vehicle> &vehicles, double dt,
@@ -203,7 +205,7 @@ TEST(PathPlanningTest, should_drive_in_same_lane) {
   ReferencePoint refPoint;
   refPoint.vel = 0;
   int lane = 1;
-  Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
+  Frenet pos = Frenet {124.8336, getMiddleOfLane(lane)};
   EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
 
   PreviousData previousData;
@@ -213,7 +215,7 @@ TEST(PathPlanningTest, should_drive_in_same_lane) {
 
 // WHEN
   Points path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
-                           vehicles, dt);
+      vehicles, dt);
 
 // THEN
   test::assert_car_drives_in_middle_of_lane(path, 1, map_waypoints);
@@ -226,7 +228,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
   ReferencePoint refPoint;
   refPoint.vel = 0;
   int lane = 1;
-  Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
+  Frenet pos = Frenet {124.8336, getMiddleOfLane(lane)};
   EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
 
   PreviousData previousData;
@@ -236,7 +238,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 
 // WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              [&egoCar]() {ASSERT_LT(egoCar.speed, 50);});
+      [&egoCar]() {ASSERT_LT(egoCar.speed, 50);});
 
 // THEN
 }
@@ -244,12 +246,12 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 TEST(PathPlanningTest, should_collide) {
   // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
-  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(1) };
+  Frenet posCar = Frenet {124.8336, getMiddleOfLane(1)};
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
   Vehicle vehicle = test::createVehicle(0,
-                                        Frenet { posCar.s + test::carRadius / 2,
-                                            posCar.d },
-                                        Frenet { 0, 0 }, map_waypoints);
+      Frenet {posCar.s + test::carRadius / 2,
+        posCar.d},
+      Frenet {0, 0}, map_waypoints);
 
   // WHEN
 
@@ -265,18 +267,18 @@ TEST(PathPlanningTest, should_not_collide) {
   double dt = 0.02;
   PreviousData previousData;
   int lane = 1;
-  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
+  Frenet posCar = Frenet {124.8336, getMiddleOfLane(lane)};
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
   Vehicle vehicle = test::createVehicle(
-      0, Frenet { posCar.s + 10 * (2 * test::carRadius), posCar.d }, Frenet { 5,
-          0 },
+      0, Frenet {posCar.s + 10 * test::carSize, posCar.d}, Frenet {5,
+        0},
       map_waypoints);
-  vector<Vehicle> vehicles = { vehicle };
+  vector<Vehicle> vehicles = {vehicle};
 
   // WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              [&egoCar, &vehicles]() {
-                ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
+      [&egoCar, &vehicles]() {
+        ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
 
   // THEN
 }
