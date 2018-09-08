@@ -189,13 +189,18 @@ void drive(ReferencePoint &refPoint, int &lane,
   }
 }
 
-Vehicle createVehicle(int id, const Frenet &pos, const Frenet &v,
+Vehicle createVehicle(int id, const Frenet &pos, const Frenet &vel_m_per_sec,
                       const MapWaypoints &map_waypoints) {
   Vehicle vehicle;
   vehicle.id = id;
   vehicle.setPos_frenet(pos, map_waypoints);
-  vehicle.setVel_frenet_m_per_s(v, map_waypoints);
+  vehicle.setVel_frenet_m_per_s(vel_m_per_sec, map_waypoints);
   return vehicle;
+}
+
+bool hasBeenInLane(const vector<double> &ds, int lane) {
+  return std::any_of(ds.cbegin(), ds.cend(),
+                     [lane](double d) {return isInLane(d, lane);});
 }
 
 }
@@ -245,7 +250,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 }
 
 TEST(PathPlanningTest, should_collide) {
-  // GIVEN
+// GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(1) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
@@ -254,14 +259,14 @@ TEST(PathPlanningTest, should_collide) {
                                             posCar.d },
                                         Frenet { 0, 0 }, map_waypoints);
 
-  // WHEN
+// WHEN
 
-  // THEN
+// THEN
   ASSERT_TRUE(test::isCollision(egoCar, vehicle));
 }
 
 TEST(PathPlanningTest, should_not_collide) {
-  // GIVEN
+// GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
@@ -276,10 +281,34 @@ TEST(PathPlanningTest, should_not_collide) {
                                         Frenet { 5, 0 }, map_waypoints);
   vector<Vehicle> vehicles = { vehicle };
 
-  // WHEN
+// WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-      [&egoCar, &vehicles]() {
-        ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
+              [&egoCar, &vehicles]() {
+                ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
 
-  // THEN
+// THEN
+}
+
+TEST(PathPlanningTest, should_change_lane) {
+// GIVEN
+  MapWaypoints map_waypoints = read_map_waypoints();
+  ReferencePoint refPoint;
+  refPoint.vel_mph = 0;
+  double dt = 0.02;
+  PreviousData previousData;
+  int lane = 1;
+  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
+  EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
+  Vehicle vehicle = test::createVehicle(0, Frenet { posCar.s + 35, posCar.d },
+                                        Frenet { 5, 0 }, map_waypoints);
+  vector<Vehicle> vehicles = { vehicle };
+
+// WHEN
+  vector<double> ds;
+  test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
+              [&egoCar, &vehicles, &ds]() {
+                ds.push_back(egoCar.getPos_frenet().d);});
+
+// THEN
+  ASSERT_TRUE(test::hasBeenInLane(ds, 0));
 }
