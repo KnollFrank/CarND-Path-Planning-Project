@@ -2,6 +2,10 @@
 #include "gtest/gtest.h"
 #include "tests.cpp"
 
+double Point::len() const {
+  return sqrt(x * x + y * y);
+}
+
 void EgoCar::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
   this->pos_cart = pos_cart;
   this->pos_frenet = pos_frenet;

@@ -276,14 +276,11 @@ bool isVehicleInLane(const Vehicle &vehicle, int lane) {
 bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
                                               const Vehicle &vehicle,
                                               const int prev_size, double dt) {
-  double vx = vehicle.getVel_cart_m_per_s().x;
-  double vy = vehicle.getVel_cart_m_per_s().y;
-  double check_speed = sqrt(vx * vx + vy * vy);
-  double check_car_s = vehicle.getPos_frenet().s;
-  check_car_s += (double) prev_size * dt * check_speed;
+  double check_speed = vehicle.getVel_cart_m_per_s().len();
+  double check_vehicle_s = vehicle.getPos_frenet().s + prev_size * dt * check_speed;
   // TODO: replace magic number 30 with constant
-  return check_car_s > egoCar.getPos_frenet().s
-      && check_car_s - egoCar.getPos_frenet().s < 30;
+  return check_vehicle_s > egoCar.getPos_frenet().s
+      && check_vehicle_s - egoCar.getPos_frenet().s < 30;
 }
 
 bool isEgoCarTooCloseToAnyVehicle(const EgoCar& egoCar,

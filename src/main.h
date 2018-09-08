@@ -25,6 +25,7 @@ struct Point {
   double x;
   double y;
 
+  double len() const;
   Point& operator=(const Point &point);
   friend ostream& operator<<(ostream& os, const Point& point);
 };
