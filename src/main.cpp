@@ -50,23 +50,23 @@ Frenet Vehicle::getPos_frenet() const {
   return pos_frenet;
 }
 
-void Vehicle::setVel_cart(const Point &vel) {
-  this->vel = vel;
+void Vehicle::setVel_cart_m_per_s(const Point &vel) {
+  this->vel_cart_m_per_s = vel;
 }
 
-Point Vehicle::getVel_cart() const {
-  return vel;
+Point Vehicle::getVel_cart_m_per_s() const {
+  return vel_cart_m_per_s;
 }
 
-void Vehicle::setVel_frenet(const Frenet &vel, const MapWaypoints &map_waypoints) {
+void Vehicle::setVel_frenet_m_per_s(const Frenet &vel, const MapWaypoints &map_waypoints) {
   const Frenet &src = getPos_frenet();
   const Frenet &dst = Frenet { src.s + vel.s, src.d + vel.d };
-  this->vel = createCartVectorConnectingStartAndEnd(src, dst, map_waypoints);
+  this->vel_cart_m_per_s = createCartVectorConnectingStartAndEnd(src, dst, map_waypoints);
 }
 
-Frenet Vehicle::getVel_frenet(const MapWaypoints &map_waypoints) const {
+Frenet Vehicle::getVel_frenet_m_per_s(const MapWaypoints &map_waypoints) const {
   const Point &src = getPos_cart();
-  const Point &dst = Point { src.x + vel.x, src.y + vel.y };
+  const Point &dst = Point { src.x + getVel_cart_m_per_s().x, src.y + getVel_cart_m_per_s().y };
   return createFrenetVectorConnectingStartAndEnd(src, dst, map_waypoints);
 }
 
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 
   int lane = 1;
   ReferencePoint refPoint;
-  refPoint.vel = 0;
+  refPoint.vel_mph = 0;
   double dt = 0.02;
 
   h.onMessage(

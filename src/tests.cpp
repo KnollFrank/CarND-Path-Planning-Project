@@ -58,7 +58,7 @@ EgoCar createEgoCar(const Frenet &pos, const MapWaypoints &map_waypoints) {
   EgoCar egoCar;
   egoCar.setPos_frenet(pos, map_waypoints);
   egoCar.yaw_deg = 0;
-  egoCar.speed = 0;
+  egoCar.speed_mph = 0;
   return egoCar;
 }
 
@@ -102,7 +102,7 @@ void drive2PointOfEgoCar(const Point &dst, EgoCar &egoCar, double dt,
   check_and_assert_no_collision(check, egoCar, vehicles);
 
   const Point &src = egoCar.getPos_cart();
-  egoCar.speed = distance(src, dst) / dt * 2.24;
+  egoCar.speed_mph = distance(src, dst) / dt * 2.24;
   egoCar.setPos_cart(dst, map_waypoints);
   egoCar.yaw_deg = rad2deg(atan2(dst.y - src.y, dst.x - src.x));
   // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet();
@@ -112,7 +112,7 @@ void drive2PointOfEgoCar(const Point &dst, EgoCar &egoCar, double dt,
 
 void driveVehicle(Vehicle &vehicle, double dt,
                   const MapWaypoints &map_waypoints) {
-  const Frenet vel_frenet = vehicle.getVel_frenet(map_waypoints);
+  const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s(map_waypoints);
   vehicle.setPos_frenet(
       Frenet { vehicle.getPos_frenet().s + dt * vel_frenet.s, vehicle
           .getPos_frenet().d + dt * vel_frenet.d },
@@ -193,7 +193,7 @@ Vehicle createVehicle(int id, const Frenet &pos, const Frenet &v,
   Vehicle vehicle;
   vehicle.id = id;
   vehicle.setPos_frenet(pos, map_waypoints);
-  vehicle.setVel_frenet(v, map_waypoints);
+  vehicle.setVel_frenet_m_per_s(v, map_waypoints);
   return vehicle;
 }
 
@@ -203,7 +203,7 @@ TEST(PathPlanningTest, should_drive_in_same_lane) {
 // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
   ReferencePoint refPoint;
-  refPoint.vel = 0;
+  refPoint.vel_mph = 0;
   int lane = 1;
   Frenet pos = Frenet {124.8336, getMiddleOfLane(lane)};
   EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
@@ -226,7 +226,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
   ReferencePoint refPoint;
-  refPoint.vel = 0;
+  refPoint.vel_mph = 0;
   int lane = 1;
   Frenet pos = Frenet {124.8336, getMiddleOfLane(lane)};
   EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
@@ -238,7 +238,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 
 // WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-      [&egoCar]() {ASSERT_LT(egoCar.speed, 50);});
+      [&egoCar]() {ASSERT_LT(egoCar.speed_mph, 50);});
 
 // THEN
 }
@@ -263,7 +263,7 @@ TEST(PathPlanningTest, should_not_collide) {
   // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
   ReferencePoint refPoint;
-  refPoint.vel = 0;
+  refPoint.vel_mph = 0;
   double dt = 0.02;
   PreviousData previousData;
   int lane = 1;

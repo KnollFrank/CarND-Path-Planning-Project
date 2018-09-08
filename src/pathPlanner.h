@@ -248,8 +248,8 @@ bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
     // if(d > 4*lane && d < 4*(lane + 1))
     // TODO: extract function "bool isVehicleInLane(vehicle, lane)"
     if (d > 2 + 4 * lane - 2 && d < 2 + 4 * lane + 2) {
-      double vx = vehicles[i].getVel_cart().x;
-      double vy = vehicles[i].getVel_cart().y;
+      double vx = vehicles[i].getVel_cart_m_per_s().x;
+      double vy = vehicles[i].getVel_cart_m_per_s().y;
       double check_speed = sqrt(vx * vx + vy * vy);
       double check_car_s = vehicles[i].getPos_frenet().s;
       check_car_s += (double) prev_size * dt * check_speed;
@@ -265,14 +265,14 @@ bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
   return false;
 }
 
-double updateVelocity(bool too_close, double velocity) {
-  if (too_close || velocity > 50) {
-    velocity -= .224;
-  } else if (velocity < 49.5) {
-    velocity += .224;
+double updateVelocity(bool too_close, double vel_mph) {
+  if (too_close || vel_mph > 50) {
+    vel_mph -= .224;
+  } else if (vel_mph < 49.5) {
+    vel_mph += .224;
   }
 
-  return velocity;
+  return vel_mph;
 }
 
 int updateLane(bool too_close, int lane) {
@@ -358,7 +358,7 @@ Points createNextVals(const Points &points, const int prev_size,
   double x_add_on = 0;
   const int path_size = 50;
   for (int i = 1; i < path_size - prev_size; i++) {
-    double N = target_dist / (dt * refPoint.vel / 2.24);
+    double N = target_dist / (dt * refPoint.vel_mph / 2.24);
     double x_point = x_add_on + target_x / N;
     double y_point = s(x_point);
     x_add_on = x_point;
@@ -393,7 +393,7 @@ Points createPath(ReferencePoint &refPoint, int &lane,
 
   bool too_close = isTooClose(egoCar, vehicles, prev_size, lane, dt);
   lane = updateLane(too_close, lane);
-  refPoint.vel = updateVelocity(too_close, refPoint.vel);
+  refPoint.vel_mph = updateVelocity(too_close, refPoint.vel_mph);
 
   refPoint.point = egoCar.getPos_cart();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
@@ -413,7 +413,7 @@ EgoCar createEgoCar(
   egoCar.setPos(Point { j[1]["x"], j[1]["y"] },
                 Frenet { j[1]["s"], j[1]["d"] });
   egoCar.yaw_deg = j[1]["yaw"];
-  egoCar.speed = j[1]["speed"];
+  egoCar.speed_mph = j[1]["speed"];
   return egoCar;
 }
 
@@ -457,7 +457,7 @@ vector<Vehicle> createVehicles(
     vehicle.id = sensor_fusion[i][ID];
     vehicle.setPos(Point { sensor_fusion[i][X], sensor_fusion[i][Y] }, Frenet {
                        sensor_fusion[i][S], sensor_fusion[i][D] });
-    vehicle.setVel_cart(Point { sensor_fusion[i][VX], sensor_fusion[i][VY] });
+    vehicle.setVel_cart_m_per_s(Point { sensor_fusion[i][VX], sensor_fusion[i][VY] });
     vehicles.push_back(vehicle);
   }
   return vehicles;
