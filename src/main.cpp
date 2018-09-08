@@ -58,15 +58,18 @@ Point Vehicle::getVel_cart_m_per_s() const {
   return vel_cart_m_per_s;
 }
 
-void Vehicle::setVel_frenet_m_per_s(const Frenet &vel, const MapWaypoints &map_waypoints) {
+void Vehicle::setVel_frenet_m_per_s(const Frenet &vel,
+                                    const MapWaypoints &map_waypoints) {
   const Frenet &src = getPos_frenet();
   const Frenet &dst = Frenet { src.s + vel.s, src.d + vel.d };
-  this->vel_cart_m_per_s = createCartVectorConnectingStartAndEnd(src, dst, map_waypoints);
+  this->vel_cart_m_per_s = createCartVectorConnectingStartAndEnd(src, dst,
+                                                                 map_waypoints);
 }
 
 Frenet Vehicle::getVel_frenet_m_per_s(const MapWaypoints &map_waypoints) const {
   const Point &src = getPos_cart();
-  const Point &dst = Point { src.x + getVel_cart_m_per_s().x, src.y + getVel_cart_m_per_s().y };
+  const Point &dst = Point { src.x + getVel_cart_m_per_s().x, src.y
+      + getVel_cart_m_per_s().y };
   return createFrenetVectorConnectingStartAndEnd(src, dst, map_waypoints);
 }
 
