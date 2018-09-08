@@ -32,11 +32,11 @@ double rad2deg(double x) {
 }
 
 double mph2meter_per_sec(double t) {
-  return t/2.24;
+  return t / 2.24;
 }
 
 double meter_per_sec2mph(double t) {
-  return t*2.24;
+  return t * 2.24;
 }
 
 // Load up map values for waypoint's x,y,s and d normalized normal vectors
@@ -259,12 +259,12 @@ bool isVehicleInLane(const Vehicle &vehicle, int lane) {
 
 bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
                 const int prev_size, int lane, double dt) {
-  for (int i = 0; i < vehicles.size(); i++) {
-    if (isVehicleInLane(vehicles[i], lane)) {
-      double vx = vehicles[i].getVel_cart_m_per_s().x;
-      double vy = vehicles[i].getVel_cart_m_per_s().y;
+  for (const Vehicle &vehicle : vehicles) {
+    if (isVehicleInLane(vehicle, lane)) {
+      double vx = vehicle.getVel_cart_m_per_s().x;
+      double vy = vehicle.getVel_cart_m_per_s().y;
       double check_speed = sqrt(vx * vx + vy * vy);
-      double check_car_s = vehicles[i].getPos_frenet().s;
+      double check_car_s = vehicle.getPos_frenet().s;
       check_car_s += (double) prev_size * dt * check_speed;
       // TODO: replace magic number 30 with constant
       if (check_car_s > egoCar.getPos_frenet().s
@@ -470,7 +470,8 @@ vector<Vehicle> createVehicles(
     vehicle.id = sensor_fusion[i][ID];
     vehicle.setPos(Point { sensor_fusion[i][X], sensor_fusion[i][Y] }, Frenet {
                        sensor_fusion[i][S], sensor_fusion[i][D] });
-    vehicle.setVel_cart_m_per_s(Point { sensor_fusion[i][VX], sensor_fusion[i][VY] });
+    vehicle.setVel_cart_m_per_s(Point { sensor_fusion[i][VX],
+        sensor_fusion[i][VY] });
     vehicles.push_back(vehicle);
   }
   return vehicles;
