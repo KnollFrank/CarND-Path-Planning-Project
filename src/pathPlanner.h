@@ -257,25 +257,32 @@ bool isVehicleInLane(const Vehicle &vehicle, int lane) {
   return isInLane(vehicle.getPos_frenet().d, lane);
 }
 
-bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
+bool isTooClose(const EgoCar& egoCar, const Vehicle &vehicle,
                 const int prev_size, int lane, double dt) {
-  for (const Vehicle &vehicle : vehicles) {
-    if (isVehicleInLane(vehicle, lane)) {
-      double vx = vehicle.getVel_cart_m_per_s().x;
-      double vy = vehicle.getVel_cart_m_per_s().y;
-      double check_speed = sqrt(vx * vx + vy * vy);
-      double check_car_s = vehicle.getPos_frenet().s;
-      check_car_s += (double) prev_size * dt * check_speed;
-      // TODO: replace magic number 30 with constant
-      if (check_car_s > egoCar.getPos_frenet().s
-          && check_car_s - egoCar.getPos_frenet().s < 30) {
-        // ref_vel = 29.5;
-        return true;
-      }
+  if (isVehicleInLane(vehicle, lane)) {
+    double vx = vehicle.getVel_cart_m_per_s().x;
+    double vy = vehicle.getVel_cart_m_per_s().y;
+    double check_speed = sqrt(vx * vx + vy * vy);
+    double check_car_s = vehicle.getPos_frenet().s;
+    check_car_s += (double) prev_size * dt * check_speed;
+    // TODO: replace magic number 30 with constant
+    if (check_car_s > egoCar.getPos_frenet().s
+        && check_car_s - egoCar.getPos_frenet().s < 30) {
+      // ref_vel = 29.5;
+      return true;
     }
   }
 
   return false;
+}
+
+bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
+                const int prev_size, int lane, double dt) {
+
+  return std::any_of(
+      vehicles.cbegin(),
+      vehicles.cend(),
+      [&egoCar, prev_size, lane, dt](const Vehicle &vehicle) {return isTooClose(egoCar, vehicle, prev_size, lane, dt);});
 }
 
 double updateVelocity(bool too_close, double vel_mph) {
@@ -302,7 +309,7 @@ double getMiddleOfLane(int lane) {
 
 Points createPoints(const int prev_size, const EgoCar& egoCar,
                     ReferencePoint &refPoint, const PreviousData& previousData,
-                    int& lane, const MapWaypoints &map_waypoints) {
+                    int lane, const MapWaypoints &map_waypoints) {
   Points points;
 
   if (prev_size < 2) {
