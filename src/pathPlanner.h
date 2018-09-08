@@ -249,8 +249,24 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
+double sizeOfLane() {
+  return 4;
+}
+
+double startOfLane(int lane) {
+  return sizeOfLane() * lane;
+}
+
+double getMiddleOfLane(int lane) {
+  return startOfLane(lane) + sizeOfLane() / 2;
+}
+
+double endOfLane(int lane) {
+  return startOfLane(lane + 1);
+}
+
 bool isInLane(float d, int lane) {
-  return d > 4 * lane && d < 4 * (lane + 1);
+  return startOfLane(lane) < d && d < endOfLane(lane);
 }
 
 bool isVehicleInLane(const Vehicle &vehicle, int lane) {
@@ -298,10 +314,6 @@ int updateLane(bool too_close, int lane) {
   }
 
   return lane;
-}
-
-double getMiddleOfLane(int lane) {
-  return 2 + 4 * lane;
 }
 
 Points createPoints(const int prev_size, const EgoCar& egoCar,
