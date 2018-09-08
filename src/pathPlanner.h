@@ -270,20 +270,16 @@ bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
       && check_car_s - egoCar.getPos_frenet().s < 30;
 }
 
-bool isTooClose(const EgoCar& egoCar, const Vehicle &vehicle,
-                const int prev_size, int lane, double dt) {
-  return isVehicleInLane(vehicle, lane)
-      && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size,
-                                                  dt);
-}
+bool isEgoCarTooCloseToAnyVehicle(const EgoCar& egoCar,
+                                  const vector<Vehicle>& vehicles,
+                                  const int prev_size, int lane, double dt) {
+  auto isEgoCarTooCloseToVehicle =
+      [&egoCar, prev_size, lane, dt]
+      (const Vehicle &vehicle) {
+        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size, dt);};
 
-bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
-                const int prev_size, int lane, double dt) {
-
-  return std::any_of(
-      vehicles.cbegin(),
-      vehicles.cend(),
-      [&egoCar, prev_size, lane, dt](const Vehicle &vehicle) {return isTooClose(egoCar, vehicle, prev_size, lane, dt);});
+  return std::any_of(vehicles.cbegin(), vehicles.cend(),
+                     isEgoCarTooCloseToVehicle);
 }
 
 double updateVelocity(bool too_close, double vel_mph) {
@@ -412,7 +408,8 @@ Points createPath(ReferencePoint &refPoint, int &lane,
                          map_waypoints);
   }
 
-  bool too_close = isTooClose(egoCar, vehicles, prev_size, lane, dt);
+  bool too_close = isEgoCarTooCloseToAnyVehicle(egoCar, vehicles, prev_size,
+                                                lane, dt);
   lane = updateLane(too_close, lane);
   refPoint.vel_mph = updateVelocity(too_close, refPoint.vel_mph);
 
