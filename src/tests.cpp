@@ -138,7 +138,6 @@ void drive2PointsOfEgoCarAndDriveVehicles(const vector<Point>& points,
   for (int i = 0; i < points.size() - numberOfUnprocessedElements; i++) {
     driveVehicles(vehicles, dt, map_waypoints);
     drive2PointOfEgoCar(points[i], egoCar, dt, map_waypoints, vehicles, check);
-    GTEST_COUT<< endl;
   }
 }
 

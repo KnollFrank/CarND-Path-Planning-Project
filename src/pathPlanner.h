@@ -257,23 +257,24 @@ bool isVehicleInLane(const Vehicle &vehicle, int lane) {
   return isInLane(vehicle.getPos_frenet().d, lane);
 }
 
+bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
+                                              const Vehicle &vehicle,
+                                              const int prev_size, double dt) {
+  double vx = vehicle.getVel_cart_m_per_s().x;
+  double vy = vehicle.getVel_cart_m_per_s().y;
+  double check_speed = sqrt(vx * vx + vy * vy);
+  double check_car_s = vehicle.getPos_frenet().s;
+  check_car_s += (double) prev_size * dt * check_speed;
+  // TODO: replace magic number 30 with constant
+  return check_car_s > egoCar.getPos_frenet().s
+      && check_car_s - egoCar.getPos_frenet().s < 30;
+}
+
 bool isTooClose(const EgoCar& egoCar, const Vehicle &vehicle,
                 const int prev_size, int lane, double dt) {
-  if (isVehicleInLane(vehicle, lane)) {
-    double vx = vehicle.getVel_cart_m_per_s().x;
-    double vy = vehicle.getVel_cart_m_per_s().y;
-    double check_speed = sqrt(vx * vx + vy * vy);
-    double check_car_s = vehicle.getPos_frenet().s;
-    check_car_s += (double) prev_size * dt * check_speed;
-    // TODO: replace magic number 30 with constant
-    if (check_car_s > egoCar.getPos_frenet().s
-        && check_car_s - egoCar.getPos_frenet().s < 30) {
-      // ref_vel = 29.5;
-      return true;
-    }
-  }
-
-  return false;
+  return isVehicleInLane(vehicle, lane)
+      && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size,
+                                                  dt);
 }
 
 bool isTooClose(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
