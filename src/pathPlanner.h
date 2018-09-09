@@ -217,19 +217,13 @@ Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
 Point createCartVectorConnectingStartAndEnd(const Frenet &start,
                                             const Frenet &end,
                                             const MapWaypoints &map_waypoints) {
-  Point start_cart = getXY(start, map_waypoints);
-  Point end_cart = getXY(end, map_waypoints);
-  // TODO: introduce and use -operator of Point class
-  return Point { end_cart.x - start_cart.x, end_cart.y - start_cart.y };
+  return getXY(end, map_waypoints) - getXY(start, map_waypoints);
 }
 
 Frenet createFrenetVectorConnectingStartAndEnd(
     const Point &start, const Point &end, const MapWaypoints &map_waypoints) {
 
-  Frenet start_frenet = getFrenet(start, 0, map_waypoints);
-  Frenet end_frenet = getFrenet(end, 0, map_waypoints);
-  // TODO: introduce and use -operator of Frenet class
-  return Frenet { end_frenet.s - start_frenet.s, end_frenet.d - start_frenet.d };
+  return getFrenet(end, 0, map_waypoints) - getFrenet(start, 0, map_waypoints);
 }
 
 void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {

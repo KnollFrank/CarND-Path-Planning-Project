@@ -60,6 +60,7 @@ struct Frenet {
   double s;
   double d;
   Frenet operator+(const Frenet& other) const;
+  Frenet operator-(const Frenet& other) const;
   Frenet operator*(double scalar) const;
 
   friend ostream& operator<<(ostream& os, const Frenet& frenet);

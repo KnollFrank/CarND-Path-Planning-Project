@@ -9,6 +9,10 @@ Frenet Frenet::operator+(const Frenet &other) const {
   return sum;
 }
 
+Frenet Frenet::operator-(const Frenet &other) const {
+  return *this + (other * -1);
+}
+
 Frenet Frenet::operator*(double scalar) const {
   Frenet result;
   result.s = s * scalar;
