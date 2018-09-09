@@ -2,6 +2,20 @@
 #include "gtest/gtest.h"
 #include "tests.cpp"
 
+Frenet Frenet::operator+(const Frenet &other) const {
+  Frenet sum;
+  sum.s = s + other.s;
+  sum.d = d + other.d;
+  return sum;
+}
+
+Frenet Frenet::operator*(double scalar) const {
+  Frenet result;
+  result.s = s * scalar;
+  result.d = d * scalar;
+  return result;
+}
+
 double Point::len() const {
   return sqrt(x * x + y * y);
 }

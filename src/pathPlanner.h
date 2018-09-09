@@ -105,6 +105,7 @@ int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
   for (int i = 0; i < map_waypoints.map_waypoints_x.size(); i++) {
     double map_x = map_waypoints.map_waypoints_x[i];
     double map_y = map_waypoints.map_waypoints_y[i];
+    // TODO: use len() method of Point class
     double dist = distance(point, Point { map_x, map_y });
     if (dist < closestLen) {
       closestLen = dist;
@@ -157,7 +158,9 @@ Frenet getFrenet(const Point &point, double theta_rad,
   double x_y = point.y - maps_y[prev_wp];
 
   // find the projection of x onto n
+  // TODO: add scalar product to Point class and use it here:
   double proj_norm = (x_x * n_x + x_y * n_y) / (n_x * n_x + n_y * n_y);
+  // TODO: use scalar multiplication of Point class.
   double proj_x = proj_norm * n_x;
   double proj_y = proj_norm * n_y;
 
@@ -167,8 +170,10 @@ Frenet getFrenet(const Point &point, double theta_rad,
 
   double center_x = 1000 - maps_x[prev_wp];
   double center_y = 2000 - maps_y[prev_wp];
+  // TODO: use len() method of Point class
   double centerToPos = distance(Point { center_x, center_y },
                                 Point { x_x, x_y });
+  // TODO: use len() method of Point class
   double centerToRef = distance(Point { center_x, center_y }, Point { proj_x,
                                     proj_y });
 
@@ -179,10 +184,12 @@ Frenet getFrenet(const Point &point, double theta_rad,
   // calculate s value
   double frenet_s = 0;
   for (int i = 0; i < prev_wp; i++) {
+    // TODO: use len() method of Point class
     frenet_s += distance(Point { maps_x[i], maps_y[i] }, Point { maps_x[i + 1],
                              maps_y[i + 1] });
   }
 
+  // TODO: use len() method of Point class
   frenet_s += distance(Point { 0, 0 }, Point { proj_x, proj_y });
 
   return Frenet { frenet_s, frenet_d };
@@ -223,6 +230,7 @@ Point createCartVectorConnectingStartAndEnd(const Frenet &start,
                                             const MapWaypoints &map_waypoints) {
   Point start_cart = getXY(start, map_waypoints);
   Point end_cart = getXY(end, map_waypoints);
+  // TODO: introduce and use -operator of Point class
   return Point { end_cart.x - start_cart.x, end_cart.y - start_cart.y };
 }
 
@@ -231,6 +239,7 @@ Frenet createFrenetVectorConnectingStartAndEnd(
 
   Frenet start_frenet = getFrenet(start, 0, map_waypoints);
   Frenet end_frenet = getFrenet(end, 0, map_waypoints);
+  // TODO: introduce and use -operator of Frenet class
   return Frenet { end_frenet.s - start_frenet.s, end_frenet.d - start_frenet.d };
 }
 
@@ -277,7 +286,8 @@ bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
                                               const Vehicle &vehicle,
                                               const int prev_size, double dt) {
   double check_speed = vehicle.getVel_cart_m_per_s().len();
-  double check_vehicle_s = vehicle.getPos_frenet().s + prev_size * dt * check_speed;
+  double check_vehicle_s = vehicle.getPos_frenet().s
+      + prev_size * dt * check_speed;
   // TODO: replace magic number 30 with constant
   return check_vehicle_s > egoCar.getPos_frenet().s
       && check_vehicle_s - egoCar.getPos_frenet().s < 30;
