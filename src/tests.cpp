@@ -89,8 +89,7 @@ void assert_car_drives_straight_ahead(const Points &path,
 void check_and_assert_no_collision(const function<void(void)>& check,
                                    const EgoCar &egoCar,
                                    const vector<Vehicle> &vehicles) {
-  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar
-  << vehicles[0];
+  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar << vehicles[0];
   check();
 }
 
@@ -250,10 +249,9 @@ TEST(PathPlanningTest, should_collide) {
   MapWaypoints map_waypoints = read_map_waypoints();
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(1) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
-  Vehicle vehicle = test::createVehicle(0,
-                                        Frenet { posCar.s + test::carRadius / 2,
-                                            posCar.d },
-                                        Frenet { 0, 0 }, map_waypoints);
+  Vehicle vehicle = test::createVehicle(
+      0, posCar + Frenet { test::carRadius / 2, 0 }, Frenet { 0, 0 },
+      map_waypoints);
 
 // WHEN
 
@@ -271,9 +269,8 @@ TEST(PathPlanningTest, should_not_collide) {
   int lane = 1;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
-  Vehicle vehicle = test::createVehicle(0,
-                                        Frenet { posCar.s + 10 * test::carSize,
-                                            posCar.d },
+  Vehicle vehicle = test::createVehicle(0, posCar + Frenet { 10 * test::carSize,
+      0 },
                                         Frenet { 5, 0 }, map_waypoints);
   vector<Vehicle> vehicles = { vehicle };
 
@@ -295,8 +292,9 @@ TEST(PathPlanningTest, should_overtake_vehicle) {
   int lane = 1;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
-  Vehicle vehicle = test::createVehicle(0, Frenet { posCar.s + 35, posCar.d },
-                                        Frenet { 5, 0 }, map_waypoints);
+  Vehicle vehicle = test::createVehicle(0, posCar + Frenet { 35, 0 }, Frenet {
+                                            5, 0 },
+                                        map_waypoints);
   vector<Vehicle> vehicles = { vehicle };
 
 // WHEN
@@ -306,6 +304,6 @@ TEST(PathPlanningTest, should_overtake_vehicle) {
                 ds.push_back(egoCar.getPos_frenet().d);});
 
 // THEN
-  // TODO: check instead that vehicle has been overtaken, i.e. egoCar.s > vehicle.s
+  // FIXME: check instead that vehicle has been overtaken, i.e. egoCar.s > vehicle.s
   ASSERT_TRUE(test::hasBeenInLane(ds, 0));
 }
