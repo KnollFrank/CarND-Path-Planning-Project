@@ -27,6 +27,10 @@ struct Point {
 
   double len() const;
   Point& operator=(const Point &point);
+  Point operator+(const Point& other) const;
+  Point operator-(const Point& other) const;
+  Point operator*(double scalar) const;
+
   friend ostream& operator<<(ostream& os, const Point& point);
 };
 
@@ -41,6 +45,10 @@ Point& Point::operator=(const Point &point) {
 
   // return the existing object so we can chain this operator
   return *this;
+}
+
+double scalarProd(const Point &a, const Point &b) {
+  return a.x * b.x + a.y * b.y;
 }
 
 ostream& operator<<(ostream& os, const Point& point) {

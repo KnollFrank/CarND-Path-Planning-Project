@@ -151,28 +151,22 @@ Frenet getFrenet(const Point &point, double theta_rad,
     prev_wp = maps_x.size() - 1;
   }
 
-  double n_x = maps_x[next_wp] - maps_x[prev_wp];
-  double n_y = maps_y[next_wp] - maps_y[prev_wp];
-  double x_x = point.x - maps_x[prev_wp];
-  double x_y = point.y - maps_y[prev_wp];
+  Point next = Point { maps_x[next_wp], maps_y[next_wp] };
+  Point prev = Point { maps_x[prev_wp], maps_y[prev_wp] };
+  Point n = next - prev;
+  Point x = point - prev;
 
   // find the projection of x onto n
-  // TODO: add scalar product to Point class and use it here:
-  double proj_norm = (x_x * n_x + x_y * n_y) / (n_x * n_x + n_y * n_y);
-  // TODO: use scalar multiplication of Point class.
-  double proj_x = proj_norm * n_x;
-  double proj_y = proj_norm * n_y;
-
-  double frenet_d = distance(Point { x_x, x_y }, Point { proj_x, proj_y });
+  // TODO: warum nicht /n.len() ?
+  double proj_norm = scalarProd(x, n) / scalarProd(n, n);
+  Point proj = n * proj_norm;
+  double frenet_d = distance(x, proj);
 
   //see if d value is positive or negative by comparing it to a center point
 
-  double center_x = 1000 - maps_x[prev_wp];
-  double center_y = 2000 - maps_y[prev_wp];
-  double centerToPos = distance(Point { center_x, center_y },
-                                Point { x_x, x_y });
-  double centerToRef = distance(Point { center_x, center_y }, Point { proj_x,
-                                    proj_y });
+  Point center = Point { 1000 - maps_x[prev_wp], 2000 - maps_y[prev_wp] };
+  double centerToPos = distance(center, x);
+  double centerToRef = distance(center, proj);
 
   if (centerToPos <= centerToRef) {
     frenet_d *= -1;
@@ -185,7 +179,7 @@ Frenet getFrenet(const Point &point, double theta_rad,
                              maps_y[i + 1] });
   }
 
-  frenet_s += Point { proj_x, proj_y }.len();
+  frenet_s += proj.len();
 
   return Frenet { frenet_s, frenet_d };
 }

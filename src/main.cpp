@@ -20,6 +20,24 @@ double Point::len() const {
   return sqrt(x * x + y * y);
 }
 
+Point Point::operator+(const Point &other) const {
+  Point sum;
+  sum.x = x + other.x;
+  sum.y = y + other.y;
+  return sum;
+}
+
+Point Point::operator-(const Point &other) const {
+  return *this + (other * -1);
+}
+
+Point Point::operator*(double scalar) const {
+  Point result;
+  result.x = x * scalar;
+  result.y = y * scalar;
+  return result;
+}
+
 void EgoCar::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
   this->pos_cart = pos_cart;
   this->pos_frenet = pos_frenet;
