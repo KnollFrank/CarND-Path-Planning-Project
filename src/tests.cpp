@@ -113,7 +113,6 @@ void drive2PointOfEgoCar(const Point &dst, EgoCar &egoCar, double dt,
 void driveVehicle(Vehicle &vehicle, double dt,
                   const MapWaypoints &map_waypoints) {
   const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s(map_waypoints);
-  // TODO: überlade Operatoren + und * von Point, um die nachfolgenden Zeilen kürzer aufschreiben zu können:
   vehicle.setPos_frenet(vehicle.getPos_frenet() + (vel_frenet * dt),
                         map_waypoints);
   // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet();

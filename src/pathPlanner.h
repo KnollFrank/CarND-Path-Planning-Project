@@ -105,7 +105,6 @@ int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
   for (int i = 0; i < map_waypoints.map_waypoints_x.size(); i++) {
     double map_x = map_waypoints.map_waypoints_x[i];
     double map_y = map_waypoints.map_waypoints_y[i];
-    // TODO: use len() method of Point class
     double dist = distance(point, Point { map_x, map_y });
     if (dist < closestLen) {
       closestLen = dist;
@@ -170,10 +169,8 @@ Frenet getFrenet(const Point &point, double theta_rad,
 
   double center_x = 1000 - maps_x[prev_wp];
   double center_y = 2000 - maps_y[prev_wp];
-  // TODO: use len() method of Point class
   double centerToPos = distance(Point { center_x, center_y },
                                 Point { x_x, x_y });
-  // TODO: use len() method of Point class
   double centerToRef = distance(Point { center_x, center_y }, Point { proj_x,
                                     proj_y });
 
@@ -184,13 +181,11 @@ Frenet getFrenet(const Point &point, double theta_rad,
   // calculate s value
   double frenet_s = 0;
   for (int i = 0; i < prev_wp; i++) {
-    // TODO: use len() method of Point class
     frenet_s += distance(Point { maps_x[i], maps_y[i] }, Point { maps_x[i + 1],
                              maps_y[i + 1] });
   }
 
-  // TODO: use len() method of Point class
-  frenet_s += distance(Point { 0, 0 }, Point { proj_x, proj_y });
+  frenet_s += Point { proj_x, proj_y }.len();
 
   return Frenet { frenet_s, frenet_d };
 }
