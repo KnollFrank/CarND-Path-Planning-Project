@@ -151,20 +151,20 @@ Frenet getFrenet(const Point &point, double theta_rad,
     prev_wp = maps_x.size() - 1;
   }
 
-  Point next = Point { maps_x[next_wp], maps_y[next_wp] };
-  Point prev = Point { maps_x[prev_wp], maps_y[prev_wp] };
-  Point n = next - prev;
-  Point x = point - prev;
+  const Point next = Point { maps_x[next_wp], maps_y[next_wp] };
+  const Point prev = Point { maps_x[prev_wp], maps_y[prev_wp] };
+  const Point n = next - prev;
+  const Point x = point - prev;
 
   // find the projection of x onto n
   // TODO: warum nicht /n.len() ?
   double proj_norm = scalarProd(x, n) / scalarProd(n, n);
-  Point proj = n * proj_norm;
+  const Point proj = n * proj_norm;
   double frenet_d = distance(x, proj);
 
   //see if d value is positive or negative by comparing it to a center point
 
-  Point center = Point { 1000 - maps_x[prev_wp], 2000 - maps_y[prev_wp] };
+  const Point center = Point { 1000, 2000 } - prev;
   double centerToPos = distance(center, x);
   double centerToRef = distance(center, proj);
 
