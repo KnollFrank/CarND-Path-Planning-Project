@@ -288,7 +288,7 @@ TEST(PathPlanningTest, should_not_collide) {
 // THEN
 }
 
-TEST(PathPlanningTest, should_change_lane) {
+TEST(PathPlanningTest, should_overtake_vehicle) {
 // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
   ReferencePoint refPoint;
@@ -309,5 +309,6 @@ TEST(PathPlanningTest, should_change_lane) {
                 ds.push_back(egoCar.getPos_frenet().d);});
 
 // THEN
+  // TODO: check instead that vehicle has been overtaken, i.e. egoCar.s > vehicle.s
   ASSERT_TRUE(test::hasBeenInLane(ds, 0));
 }
