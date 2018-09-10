@@ -66,8 +66,7 @@ MapWaypoints read_map_waypoints() {
     iss >> s;
     iss >> d_x;
     iss >> d_y;
-    map_waypoints.map_waypoints_x.push_back(x);
-    map_waypoints.map_waypoints_y.push_back(y);
+    map_waypoints.map_waypoints.push_back(Point { x, y });
     map_waypoints.map_waypoints_s.push_back(s);
     map_waypoints_dx.push_back(d_x);
     map_waypoints_dy.push_back(d_y);
@@ -102,10 +101,8 @@ int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
   double closestLen = 100000;  //large number
   int closestWaypoint = 0;
 
-  for (int i = 0; i < map_waypoints.map_waypoints_x.size(); i++) {
-    double map_x = map_waypoints.map_waypoints_x[i];
-    double map_y = map_waypoints.map_waypoints_y[i];
-    double dist = distance(point, Point { map_x, map_y });
+  for (int i = 0; i < map_waypoints.map_waypoints.size(); i++) {
+    double dist = distance(point, map_waypoints.map_waypoints[i]);
     if (dist < closestLen) {
       closestLen = dist;
       closestWaypoint = i;
@@ -115,22 +112,23 @@ int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
   return closestWaypoint;
 }
 
+// TODO: make method of Point class
+double getHeading(const Point &point) {
+  return atan2(point.y, point.x);
+}
+
 int NextWaypoint(const Point &point, double theta_rad,
                  const MapWaypoints &map_waypoints) {
 
   int closestWaypoint = ClosestWaypoint(point, map_waypoints);
-
-  double map_x = map_waypoints.map_waypoints_x[closestWaypoint];
-  double map_y = map_waypoints.map_waypoints_y[closestWaypoint];
-
-  double heading = atan2(map_y - point.y, map_x - point.x);
-
+  Point map = map_waypoints.map_waypoints[closestWaypoint];
+  double heading = getHeading(map - point);
   double angle = fabs(theta_rad - heading);
   angle = min(2 * pi() - angle, angle);
 
   if (angle > pi() / 4) {
     closestWaypoint++;
-    if (closestWaypoint == map_waypoints.map_waypoints_x.size()) {
+    if (closestWaypoint == map_waypoints.map_waypoints.size()) {
       closestWaypoint = 0;
     }
   }
@@ -141,20 +139,17 @@ int NextWaypoint(const Point &point, double theta_rad,
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 Frenet getFrenet(const Point &point, double theta_rad,
                  const MapWaypoints &map_waypoints) {
-  const vector<double> &maps_x = map_waypoints.map_waypoints_x;
-  const vector<double> &maps_y = map_waypoints.map_waypoints_y;
+  const vector<Point> &maps = map_waypoints.map_waypoints;
   int next_wp = NextWaypoint(point, theta_rad, map_waypoints);
 
   int prev_wp;
   prev_wp = next_wp - 1;
   if (next_wp == 0) {
-    prev_wp = maps_x.size() - 1;
+    prev_wp = maps.size() - 1;
   }
 
-  const Point next = Point { maps_x[next_wp], maps_y[next_wp] };
-  const Point prev = Point { maps_x[prev_wp], maps_y[prev_wp] };
-  const Point n = next - prev;
-  const Point x = point - prev;
+  const Point n = maps[next_wp] - maps[prev_wp];
+  const Point x = point - maps[prev_wp];
 
   // find the projection of x onto n
   // TODO: warum nicht /n.len() ?
@@ -164,7 +159,7 @@ Frenet getFrenet(const Point &point, double theta_rad,
 
   //see if d value is positive or negative by comparing it to a center point
 
-  const Point center = Point { 1000, 2000 } - prev;
+  const Point center = Point { 1000, 2000 } - maps[prev_wp];
   double centerToPos = distance(center, x);
   double centerToRef = distance(center, proj);
 
@@ -175,8 +170,7 @@ Frenet getFrenet(const Point &point, double theta_rad,
   // calculate s value
   double frenet_s = 0;
   for (int i = 0; i < prev_wp; i++) {
-    frenet_s += distance(Point { maps_x[i], maps_y[i] }, Point { maps_x[i + 1],
-                             maps_y[i + 1] });
+    frenet_s += distance(maps[i], maps[i + 1]);
   }
 
   frenet_s += proj.len();
@@ -187,8 +181,7 @@ Frenet getFrenet(const Point &point, double theta_rad,
 // Transform from Frenet s,d coordinates to Cartesian x,y
 Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
   const vector<double> &maps_s = map_waypoints.map_waypoints_s;
-  const vector<double> &maps_x = map_waypoints.map_waypoints_x;
-  const vector<double> &maps_y = map_waypoints.map_waypoints_y;
+  const vector<Point> &maps = map_waypoints.map_waypoints;
 
   int prev_wp = -1;
 
@@ -196,24 +189,17 @@ Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
     prev_wp++;
   }
 
-  int wp2 = (prev_wp + 1) % maps_x.size();
+  int wp2 = (prev_wp + 1) % maps.size();
 
-  double heading = atan2(maps_y[wp2] - maps_y[prev_wp],
-                         maps_x[wp2] - maps_x[prev_wp]);
+  double heading = getHeading(maps[wp2] - maps[prev_wp]);
   // the x,y,s along the segment
   double seg_s = (pos.s - maps_s[prev_wp]);
 
-  // TODO: use Point instead of seg_x and seg_y
-  double seg_x = maps_x[prev_wp] + seg_s * cos(heading);
-  double seg_y = maps_y[prev_wp] + seg_s * sin(heading);
-
+  // TODO: define and use static method of Point class for Point { cos(heading), sin(heading) }. Dito other places.
+  Point seg = maps[prev_wp] + Point { cos(heading), sin(heading) } * seg_s;
   double perp_heading = heading - pi() / 2;
 
-  // TODO: use Point instead of x and y
-  double x = seg_x + pos.d * cos(perp_heading);
-  double y = seg_y + pos.d * sin(perp_heading);
-
-  return Point { x, y };
+  return seg + Point { cos(perp_heading), sin(perp_heading) } * pos.d;
 }
 
 Point createCartVectorConnectingStartAndEnd(const Frenet &start,

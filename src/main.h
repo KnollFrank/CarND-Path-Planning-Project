@@ -15,12 +15,6 @@
 
 using namespace std;
 
-struct MapWaypoints {
-  vector<double> map_waypoints_x;
-  vector<double> map_waypoints_y;
-  vector<double> map_waypoints_s;
-};
-
 struct Point {
   double x;
   double y;
@@ -46,6 +40,11 @@ Point& Point::operator=(const Point &point) {
   // return the existing object so we can chain this operator
   return *this;
 }
+
+struct MapWaypoints {
+  vector<Point> map_waypoints;
+  vector<double> map_waypoints_s;
+};
 
 double scalarProd(const Point &a, const Point &b) {
   return a.x * b.x + a.y * b.y;
