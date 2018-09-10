@@ -7,6 +7,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <optional>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
@@ -124,32 +125,38 @@ void driveVehicles(vector<Vehicle> &vehicles, double dt,
   }
 }
 
-void drive2PointsOfEgoCarAndDriveVehicles(const vector<Point>& points,
-                                          int numberOfUnprocessedElements,
-                                          double dt,
-                                          const MapWaypoints& map_waypoints,
-                                          const function<void(void)>& check,
-                                          EgoCar& egoCar,
-                                          vector<Vehicle> &vehicles) {
-  for (int i = 0; i < points.size() - numberOfUnprocessedElements; i++) {
+double drive2PointsOfEgoCarAndDriveVehicles(const vector<Point>& points,
+                                            int numberOfUnprocessedPathElements,
+                                            double dt,
+                                            const MapWaypoints& map_waypoints,
+                                            const function<void(void)>& check,
+                                            EgoCar& egoCar,
+                                            vector<Vehicle> &vehicles) {
+
+  int numberOfProcessedPathElements = points.size()
+      - numberOfUnprocessedPathElements;
+  for (int i = 0; i < numberOfProcessedPathElements; i++) {
     driveVehicles(vehicles, dt, map_waypoints);
     drive2PointOfEgoCar(points[i], egoCar, dt, map_waypoints, vehicles, check);
   }
+
+  double secsDriven = numberOfProcessedPathElements * dt;
+  return secsDriven;
 }
 
 void updatePreviousData(const vector<Point>& points,
-                        int numberOfUnprocessedElements, const Points& path,
+                        int numberOfUnprocessedPathElements, const Points& path,
                         const MapWaypoints& map_waypoints,
                         PreviousData& previousData, const EgoCar& egoCar) {
   previousData.previous_path_x.clear();
   previousData.previous_path_y.clear();
-  for (int i = points.size() - numberOfUnprocessedElements; i < points.size();
-      i++) {
+  for (int i = points.size() - numberOfUnprocessedPathElements;
+      i < points.size(); i++) {
     previousData.previous_path_x.push_back(path.xs[i]);
     previousData.previous_path_y.push_back(path.ys[i]);
   }
   previousData.end_path = getFrenet(
-      points[points.size() - numberOfUnprocessedElements - 1],
+      points[points.size() - numberOfUnprocessedPathElements - 1],
       deg2rad(egoCar.yaw_deg), map_waypoints);
 }
 
@@ -157,30 +164,35 @@ bool oneRoundDriven(const EgoCar &egoCar) {
   return egoCar.getPos_frenet().s > 6900;
 }
 
-void driveEgoCarAndVehicles(ReferencePoint &refPoint, int &lane,
-                            const MapWaypoints &map_waypoints, EgoCar &egoCar,
-                            PreviousData &previousData,
-                            vector<Vehicle> &vehicles, double dt,
-                            const function<void(void)> &check) {
+double driveEgoCarAndVehicles(ReferencePoint &refPoint, int &lane,
+                              const MapWaypoints &map_waypoints, EgoCar &egoCar,
+                              PreviousData &previousData,
+                              vector<Vehicle> &vehicles, double dt,
+                              const function<void(void)> &check) {
 
   Points path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
                            vehicles, dt);
   vector<Point> points = test::getPoints(path, map_waypoints);
-  int numberOfUnprocessedElements = 10;
-  drive2PointsOfEgoCarAndDriveVehicles(points, numberOfUnprocessedElements, dt,
-                                       map_waypoints, check, egoCar, vehicles);
-  updatePreviousData(points, numberOfUnprocessedElements, path, map_waypoints,
-                     previousData, egoCar);
+  int numberOfUnprocessedPathElements = 10;
+  double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(
+      points, numberOfUnprocessedPathElements, dt, map_waypoints, check, egoCar,
+      vehicles);
+  updatePreviousData(points, numberOfUnprocessedPathElements, path,
+                     map_waypoints, previousData, egoCar);
+  return secsDriven;
 }
 
 void drive(ReferencePoint &refPoint, int &lane,
            const MapWaypoints &map_waypoints, EgoCar &egoCar,
            PreviousData &previousData, vector<Vehicle> &vehicles, double dt,
-           const function<void(void)> &check) {
+           // TODO: optional<int> for minSecs2Drive
+           int minSecs2Drive, const function<void(void)> &check) {
 
-  for (int i = 0; i < 1000 && !oneRoundDriven(egoCar); i++) {
-    driveEgoCarAndVehicles(refPoint, lane, map_waypoints, egoCar, previousData,
-                           vehicles, dt, check);
+  double secsDriven = 0;
+  while ((secsDriven <= minSecs2Drive || minSecs2Drive == -1)
+      && !oneRoundDriven(egoCar)) {
+    secsDriven += driveEgoCarAndVehicles(refPoint, lane, map_waypoints, egoCar,
+                                         previousData, vehicles, dt, check);
   }
 }
 
@@ -239,7 +251,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 
 // WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              [&egoCar]() {ASSERT_LT(egoCar.speed_mph, 50);});
+              -1, [&egoCar]() {ASSERT_LT(egoCar.speed_mph, 50);});
 
 // THEN
 }
@@ -276,7 +288,7 @@ TEST(PathPlanningTest, should_not_collide) {
 
 // WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              [&egoCar, &vehicles]() {
+              -1, [&egoCar, &vehicles]() {
                 ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
 
 // THEN
@@ -293,17 +305,17 @@ TEST(PathPlanningTest, should_overtake_vehicle) {
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
   Vehicle vehicle = test::createVehicle(0, posCar + Frenet { 35, 0 }, Frenet {
-                                            5, 0 },
+                                            mph2meter_per_sec(5), 0 },
                                         map_waypoints);
   vector<Vehicle> vehicles = { vehicle };
 
 // WHEN
   vector<double> ds;
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              [&egoCar, &vehicles, &ds]() {
+              60, [&egoCar, &vehicles, &ds]() {
                 ds.push_back(egoCar.getPos_frenet().d);});
 
 // THEN
-  // FIXME: check instead that vehicle has been overtaken, i.e. egoCar.s > vehicle.s
+// FIXME: check instead that vehicle has been overtaken, i.e. egoCar.s > vehicle.s
   ASSERT_TRUE(test::hasBeenInLane(ds, 0));
 }

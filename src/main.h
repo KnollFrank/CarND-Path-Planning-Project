@@ -144,6 +144,7 @@ ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   return os;
 }
 
+// TODO: rename to Path, dito variables
 struct Points {
   vector<double> xs;
   vector<double> ys;
