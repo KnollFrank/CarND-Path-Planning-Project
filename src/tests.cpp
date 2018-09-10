@@ -203,6 +203,13 @@ bool hasBeenInLane(const vector<double> &ds, int lane) {
                      [lane](double d) {return isInLane(d, lane);});
 }
 
+std::vector<bool>::iterator getJustBeenOvertakenIterator(
+    vector<bool> &overtakens) {
+  std::vector<bool>::const_iterator it = find(begin(overtakens),
+                                              end(overtakens), true);
+  return begin(overtakens) + (it - begin(overtakens));
+}
+
 }
 
 TEST(PathPlanningTest, should_drive_in_same_lane) {
@@ -317,9 +324,10 @@ TEST(PathPlanningTest, should_overtake_vehicle) {
         bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
         overtakens.push_back(overtaken);});
 
-// THEN
-  auto just_overtaken_iterator = find(begin(overtakens), end(overtakens), true);
-  ASSERT_NE(just_overtaken_iterator, end(overtakens)) << "egoCar should overtake vehicle";
+  // THEN
+  std::vector<bool>::iterator just_been_overtaken_it =
+      test::getJustBeenOvertakenIterator(overtakens);
+  ASSERT_NE(just_been_overtaken_it, end(overtakens))<< "egoCar should overtake vehicle";
   ASSERT_TRUE(
-      all_of(just_overtaken_iterator, end(overtakens), [](bool overtaken) {return overtaken;})) << "egoCar should stay ahead of vehicle";
+      all_of(just_been_overtaken_it, end(overtakens), [](bool overtaken) {return overtaken;}))<< "egoCar should stay ahead of vehicle";
 }
