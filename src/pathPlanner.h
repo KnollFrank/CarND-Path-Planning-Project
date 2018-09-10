@@ -360,8 +360,8 @@ tuple<vector<double>, vector<double>> getPoints(const Path &path) {
 }
 
 Path createNextVals(const Path &path, const int prev_size,
-                    const PreviousData& previousData, ReferencePoint &refPoint,
-                    double dt) {
+                    const PreviousData& previousData,
+                    const ReferencePoint &refPoint, double dt) {
   Path next_vals;
 
   vector<double> xs;
@@ -378,20 +378,16 @@ Path createNextVals(const Path &path, const int prev_size,
   double target_dist = sqrt(target_x * target_x + target_y * target_y);
   double x_add_on = 0;
   const int path_size = 50;
+  Point e1 = Point { cos(refPoint.yaw_rad), sin(refPoint.yaw_rad) };
+  Point e2 = Point { -sin(refPoint.yaw_rad), cos(refPoint.yaw_rad) };
   for (int i = 1; i < path_size - prev_size; i++) {
     double N = target_dist / (dt * mph2meter_per_sec(refPoint.vel_mph));
     double x_point = x_add_on + target_x / N;
-    double y_point = s(x_point);
-    x_add_on = x_point;
-    double x_ref = x_point;
-    double y_ref = y_point;
+    Point point = Point { x_point, s(x_point) };
+    x_add_on = point.x;
     // TODO: reformulate as a matrix multiplication using Eigen
-    // TODO: use Point class for transformation.
-    x_point = x_ref * cos(refPoint.yaw_rad) - y_ref * sin(refPoint.yaw_rad);
-    y_point = x_ref * sin(refPoint.yaw_rad) + y_ref * cos(refPoint.yaw_rad);
-    x_point += refPoint.point.x;
-    y_point += refPoint.point.y;
-    next_vals.points.push_back(Point { x_point, y_point });
+    point = (e1 * point.x) + (e2 * point.y) + refPoint.point;
+    next_vals.points.push_back(point);
   }
 
   return next_vals;
