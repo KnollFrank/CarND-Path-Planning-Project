@@ -203,11 +203,17 @@ bool hasBeenInLane(const vector<double> &ds, int lane) {
                      [lane](double d) {return isInLane(d, lane);});
 }
 
-std::vector<bool>::iterator getJustBeenOvertakenIterator(
+std::vector<bool>::iterator getEgoCarJustOvertakesVehicleIterator(
     vector<bool> &overtakens) {
-  std::vector<bool>::const_iterator it = find(begin(overtakens),
-                                              end(overtakens), true);
+
+  auto it = find(begin(overtakens), end(overtakens), true);
   return begin(overtakens) + (it - begin(overtakens));
+}
+
+bool staysOvertaken(vector<bool>::const_iterator egoCarJustOvertakesVehicle,
+                    const vector<bool> &overtakens) {
+  return all_of(egoCarJustOvertakesVehicle, end(overtakens),
+                [](bool overtaken) {return overtaken;});
 }
 
 }
@@ -325,9 +331,8 @@ TEST(PathPlanningTest, should_overtake_vehicle) {
         overtakens.push_back(overtaken);});
 
   // THEN
-  std::vector<bool>::iterator just_been_overtaken_it =
-      test::getJustBeenOvertakenIterator(overtakens);
-  ASSERT_NE(just_been_overtaken_it, end(overtakens))<< "egoCar should overtake vehicle";
-  ASSERT_TRUE(
-      all_of(just_been_overtaken_it, end(overtakens), [](bool overtaken) {return overtaken;}))<< "egoCar should stay ahead of vehicle";
+  auto egoCarJustOvertakesVehicle = test::getEgoCarJustOvertakesVehicleIterator(
+      overtakens);
+  ASSERT_NE(egoCarJustOvertakesVehicle, end(overtakens))<< "egoCar should overtake vehicle";
+  ASSERT_TRUE(test::staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
 }
