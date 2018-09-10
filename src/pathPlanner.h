@@ -203,11 +203,13 @@ Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
   // the x,y,s along the segment
   double seg_s = (pos.s - maps_s[prev_wp]);
 
+  // TODO: use Point instead of seg_x and seg_y
   double seg_x = maps_x[prev_wp] + seg_s * cos(heading);
   double seg_y = maps_y[prev_wp] + seg_s * sin(heading);
 
   double perp_heading = heading - pi() / 2;
 
+  // TODO: use Point instead of x and y
   double x = seg_x + pos.d * cos(perp_heading);
   double y = seg_y + pos.d * sin(perp_heading);
 
@@ -306,14 +308,24 @@ int updateLane(bool too_close, int lane) {
   return lane;
 }
 
+tuple<Point, Point> createRotatedVectors(double angle_rad) {
+  Point e1 = Point { cos(angle_rad), sin(angle_rad) };
+  Point e2 = Point { -sin(angle_rad), cos(angle_rad) };
+  return make_tuple(e1, e2);
+}
+
+Point transform(const Point& e1, const Point& e2, const Point& point) {
+  return e1 * point.x + e2 * point.y;
+}
+
 Path createPoints(const int prev_size, const EgoCar& egoCar,
                   ReferencePoint &refPoint, const PreviousData& previousData,
                   int lane, const MapWaypoints &map_waypoints) {
   Path path;
 
   if (prev_size < 2) {
-    Point prev = Point { egoCar.getPos_cart().x - cos(deg2rad(egoCar.yaw_deg)),
-        egoCar.getPos_cart().y - sin(deg2rad(egoCar.yaw_deg)) };
+    Point prev = egoCar.getPos_cart() - Point { cos(deg2rad(egoCar.yaw_deg)),
+        sin(deg2rad(egoCar.yaw_deg)) };
     path.points.push_back(prev);
     path.points.push_back(egoCar.getPos_cart());
   } else {
@@ -338,12 +350,12 @@ Path createPoints(const int prev_size, const EgoCar& egoCar,
   path.points.push_back(next_wp1);
   path.points.push_back(next_wp2);
 
-  Point e1 = Point { cos(-refPoint.yaw_rad), sin(-refPoint.yaw_rad) };
-  Point e2 = Point { -sin(-refPoint.yaw_rad), cos(-refPoint.yaw_rad) };
+  Point e1;
+  Point e2;
+  tie(e1, e2) = createRotatedVectors(-refPoint.yaw_rad);
   for (int i = 0; i < path.points.size(); i++) {
-    Point shift = path.points[i] - refPoint.point;
     // TODO: reformulate as a matrix multiplication using Eigen
-    path.points[i] = e1 * shift.x + e2 * shift.y;
+    path.points[i] = transform(e1, e2, path.points[i] - refPoint.point);
   }
   return path;
 }
@@ -380,14 +392,15 @@ Path createNextVals(const Path &path, const int prev_size,
   Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
   const int path_size = 50;
-  Point e1 = Point { cos(refPoint.yaw_rad), sin(refPoint.yaw_rad) };
-  Point e2 = Point { -sin(refPoint.yaw_rad), cos(refPoint.yaw_rad) };
+  Point e1;
+  Point e2;
+  tie(e1, e2) = createRotatedVectors(refPoint.yaw_rad);
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 1; i < path_size - prev_size; i++) {
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
     // TODO: reformulate as a matrix multiplication using Eigen
-    next_vals.points.push_back(e1 * point.x + e2 * point.y + refPoint.point);
+    next_vals.points.push_back(transform(e1, e2, point) + refPoint.point);
   }
 
   return next_vals;
