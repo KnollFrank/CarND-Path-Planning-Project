@@ -112,17 +112,12 @@ int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
   return closestWaypoint;
 }
 
-// TODO: make method of Point class
-double getHeading(const Point &point) {
-  return atan2(point.y, point.x);
-}
-
 int NextWaypoint(const Point &point, double theta_rad,
                  const MapWaypoints &map_waypoints) {
 
   int closestWaypoint = ClosestWaypoint(point, map_waypoints);
   Point map = map_waypoints.map_waypoints[closestWaypoint];
-  double heading = getHeading(map - point);
+  double heading = (map - point).getHeading();
   double angle = fabs(theta_rad - heading);
   angle = min(2 * pi() - angle, angle);
 
@@ -191,7 +186,7 @@ Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
 
   int wp2 = (prev_wp + 1) % maps.size();
 
-  double heading = getHeading(maps[wp2] - maps[prev_wp]);
+  double heading = (maps[wp2] - maps[prev_wp]).getHeading();
   // the x,y,s along the segment
   double seg_s = pos.s - maps_s[prev_wp];
 

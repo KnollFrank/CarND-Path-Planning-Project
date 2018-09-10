@@ -28,6 +28,10 @@ double Point::len() const {
   return sqrt(x * x + y * y);
 }
 
+double Point::getHeading() const {
+  return atan2(y, x);
+}
+
 Point Point::operator+(const Point &other) const {
   Point sum;
   sum.x = x + other.x;
