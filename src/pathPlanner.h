@@ -387,8 +387,7 @@ Path createNextVals(const Path &path, const int prev_size,
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
     // TODO: reformulate as a matrix multiplication using Eigen
-    next_vals.points.push_back(
-        (e1 * point.x) + (e2 * point.y) + refPoint.point);
+    next_vals.points.push_back(e1 * point.x + e2 * point.y + refPoint.point);
   }
 
   return next_vals;
