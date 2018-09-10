@@ -20,6 +20,10 @@ Frenet Frenet::operator*(double scalar) const {
   return result;
 }
 
+Point Point::fromAngle(double angle_rad) {
+  return Point { cos(angle_rad), sin(angle_rad) };
+}
+
 double Point::len() const {
   return sqrt(x * x + y * y);
 }

@@ -19,6 +19,7 @@ struct Point {
   double x;
   double y;
 
+  static Point fromAngle(double angle_rad);
   double len() const;
   Point& operator=(const Point &point);
   Point operator+(const Point& other) const;

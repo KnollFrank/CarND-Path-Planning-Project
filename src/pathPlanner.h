@@ -193,13 +193,12 @@ Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
 
   double heading = getHeading(maps[wp2] - maps[prev_wp]);
   // the x,y,s along the segment
-  double seg_s = (pos.s - maps_s[prev_wp]);
+  double seg_s = pos.s - maps_s[prev_wp];
 
-  // TODO: define and use static method of Point class for Point { cos(heading), sin(heading) }. Dito other places.
-  Point seg = maps[prev_wp] + Point { cos(heading), sin(heading) } * seg_s;
+  Point seg = maps[prev_wp] + Point::fromAngle(heading) * seg_s;
   double perp_heading = heading - pi() / 2;
 
-  return seg + Point { cos(perp_heading), sin(perp_heading) } * pos.d;
+  return seg + Point::fromAngle(perp_heading) * pos.d;
 }
 
 Point createCartVectorConnectingStartAndEnd(const Frenet &start,
@@ -310,8 +309,8 @@ Path createPoints(const int prev_size, const EgoCar& egoCar,
   Path path;
 
   if (prev_size < 2) {
-    Point prev = egoCar.getPos_cart() - Point { cos(deg2rad(egoCar.yaw_deg)),
-        sin(deg2rad(egoCar.yaw_deg)) };
+    Point prev = egoCar.getPos_cart()
+        - Point::fromAngle(deg2rad(egoCar.yaw_deg));
     path.points.push_back(prev);
     path.points.push_back(egoCar.getPos_cart());
   } else {
