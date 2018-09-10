@@ -317,10 +317,8 @@ Path createPoints(const int prev_size, const EgoCar& egoCar,
     path.points.push_back(prev);
     path.points.push_back(egoCar.getPos_cart());
   } else {
-    refPoint.point = Point { previousData.previous_path_x[prev_size - 1],
-        previousData.previous_path_y[prev_size - 1] };
-    Point prev = Point { previousData.previous_path_x[prev_size - 2],
-        previousData.previous_path_y[prev_size - 2] };
+    refPoint.point = previousData.previous_path.points[prev_size - 1];
+    Point prev = previousData.previous_path.points[prev_size - 2];
     refPoint.yaw_rad = atan2(refPoint.point.y - prev.y,
                              refPoint.point.x - prev.x);
     path.points.push_back(prev);
@@ -373,8 +371,7 @@ Path createNextVals(const Path &path, const int prev_size,
   tk::spline s;
   s.set_points(xs, ys);
   for (int i = 0; i < prev_size; i++) {
-    next_vals.points.push_back(Point { previousData.previous_path_x[i],
-        previousData.previous_path_y[i] });
+    next_vals.points.push_back(previousData.previous_path.points[i]);
   }
   double target_x = 30.0;
   double target_y = s(target_x);
@@ -407,7 +404,7 @@ Path createPath(ReferencePoint &refPoint, int &lane,
 
   // printInfo(egoCar, vehicles);
 
-  const int prev_size = previousData.previous_path_x.size();
+  const int prev_size = previousData.previous_path.points.size();
 
   if (prev_size > 0) {
     egoCar.setPos_frenet(Frenet { previousData.end_path.s,
@@ -450,13 +447,14 @@ PreviousData createPreviousData(
   PreviousData previousData;
   // Previous path data given to the Planner
   vector<double> previous_path_x = j[1]["previous_path_x"];
-  previousData.previous_path_x = previous_path_x;
   vector<double> previous_path_y = j[1]["previous_path_y"];
-  previousData.previous_path_y = previous_path_y;
+  for (int i = 0; i < previous_path_x.size(); i++) {
+    previousData.previous_path.points.push_back(Point { previous_path_x[i],
+        previous_path_y[i] });
+  }
 
   // Previous path's end s and d values
-  previousData.end_path.s = j[1]["end_path_s"];
-  previousData.end_path.d = j[1]["end_path_d"];
+  previousData.end_path = Frenet { j[1]["end_path_s"], j[1]["end_path_d"] };
   return previousData;
 }
 

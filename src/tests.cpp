@@ -132,12 +132,10 @@ void updatePreviousData(const vector<Point>& points,
                         int numberOfUnprocessedPathElements, const Path& path,
                         const MapWaypoints& map_waypoints,
                         PreviousData& previousData, const EgoCar& egoCar) {
-  previousData.previous_path_x.clear();
-  previousData.previous_path_y.clear();
+  previousData.previous_path.points.clear();
   for (int i = points.size() - numberOfUnprocessedPathElements;
       i < points.size(); i++) {
-    previousData.previous_path_x.push_back(path.points[i].x);
-    previousData.previous_path_y.push_back(path.points[i].y);
+    previousData.previous_path.points.push_back(path.points[i]);
   }
   previousData.end_path = getFrenet(
       points[points.size() - numberOfUnprocessedPathElements - 1],

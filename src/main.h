@@ -59,6 +59,7 @@ ostream& operator<<(ostream& os, const Point& point) {
 struct Frenet {
   double s;
   double d;
+
   Frenet operator+(const Frenet& other) const;
   Frenet operator-(const Frenet& other) const;
   Frenet operator*(double scalar) const;
@@ -102,13 +103,6 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   return os;
 }
 
-struct PreviousData {
-  // TODO: replace previous_path_x and previous_path_y with Path
-  vector<double> previous_path_x;
-  vector<double> previous_path_y;
-  Frenet end_path;
-};
-
 class Vehicle {
 
  public:
@@ -148,6 +142,11 @@ ostream& operator<<(ostream& os, const Vehicle& vehicle) {
 
 struct Path {
   vector<Point> points;
+};
+
+struct PreviousData {
+  Path previous_path;
+  Frenet end_path;
 };
 
 struct ReferencePoint {
