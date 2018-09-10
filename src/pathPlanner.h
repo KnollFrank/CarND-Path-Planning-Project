@@ -359,6 +359,10 @@ tuple<vector<double>, vector<double>> getPoints(const Path &path) {
   return make_tuple(xs, ys);
 }
 
+Point createSplinePoint(double x, const tk::spline& s) {
+  return Point { x, s(x) };
+}
+
 Path createNextVals(const Path &path, const int prev_size,
                     const PreviousData& previousData,
                     const ReferencePoint &refPoint, double dt) {
@@ -373,21 +377,18 @@ Path createNextVals(const Path &path, const int prev_size,
   for (int i = 0; i < prev_size; i++) {
     next_vals.points.push_back(previousData.previous_path.points[i]);
   }
-  double target_x = 30.0;
-  double target_y = s(target_x);
-  double target_dist = sqrt(target_x * target_x + target_y * target_y);
+  Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
   const int path_size = 50;
   Point e1 = Point { cos(refPoint.yaw_rad), sin(refPoint.yaw_rad) };
   Point e2 = Point { -sin(refPoint.yaw_rad), cos(refPoint.yaw_rad) };
+  double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 1; i < path_size - prev_size; i++) {
-    double N = target_dist / (dt * mph2meter_per_sec(refPoint.vel_mph));
-    double x_point = x_add_on + target_x / N;
-    Point point = Point { x_point, s(x_point) };
+    Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
     // TODO: reformulate as a matrix multiplication using Eigen
-    point = (e1 * point.x) + (e2 * point.y) + refPoint.point;
-    next_vals.points.push_back(point);
+    next_vals.points.push_back(
+        (e1 * point.x) + (e2 * point.y) + refPoint.point);
   }
 
   return next_vals;
