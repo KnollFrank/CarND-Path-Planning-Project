@@ -103,6 +103,7 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
 }
 
 struct PreviousData {
+  // TODO: replace previous_path_x and previous_path_y with Path
   vector<double> previous_path_x;
   vector<double> previous_path_y;
   Frenet end_path;
@@ -146,8 +147,7 @@ ostream& operator<<(ostream& os, const Vehicle& vehicle) {
 }
 
 struct Path {
-  vector<double> xs;
-  vector<double> ys;
+  vector<Point> points;
 };
 
 struct ReferencePoint {

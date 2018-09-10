@@ -151,8 +151,11 @@ int main(int argc, char **argv) {
               Path next_vals = createPath(refPoint, lane, map_waypoints, egoCar, createPreviousData(j), createVehicles(j[1]["sensor_fusion"]), dt);
 
               json msgJson;
-              msgJson["next_x"] = next_vals.xs;
-              msgJson["next_y"] = next_vals.ys;
+              vector<double> xs;
+              vector<double> ys;
+              tie(xs, ys) = getPoints(next_vals);
+              msgJson["next_x"] = xs;
+              msgJson["next_y"] = ys;
 
               auto msg = "42[\"control\","+ msgJson.dump()+"]";
 

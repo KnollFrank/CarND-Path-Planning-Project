@@ -307,28 +307,24 @@ int updateLane(bool too_close, int lane) {
 }
 
 Path createPoints(const int prev_size, const EgoCar& egoCar,
-                    ReferencePoint &refPoint, const PreviousData& previousData,
-                    int lane, const MapWaypoints &map_waypoints) {
+                  ReferencePoint &refPoint, const PreviousData& previousData,
+                  int lane, const MapWaypoints &map_waypoints) {
   Path path;
 
   if (prev_size < 2) {
-    double prev_car_x = egoCar.getPos_cart().x - cos(deg2rad(egoCar.yaw_deg));
-    double prev_car_y = egoCar.getPos_cart().y - sin(deg2rad(egoCar.yaw_deg));
-    path.xs.push_back(prev_car_x);
-    path.xs.push_back(egoCar.getPos_cart().x);
-    path.ys.push_back(prev_car_y);
-    path.ys.push_back(egoCar.getPos_cart().y);
+    Point prev = Point { egoCar.getPos_cart().x - cos(deg2rad(egoCar.yaw_deg)),
+        egoCar.getPos_cart().y - sin(deg2rad(egoCar.yaw_deg)) };
+    path.points.push_back(prev);
+    path.points.push_back(egoCar.getPos_cart());
   } else {
-    refPoint.point.x = previousData.previous_path_x[prev_size - 1];
-    refPoint.point.y = previousData.previous_path_y[prev_size - 1];
-    double ref_x_prev = previousData.previous_path_x[prev_size - 2];
-    double ref_y_prev = previousData.previous_path_y[prev_size - 2];
-    refPoint.yaw_rad = atan2(refPoint.point.y - ref_y_prev,
-                             refPoint.point.x - ref_x_prev);
-    path.xs.push_back(ref_x_prev);
-    path.xs.push_back(refPoint.point.x);
-    path.ys.push_back(ref_y_prev);
-    path.ys.push_back(refPoint.point.y);
+    refPoint.point = Point { previousData.previous_path_x[prev_size - 1],
+        previousData.previous_path_y[prev_size - 1] };
+    Point prev = Point { previousData.previous_path_x[prev_size - 2],
+        previousData.previous_path_y[prev_size - 2] };
+    refPoint.yaw_rad = atan2(refPoint.point.y - prev.y,
+                             refPoint.point.x - prev.x);
+    path.points.push_back(prev);
+    path.points.push_back(refPoint.point);
   }
   Point next_wp0 = getXY(Frenet { egoCar.getPos_frenet().s + 30,
                              getMiddleOfLane(lane) },
@@ -340,36 +336,45 @@ Path createPoints(const int prev_size, const EgoCar& egoCar,
                              getMiddleOfLane(lane) },
                          map_waypoints);
 
-  path.xs.push_back(next_wp0.x);
-  path.xs.push_back(next_wp1.x);
-  path.xs.push_back(next_wp2.x);
+  path.points.push_back(next_wp0);
+  path.points.push_back(next_wp1);
+  path.points.push_back(next_wp2);
 
-  path.ys.push_back(next_wp0.y);
-  path.ys.push_back(next_wp1.y);
-  path.ys.push_back(next_wp2.y);
-
-  for (int i = 0; i < path.xs.size(); i++) {
-    double shift_x = path.xs[i] - refPoint.point.x;
-    double shift_y = path.ys[i] - refPoint.point.y;
+  Point e1 = Point { cos(-refPoint.yaw_rad), sin(-refPoint.yaw_rad) };
+  Point e2 = Point { -sin(-refPoint.yaw_rad), cos(-refPoint.yaw_rad) };
+  for (int i = 0; i < path.points.size(); i++) {
+    Point shift = path.points[i] - refPoint.point;
     // TODO: reformulate as a matrix multiplication using Eigen
-    path.xs[i] = shift_x * cos(-refPoint.yaw_rad)
-        - shift_y * sin(-refPoint.yaw_rad);
-    path.ys[i] = shift_x * sin(-refPoint.yaw_rad)
-        + shift_y * cos(-refPoint.yaw_rad);
+    path.points[i] = e1 * shift.x + e2 * shift.y;
   }
   return path;
 }
 
+tuple<vector<double>, vector<double>> getPoints(const Path &path) {
+  vector<double> xs;
+  vector<double> ys;
+  for (const Point &point : path.points) {
+    xs.push_back(point.x);
+    ys.push_back(point.y);
+  }
+
+  return make_tuple(xs, ys);
+}
+
 Path createNextVals(const Path &path, const int prev_size,
-                      const PreviousData& previousData,
-                      ReferencePoint &refPoint, double dt) {
+                    const PreviousData& previousData, ReferencePoint &refPoint,
+                    double dt) {
   Path next_vals;
 
+  vector<double> xs;
+  vector<double> ys;
+  tie(xs, ys) = getPoints(path);
+
   tk::spline s;
-  s.set_points(path.xs, path.ys);
+  s.set_points(xs, ys);
   for (int i = 0; i < prev_size; i++) {
-    next_vals.xs.push_back(previousData.previous_path_x[i]);
-    next_vals.ys.push_back(previousData.previous_path_y[i]);
+    next_vals.points.push_back(Point { previousData.previous_path_x[i],
+        previousData.previous_path_y[i] });
   }
   double target_x = 30.0;
   double target_y = s(target_x);
@@ -384,21 +389,21 @@ Path createNextVals(const Path &path, const int prev_size,
     double x_ref = x_point;
     double y_ref = y_point;
     // TODO: reformulate as a matrix multiplication using Eigen
+    // TODO: use Point class for transformation.
     x_point = x_ref * cos(refPoint.yaw_rad) - y_ref * sin(refPoint.yaw_rad);
     y_point = x_ref * sin(refPoint.yaw_rad) + y_ref * cos(refPoint.yaw_rad);
     x_point += refPoint.point.x;
     y_point += refPoint.point.y;
-    next_vals.xs.push_back(x_point);
-    next_vals.ys.push_back(y_point);
+    next_vals.points.push_back(Point { x_point, y_point });
   }
 
   return next_vals;
 }
 
 Path createPath(ReferencePoint &refPoint, int &lane,
-                  const MapWaypoints &map_waypoints, EgoCar egoCar,
-                  const PreviousData &previousData,
-                  const vector<Vehicle> &vehicles, double dt) {
+                const MapWaypoints &map_waypoints, EgoCar egoCar,
+                const PreviousData &previousData,
+                const vector<Vehicle> &vehicles, double dt) {
 
   // printInfo(egoCar, vehicles);
 
@@ -419,7 +424,7 @@ Path createPath(ReferencePoint &refPoint, int &lane,
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
   Path path = createPoints(prev_size, egoCar, refPoint, previousData, lane,
-                               map_waypoints);
+                           map_waypoints);
 
   return createNextVals(path, prev_size, previousData, refPoint, dt);
 }
