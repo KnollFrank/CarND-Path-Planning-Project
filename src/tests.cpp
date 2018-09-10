@@ -15,6 +15,8 @@
 #include "main.h"
 #include "spline.h"
 
+constexpr int NO_VALUE = -1;
+
 namespace test {
 
 #define GTEST_COUT std::cerr
@@ -189,7 +191,7 @@ void drive(ReferencePoint &refPoint, int &lane,
            int minSecs2Drive, const function<void(void)> &check) {
 
   double secsDriven = 0;
-  while ((secsDriven <= minSecs2Drive || minSecs2Drive == -1)
+  while ((secsDriven <= minSecs2Drive || minSecs2Drive == NO_VALUE)
       && !oneRoundDriven(egoCar)) {
     secsDriven += driveEgoCarAndVehicles(refPoint, lane, map_waypoints, egoCar,
                                          previousData, vehicles, dt, check);
@@ -251,7 +253,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 
 // WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              -1, [&egoCar]() {ASSERT_LT(egoCar.speed_mph, 50);});
+              NO_VALUE, [&egoCar]() {ASSERT_LT(egoCar.speed_mph, 50);});
 
 // THEN
 }
@@ -288,7 +290,7 @@ TEST(PathPlanningTest, should_not_collide) {
 
 // WHEN
   test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              -1, [&egoCar, &vehicles]() {
+              NO_VALUE, [&egoCar, &vehicles]() {
                 ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
 
 // THEN
