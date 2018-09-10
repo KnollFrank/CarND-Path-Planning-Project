@@ -360,13 +360,13 @@ Path createPoints(const int prev_size, const EgoCar& egoCar,
   return path;
 }
 
-Path createNextVals(const Path &points, const int prev_size,
+Path createNextVals(const Path &path, const int prev_size,
                       const PreviousData& previousData,
                       ReferencePoint &refPoint, double dt) {
   Path next_vals;
 
   tk::spline s;
-  s.set_points(points.xs, points.ys);
+  s.set_points(path.xs, path.ys);
   for (int i = 0; i < prev_size; i++) {
     next_vals.xs.push_back(previousData.previous_path_x[i]);
     next_vals.ys.push_back(previousData.previous_path_y[i]);
@@ -418,10 +418,10 @@ Path createPath(ReferencePoint &refPoint, int &lane,
   refPoint.point = egoCar.getPos_cart();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
-  Path points = createPoints(prev_size, egoCar, refPoint, previousData, lane,
+  Path path = createPoints(prev_size, egoCar, refPoint, previousData, lane,
                                map_waypoints);
 
-  return createNextVals(points, prev_size, previousData, refPoint, dt);
+  return createNextVals(path, prev_size, previousData, refPoint, dt);
 }
 
 EgoCar createEgoCar(
