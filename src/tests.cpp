@@ -89,19 +89,10 @@ void assert_car_drives_straight_ahead(const Points &path,
       std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
 
-void check_and_assert_no_collision(const function<void(void)>& check,
-                                   const EgoCar &egoCar,
-                                   const vector<Vehicle> &vehicles) {
-  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar << vehicles[0];
-  check();
-}
-
 void drive2PointOfEgoCar(const Point &dst, EgoCar &egoCar, double dt,
                          const MapWaypoints &map_waypoints,
                          const vector<Vehicle> &vehicles,
                          const function<void(void)>& check) {
-
-  check_and_assert_no_collision(check, egoCar, vehicles);
 
   const Point &src = egoCar.getPos_cart();
   egoCar.speed_mph = meter_per_sec2mph(distance(src, dst) / dt);
@@ -109,7 +100,8 @@ void drive2PointOfEgoCar(const Point &dst, EgoCar &egoCar, double dt,
   egoCar.yaw_deg = rad2deg(atan2(dst.y - src.y, dst.x - src.x));
   // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet();
 
-  check_and_assert_no_collision(check, egoCar, vehicles);
+  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar << vehicles[0];
+  check();
 }
 
 void driveVehicle(Vehicle &vehicle, double dt,
@@ -187,7 +179,6 @@ double driveEgoCarAndVehicles(ReferencePoint &refPoint, int &lane,
 void drive(ReferencePoint &refPoint, int &lane,
            const MapWaypoints &map_waypoints, EgoCar &egoCar,
            PreviousData &previousData, vector<Vehicle> &vehicles, double dt,
-           // TODO: optional<int> for minSecs2Drive
            int minSecs2Drive, const function<void(void)> &check) {
 
   double secsDriven = 0;
@@ -312,12 +303,23 @@ TEST(PathPlanningTest, should_overtake_vehicle) {
   vector<Vehicle> vehicles = { vehicle };
 
 // WHEN
-  vector<double> ds;
-  test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              60, [&egoCar, &vehicles, &ds]() {
-                ds.push_back(egoCar.getPos_frenet().d);});
+  vector<bool> overtakens;
+  test::drive(
+      refPoint,
+      lane,
+      map_waypoints,
+      egoCar,
+      previousData,
+      vehicles,
+      dt,
+      60,
+      [&egoCar, &vehicles, &overtakens]() {
+        bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
+        overtakens.push_back(overtaken);});
 
 // THEN
-// FIXME: check instead that vehicle has been overtaken, i.e. egoCar.s > vehicle.s
-  ASSERT_TRUE(test::hasBeenInLane(ds, 0));
+  auto just_overtaken_iterator = find(begin(overtakens), end(overtakens), true);
+  ASSERT_NE(just_overtaken_iterator, end(overtakens)) << "egoCar should overtake vehicle";
+  ASSERT_TRUE(
+      all_of(just_overtaken_iterator, end(overtakens), [](bool overtaken) {return overtaken;})) << "egoCar should stay ahead of vehicle";
 }
