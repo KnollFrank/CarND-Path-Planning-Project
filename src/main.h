@@ -122,7 +122,8 @@ class Vehicle {
   void setVel_cart_m_per_s(const Point &vel);
   Point getVel_cart_m_per_s() const;
 
-  void setVel_frenet_m_per_s(const Frenet &vel, const MapWaypoints &map_waypoints);
+  void setVel_frenet_m_per_s(const Frenet &vel,
+                             const MapWaypoints &map_waypoints);
   Frenet getVel_frenet_m_per_s(const MapWaypoints &map_waypoints) const;
 
   int id;
@@ -138,14 +139,13 @@ class Vehicle {
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   os << "Vehicle(" << vehicle.id << "):" << endl;
   os << "  pos_cart = " << vehicle.pos_cart << endl;
-  os << "  (vx, vy) = (" << vehicle.vel_cart_m_per_s.x << " m/s, " << vehicle.vel_cart_m_per_s.y << " m/s)"
-     << endl;
+  os << "  (vx, vy) = (" << vehicle.vel_cart_m_per_s.x << " m/s, "
+     << vehicle.vel_cart_m_per_s.y << " m/s)" << endl;
   os << "  pos_frenet = " << vehicle.pos_frenet << endl;
   return os;
 }
 
-// TODO: rename to Path, dito variables
-struct Points {
+struct Path {
   vector<double> xs;
   vector<double> ys;
 };

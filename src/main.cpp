@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
               // j[1] is the data JSON object
 
               EgoCar egoCar = createEgoCar(j);
-              Points next_vals = createPath(refPoint, lane, map_waypoints, egoCar, createPreviousData(j), createVehicles(j[1]["sensor_fusion"]), dt);
+              Path next_vals = createPath(refPoint, lane, map_waypoints, egoCar, createPreviousData(j), createVehicles(j[1]["sensor_fusion"]), dt);
 
               json msgJson;
               msgJson["next_x"] = next_vals.xs;

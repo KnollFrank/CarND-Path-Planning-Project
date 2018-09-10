@@ -31,7 +31,7 @@ vector<R> map2(vector<T> v, unop op) {
   return result;
 }
 
-vector<Point> getPoints(const Points &path, const MapWaypoints &map_waypoints) {
+vector<Point> getPoints(const Path &path, const MapWaypoints &map_waypoints) {
   vector<Point> points;
   for (int i = 0; i < path.xs.size(); i++) {
     points.push_back(Point { path.xs[i], path.ys[i] });
@@ -65,7 +65,7 @@ EgoCar createEgoCar(const Frenet &pos, const MapWaypoints &map_waypoints) {
   return egoCar;
 }
 
-void assert_car_drives_in_middle_of_lane(const Points &path, int lane,
+void assert_car_drives_in_middle_of_lane(const Path &path, int lane,
                                          const MapWaypoints &map_waypoints) {
   for (const Frenet &frenet : asFrenets(getPoints(path, map_waypoints),
                                         map_waypoints)) {
@@ -73,7 +73,7 @@ void assert_car_drives_in_middle_of_lane(const Points &path, int lane,
   }
 }
 
-vector<double> getDistancesAlongRoad(const Points &path,
+vector<double> getDistancesAlongRoad(const Path &path,
                                      const MapWaypoints &map_waypoints) {
 
   return map2<Frenet, double>(
@@ -81,7 +81,7 @@ vector<double> getDistancesAlongRoad(const Points &path,
       [](const Frenet &frenet) {return frenet.s;});
 }
 
-void assert_car_drives_straight_ahead(const Points &path,
+void assert_car_drives_straight_ahead(const Path &path,
                                       const MapWaypoints &map_waypoints) {
   vector<double> distancesAlongRoad = getDistancesAlongRoad(path,
                                                             map_waypoints);
@@ -139,7 +139,7 @@ double drive2PointsOfEgoCarAndDriveVehicles(const vector<Point>& points,
 }
 
 void updatePreviousData(const vector<Point>& points,
-                        int numberOfUnprocessedPathElements, const Points& path,
+                        int numberOfUnprocessedPathElements, const Path& path,
                         const MapWaypoints& map_waypoints,
                         PreviousData& previousData, const EgoCar& egoCar) {
   previousData.previous_path_x.clear();
@@ -164,7 +164,7 @@ double driveEgoCarAndVehicles(ReferencePoint &refPoint, int &lane,
                               vector<Vehicle> &vehicles, double dt,
                               const function<void(void)> &check) {
 
-  Points path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
+  Path path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
                            vehicles, dt);
   vector<Point> points = test::getPoints(path, map_waypoints);
   int numberOfUnprocessedPathElements = 10;
@@ -233,7 +233,7 @@ TEST(PathPlanningTest, should_drive_in_same_lane) {
   double dt = 0.02;
 
 // WHEN
-  Points path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
+  Path path = createPath(refPoint, lane, map_waypoints, egoCar, previousData,
                            vehicles, dt);
 
 // THEN
