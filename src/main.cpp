@@ -25,7 +25,7 @@ Point Point::fromAngle(double angle_rad) {
 }
 
 double Point::len() const {
-  return sqrt(x * x + y * y);
+  return distanceTo(Point { 0, 0 });
 }
 
 double Point::scalarProd(const Point &point) const {
