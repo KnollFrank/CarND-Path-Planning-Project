@@ -148,7 +148,7 @@ Frenet getFrenet(const Point &point, double theta_rad,
 
   // find the projection of x onto n
   // TODO: warum nicht /n.len() ?
-  double proj_norm = scalarProd(x, n) / scalarProd(n, n);
+  double proj_norm = x.scalarProd(n) / n.scalarProd(n);
   const Point proj = n * proj_norm;
   double frenet_d = distance(x, proj);
 

@@ -28,6 +28,10 @@ double Point::len() const {
   return sqrt(x * x + y * y);
 }
 
+double Point::scalarProd(const Point &other) const {
+  return x * other.x + y * other.y;
+}
+
 double Point::getHeading() const {
   return atan2(y, x);
 }

@@ -21,6 +21,7 @@ struct Point {
 
   static Point fromAngle(double angle_rad);
   double len() const;
+  double scalarProd(const Point &other) const;
   double getHeading() const;
   Point& operator=(const Point &point);
   Point operator+(const Point& other) const;
@@ -47,10 +48,6 @@ struct MapWaypoints {
   vector<Point> map_waypoints;
   vector<double> map_waypoints_s;
 };
-
-double scalarProd(const Point &a, const Point &b) {
-  return a.x * b.x + a.y * b.y;
-}
 
 ostream& operator<<(ostream& os, const Point& point) {
   os << "Point(x = " << point.x << ", y = " << point.y << ")";
