@@ -139,8 +139,7 @@ int main(int argc, char **argv) {
 
   MapWaypoints map_waypoints = read_map_waypoints();
 
-  // TODO: make lane an enum: LEFT=0, MIDDLE=1, RIGHT=2
-  int lane = 1;
+  Lane lane = Lane::MIDDLE;
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
   double dt = 0.02;

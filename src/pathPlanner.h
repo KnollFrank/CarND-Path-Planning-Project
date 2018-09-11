@@ -225,19 +225,19 @@ double startOfLane(int lane) {
   return sizeOfLane() * lane;
 }
 
-double getMiddleOfLane(int lane) {
+double getMiddleOfLane(Lane lane) {
   return startOfLane(lane) + sizeOfLane() / 2;
 }
 
-double endOfLane(int lane) {
+double endOfLane(Lane lane) {
   return startOfLane(lane + 1);
 }
 
-bool isInLane(float d, int lane) {
+bool isInLane(float d, Lane lane) {
   return startOfLane(lane) < d && d < endOfLane(lane);
 }
 
-bool isVehicleInLane(const Vehicle &vehicle, int lane) {
+bool isVehicleInLane(const Vehicle &vehicle, Lane lane) {
   return isInLane(vehicle.getPos_frenet().d, lane);
 }
 
@@ -254,7 +254,7 @@ bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
 
 bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
                                         const vector<Vehicle>& vehicles,
-                                        const int prev_size, int lane,
+                                        const int prev_size, Lane lane,
                                         double dt) {
   auto isEgoCarTooCloseToVehicleInLane =
       [&egoCar, prev_size, lane, dt]
@@ -275,9 +275,9 @@ double getNewVelocity(bool too_close, double vel_mph) {
   return vel_mph;
 }
 
-int getNewLane(bool too_close, int lane) {
-  if (too_close && lane > 0) {
-    lane = 0;
+Lane getNewLane(bool too_close, Lane lane) {
+  if (too_close && lane > Lane::LEFT) {
+    lane = Lane::LEFT;
   }
 
   return lane;
@@ -296,7 +296,7 @@ Point transform(const tuple<Point, Point> &rotatedVectors, const Point& point) {
 
 Path createPoints(const int prev_size, const EgoCar& egoCar,
                   ReferencePoint &refPoint, const PreviousData& previousData,
-                  int lane, const MapWaypoints &map_waypoints) {
+                  Lane lane, const MapWaypoints &map_waypoints) {
   Path path;
 
   if (prev_size < 2) {
@@ -385,7 +385,7 @@ Path createNextVals(const Path &path, const int prev_size,
   return next_vals;
 }
 
-Path createPath(ReferencePoint &refPoint, int &lane,
+Path createPath(ReferencePoint &refPoint, Lane &lane,
                 const MapWaypoints &map_waypoints, EgoCar egoCar,
                 const PreviousData &previousData,
                 const vector<Vehicle> &vehicles, double dt) {

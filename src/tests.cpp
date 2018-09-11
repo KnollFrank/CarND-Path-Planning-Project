@@ -56,7 +56,7 @@ EgoCar createEgoCar(const Frenet &pos, const MapWaypoints &map_waypoints) {
   return egoCar;
 }
 
-void assert_car_drives_in_middle_of_lane(const Path &path, int lane,
+void assert_car_drives_in_middle_of_lane(const Path &path, Lane lane,
                                          const MapWaypoints &map_waypoints) {
   for (const Frenet &frenet : asFrenets(path.points, map_waypoints)) {
     ASSERT_NEAR(2 + 4 * lane, frenet.d, 0.001);
@@ -145,7 +145,7 @@ bool oneRoundDriven(const EgoCar &egoCar) {
   return egoCar.getPos_frenet().s > 6900;
 }
 
-double driveEgoCarAndVehicles(ReferencePoint &refPoint, int &lane,
+double driveEgoCarAndVehicles(ReferencePoint &refPoint, Lane &lane,
                               const MapWaypoints &map_waypoints, EgoCar &egoCar,
                               PreviousData &previousData,
                               vector<Vehicle> &vehicles, double dt,
@@ -162,7 +162,7 @@ double driveEgoCarAndVehicles(ReferencePoint &refPoint, int &lane,
   return secsDriven;
 }
 
-void drive(ReferencePoint &refPoint, int &lane,
+void drive(ReferencePoint &refPoint, Lane &lane,
            const MapWaypoints &map_waypoints, EgoCar &egoCar,
            PreviousData &previousData, vector<Vehicle> &vehicles, double dt,
            int minSecs2Drive, const function<void(void)> &check) {
@@ -184,7 +184,7 @@ Vehicle createVehicle(int id, const Frenet &pos, const Frenet &vel_m_per_sec,
   return vehicle;
 }
 
-bool hasBeenInLane(const vector<double> &ds, int lane) {
+bool hasBeenInLane(const vector<double> &ds, Lane lane) {
   return std::any_of(ds.cbegin(), ds.cend(),
                      [lane](double d) {return isInLane(d, lane);});
 }
@@ -209,7 +209,7 @@ TEST(PathPlanningTest, should_drive_in_same_lane) {
   MapWaypoints map_waypoints = read_map_waypoints();
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
-  int lane = 1;
+  Lane lane = Lane::MIDDLE;
   Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
 
@@ -223,7 +223,7 @@ TEST(PathPlanningTest, should_drive_in_same_lane) {
                          vehicles, dt);
 
 // THEN
-  test::assert_car_drives_in_middle_of_lane(path, 1, map_waypoints);
+  test::assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE, map_waypoints);
   test::assert_car_drives_straight_ahead(path, map_waypoints);
 }
 
@@ -232,7 +232,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
   MapWaypoints map_waypoints = read_map_waypoints();
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
-  int lane = 1;
+  Lane lane = Lane::MIDDLE;
   Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(pos, map_waypoints);
 
@@ -251,7 +251,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 TEST(PathPlanningTest, should_collide) {
 // GIVEN
   MapWaypoints map_waypoints = read_map_waypoints();
-  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(1) };
+  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
   Vehicle vehicle = test::createVehicle(
       0, posCar + Frenet { test::carRadius / 2, 0 }, Frenet { 0, 0 },
@@ -270,7 +270,7 @@ TEST(PathPlanningTest, should_not_collide) {
   refPoint.vel_mph = 0;
   double dt = 0.02;
   PreviousData previousData;
-  int lane = 1;
+  Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
   Vehicle vehicle = test::createVehicle(0, posCar + Frenet { 10 * test::carSize,
@@ -293,7 +293,7 @@ TEST(PathPlanningTest, should_overtake_vehicle) {
   refPoint.vel_mph = 0;
   double dt = 0.02;
   PreviousData previousData;
-  int lane = 1;
+  Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
   Vehicle vehicle = test::createVehicle(0, posCar + Frenet { 35, 0 }, Frenet {
@@ -330,7 +330,7 @@ TEST(PathPlanningTest, should_overtake_vehicle2) {
   refPoint.vel_mph = 0;
   double dt = 0.02;
   PreviousData previousData;
-  int lane = 1;
+  Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
   Vehicle vehicle2Overtake = test::createVehicle(0, posCar + Frenet { 35, 0 },
@@ -338,7 +338,7 @@ TEST(PathPlanningTest, should_overtake_vehicle2) {
                                                      0 },
                                                  map_waypoints);
   Vehicle vehicleInLeftLane = test::createVehicle(1, Frenet { posCar.s + 35,
-                                                      getMiddleOfLane(0) },
+                                                      getMiddleOfLane(Lane::LEFT) },
                                                   Frenet { mph2meter_per_sec(5),
                                                       0 },
                                                   map_waypoints);
