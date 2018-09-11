@@ -7,7 +7,6 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <optional>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
