@@ -289,9 +289,9 @@ tuple<Point, Point> createRotatedVectors(double angle_rad) {
   return make_tuple(e1, e2);
 }
 
-// TODO: replace first two arguments of transform with tuple<Point, Point>
-Point transform(const Point& e1, const Point& e2, const Point& point) {
-  return e1 * point.x + e2 * point.y;
+Point transform(const tuple<Point, Point> &rotatedVectors, const Point& point) {
+  return std::get < 0 > (rotatedVectors) * point.x + std::get < 1
+      > (rotatedVectors) * point.y;
 }
 
 Path createPoints(const int prev_size, const EgoCar& egoCar,
@@ -325,12 +325,9 @@ Path createPoints(const int prev_size, const EgoCar& egoCar,
   path.points.push_back(next_wp1);
   path.points.push_back(next_wp2);
 
-  Point e1;
-  Point e2;
-  tie(e1, e2) = createRotatedVectors(-refPoint.yaw_rad);
+  tuple<Point, Point> rotatedVectors = createRotatedVectors(-refPoint.yaw_rad);
   for (int i = 0; i < path.points.size(); i++) {
-    // TODO: reformulate as a matrix multiplication using Eigen
-    path.points[i] = transform(e1, e2, path.points[i] - refPoint.point);
+    path.points[i] = transform(rotatedVectors, path.points[i] - refPoint.point);
   }
 
   // TODO: extract method, sort_and_remove_duplicates
@@ -376,15 +373,13 @@ Path createNextVals(const Path &path, const int prev_size,
   Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
   const int path_size = 50;
-  Point e1;
-  Point e2;
-  tie(e1, e2) = createRotatedVectors(refPoint.yaw_rad);
+  tuple<Point, Point> rotatedVectors = createRotatedVectors(refPoint.yaw_rad);
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 1; i < path_size - prev_size; i++) {
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
-    // TODO: reformulate as a matrix multiplication using Eigen
-    next_vals.points.push_back(transform(e1, e2, point) + refPoint.point);
+    next_vals.points.push_back(
+        transform(rotatedVectors, point) + refPoint.point);
   }
 
   return next_vals;
