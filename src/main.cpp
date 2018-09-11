@@ -119,8 +119,8 @@ void Vehicle::setVel_frenet_m_per_s(const Frenet &vel,
                                     const MapWaypoints &map_waypoints) {
   const Frenet &src = getPos_frenet();
   const Frenet &dst = Frenet { src.s + vel.s, src.d + vel.d };
-  this->vel_cart_m_per_s = createCartVectorConnectingStartAndEnd(src, dst,
-                                                                 map_waypoints);
+  vel_cart_m_per_s = createCartVectorConnectingStartAndEnd(src, dst,
+                                                           map_waypoints);
 }
 
 Frenet Vehicle::getVel_frenet_m_per_s(const MapWaypoints &map_waypoints) const {
