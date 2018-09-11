@@ -20,7 +20,7 @@ namespace test {
 
 #define GTEST_COUT std::cerr
 
-const double carRadius = 2;
+const double carRadius = 1.25;
 const double carSize = 2 * carRadius;
 
 template<typename T, typename R, typename unop>
@@ -300,6 +300,49 @@ TEST(PathPlanningTest, should_overtake_vehicle) {
                                             mph2meter_per_sec(5), 0 },
                                         map_waypoints);
   vector<Vehicle> vehicles = { vehicle };
+
+// WHEN
+  vector<bool> overtakens;
+  test::drive(
+      refPoint,
+      lane,
+      map_waypoints,
+      egoCar,
+      previousData,
+      vehicles,
+      dt,
+      60,
+      [&egoCar, &vehicles, &overtakens]() {
+        bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
+        overtakens.push_back(overtaken);});
+
+  // THEN
+  auto egoCarJustOvertakesVehicle = test::getEgoCarJustOvertakesVehicleIterator(
+      overtakens);
+  ASSERT_NE(egoCarJustOvertakesVehicle, end(overtakens))<< "egoCar should overtake vehicle";
+  ASSERT_TRUE(test::staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
+}
+
+TEST(PathPlanningTest, should_overtake_vehicle2) {
+// GIVEN
+  MapWaypoints map_waypoints = read_map_waypoints();
+  ReferencePoint refPoint;
+  refPoint.vel_mph = 0;
+  double dt = 0.02;
+  PreviousData previousData;
+  int lane = 1;
+  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
+  EgoCar egoCar = test::createEgoCar(posCar, map_waypoints);
+  Vehicle vehicle2Overtake = test::createVehicle(0, posCar + Frenet { 35, 0 },
+                                                 Frenet { mph2meter_per_sec(5),
+                                                     0 },
+                                                 map_waypoints);
+  Vehicle vehicleInLeftLane = test::createVehicle(1, Frenet { posCar.s + 35,
+                                                      getMiddleOfLane(0) },
+                                                  Frenet { mph2meter_per_sec(5),
+                                                      0 },
+                                                  map_waypoints);
+  vector<Vehicle> vehicles = { vehicle2Overtake, vehicleInLeftLane };
 
 // WHEN
   vector<bool> overtakens;
