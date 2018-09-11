@@ -242,8 +242,11 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
   double dt = 0.02;
 
 // WHEN
-  test::drive(refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
-              NO_VALUE, [&egoCar]() {ASSERT_LT(egoCar.speed_mph, 50);});
+  test::drive(
+      refPoint, lane, map_waypoints, egoCar, previousData, vehicles, dt,
+      NO_VALUE, [&egoCar]() {
+        ASSERT_LT(egoCar.speed_mph, 50);
+        ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos_frenet().d, 0.1);});
 
 // THEN
 }
@@ -337,11 +340,10 @@ TEST(PathPlanningTest, should_overtake_vehicle2) {
                                                  Frenet { mph2meter_per_sec(5),
                                                      0 },
                                                  map_waypoints);
-  Vehicle vehicleInLeftLane = test::createVehicle(1, Frenet { posCar.s + 35,
-                                                      getMiddleOfLane(Lane::LEFT) },
-                                                  Frenet { mph2meter_per_sec(5),
-                                                      0 },
-                                                  map_waypoints);
+  Vehicle vehicleInLeftLane = test::createVehicle(
+      1, Frenet { posCar.s + 35, getMiddleOfLane(Lane::LEFT) }, Frenet {
+          mph2meter_per_sec(5), 0 },
+      map_waypoints);
   vector<Vehicle> vehicles = { vehicle2Overtake, vehicleInLeftLane };
 
 // WHEN
