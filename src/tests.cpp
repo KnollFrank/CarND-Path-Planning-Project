@@ -86,7 +86,7 @@ void drive2PointOfEgoCar(const Point &dst, EgoCar &egoCar, double dt,
   const Point &src = egoCar.getPos_cart();
   egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
   egoCar.setPos_cart(dst, map_waypoints);
-  egoCar.yaw_deg = rad2deg(atan2(dst.y - src.y, dst.x - src.x));
+  egoCar.yaw_deg = rad2deg((dst - src).getHeading());
   // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet();
 
   ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar << vehicles[0];

@@ -305,8 +305,7 @@ Path createPoints(const int prev_size, const EgoCar& egoCar,
   } else {
     refPoint.point = previousData.previous_path.points[prev_size - 1];
     Point prev = previousData.previous_path.points[prev_size - 2];
-    refPoint.yaw_rad = atan2(refPoint.point.y - prev.y,
-                             refPoint.point.x - prev.x);
+    refPoint.yaw_rad = (refPoint.point - prev).getHeading();
     path.points.push_back(prev);
     path.points.push_back(refPoint.point);
   }
