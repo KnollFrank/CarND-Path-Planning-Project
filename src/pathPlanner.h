@@ -252,19 +252,20 @@ bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
       && check_vehicle_s - egoCar.getPos_frenet().s < 30;
 }
 
-bool isEgoCarTooCloseToAnyVehicle(const EgoCar& egoCar,
-                                  const vector<Vehicle>& vehicles,
-                                  const int prev_size, int lane, double dt) {
-  auto isEgoCarTooCloseToVehicle =
+bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
+                                        const vector<Vehicle>& vehicles,
+                                        const int prev_size, int lane,
+                                        double dt) {
+  auto isEgoCarTooCloseToVehicleInLane =
       [&egoCar, prev_size, lane, dt]
       (const Vehicle &vehicle) {
         return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size, dt);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
-                     isEgoCarTooCloseToVehicle);
+                     isEgoCarTooCloseToVehicleInLane);
 }
 
-double updateVelocity(bool too_close, double vel_mph) {
+double getNewVelocity(bool too_close, double vel_mph) {
   if (too_close || vel_mph > 50) {
     vel_mph -= .224;
   } else if (vel_mph < 49.5) {
@@ -274,7 +275,7 @@ double updateVelocity(bool too_close, double vel_mph) {
   return vel_mph;
 }
 
-int updateLane(bool too_close, int lane) {
+int getNewLane(bool too_close, int lane) {
   if (too_close && lane > 0) {
     lane = 0;
   }
@@ -404,11 +405,10 @@ Path createPath(ReferencePoint &refPoint, int &lane,
                          map_waypoints);
   }
 
-  bool too_close = isEgoCarTooCloseToAnyVehicle(egoCar, vehicles, prev_size,
-                                                lane, dt);
-  lane = updateLane(too_close, lane);
-  refPoint.vel_mph = updateVelocity(too_close, refPoint.vel_mph);
-
+  bool too_close = isEgoCarTooCloseToAnyVehicleInLane(egoCar, vehicles,
+                                                      prev_size, lane, dt);
+  lane = getNewLane(too_close, lane);
+  refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
   refPoint.point = egoCar.getPos_cart();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
