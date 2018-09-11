@@ -40,7 +40,7 @@ vector<Frenet> asFrenets(const vector<Point> &points,
 }
 
 bool isCollision(const EgoCar &egoCar, const Vehicle &vehicle) {
-  return distance(egoCar.getPos_cart(), vehicle.getPos_cart()) <= carSize;
+  return egoCar.getPos_cart().distanceTo(vehicle.getPos_cart()) <= carSize;
 }
 
 bool isCollision(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
@@ -85,7 +85,7 @@ void drive2PointOfEgoCar(const Point &dst, EgoCar &egoCar, double dt,
                          const function<void(void)>& check) {
 
   const Point &src = egoCar.getPos_cart();
-  egoCar.speed_mph = meter_per_sec2mph(distance(src, dst) / dt);
+  egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
   egoCar.setPos_cart(dst, map_waypoints);
   egoCar.yaw_deg = rad2deg(atan2(dst.y - src.y, dst.x - src.x));
   // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet();

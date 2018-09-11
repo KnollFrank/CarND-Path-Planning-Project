@@ -90,19 +90,13 @@ string hasData(string s) {
   return "";
 }
 
-double distance(const Point &p1, const Point &p2) {
-  double dx = p2.x - p1.x;
-  double dy = p2.y - p1.y;
-  return sqrt(dx * dx + dy * dy);
-}
-
 int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
 
   double closestLen = 100000;  //large number
   int closestWaypoint = 0;
 
   for (int i = 0; i < map_waypoints.map_waypoints.size(); i++) {
-    double dist = distance(point, map_waypoints.map_waypoints[i]);
+    double dist = point.distanceTo(map_waypoints.map_waypoints[i]);
     if (dist < closestLen) {
       closestLen = dist;
       closestWaypoint = i;
@@ -150,13 +144,13 @@ Frenet getFrenet(const Point &point, double theta_rad,
   // TODO: warum nicht /n.len() ?
   double proj_norm = x.scalarProd(n) / n.scalarProd(n);
   const Point proj = n * proj_norm;
-  double frenet_d = distance(x, proj);
+  double frenet_d = x.distanceTo(proj);
 
   //see if d value is positive or negative by comparing it to a center point
 
   const Point center = Point { 1000, 2000 } - maps[prev_wp];
-  double centerToPos = distance(center, x);
-  double centerToRef = distance(center, proj);
+  double centerToPos = center.distanceTo(x);
+  double centerToRef = center.distanceTo(proj);
 
   if (centerToPos <= centerToRef) {
     frenet_d *= -1;
@@ -165,7 +159,7 @@ Frenet getFrenet(const Point &point, double theta_rad,
   // calculate s value
   double frenet_s = 0;
   for (int i = 0; i < prev_wp; i++) {
-    frenet_s += distance(maps[i], maps[i + 1]);
+    frenet_s += maps[i].distanceTo(maps[i + 1]);
   }
 
   frenet_s += proj.len();
@@ -211,8 +205,8 @@ Frenet createFrenetVectorConnectingStartAndEnd(
 void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   auto isCloserToEgoCar =
       [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-        double distance1 = distance(egoCar.getPos_cart(), vehicle1.getPos_cart());
-        double distance2 = distance(egoCar.getPos_cart(), vehicle2.getPos_cart());
+        double distance1 = egoCar.getPos_cart().distanceTo(vehicle1.getPos_cart());
+        double distance2 = egoCar.getPos_cart().distanceTo(vehicle2.getPos_cart());
         return distance1 < distance2;
       };
 

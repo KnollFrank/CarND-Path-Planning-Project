@@ -28,8 +28,13 @@ double Point::len() const {
   return sqrt(x * x + y * y);
 }
 
-double Point::scalarProd(const Point &other) const {
-  return x * other.x + y * other.y;
+double Point::scalarProd(const Point &point) const {
+  return x * point.x + y * point.y;
+}
+
+double Point::distanceTo(const Point &point) const {
+  Point diff = point - *this;
+  return sqrt(diff.scalarProd(diff));
 }
 
 double Point::getHeading() const {

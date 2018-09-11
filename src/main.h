@@ -21,7 +21,8 @@ struct Point {
 
   static Point fromAngle(double angle_rad);
   double len() const;
-  double scalarProd(const Point &other) const;
+  double scalarProd(const Point &point) const;
+  double distanceTo(const Point &point) const;
   double getHeading() const;
   Point& operator=(const Point &point);
   Point operator+(const Point& other) const;
