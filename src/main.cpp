@@ -3,10 +3,7 @@
 #include "tests.cpp"
 
 Frenet Frenet::operator+(const Frenet &other) const {
-  Frenet sum;
-  sum.s = s + other.s;
-  sum.d = d + other.d;
-  return sum;
+  return Frenet { s + other.s, d + other.d };
 }
 
 Frenet Frenet::operator-(const Frenet &other) const {
@@ -14,10 +11,7 @@ Frenet Frenet::operator-(const Frenet &other) const {
 }
 
 Frenet Frenet::operator*(double scalar) const {
-  Frenet result;
-  result.s = s * scalar;
-  result.d = d * scalar;
-  return result;
+  return Frenet { s * scalar, d * scalar };
 }
 
 Point Point::fromAngle(double angle_rad) {
@@ -42,10 +36,7 @@ double Point::getHeading() const {
 }
 
 Point Point::operator+(const Point &other) const {
-  Point sum;
-  sum.x = x + other.x;
-  sum.y = y + other.y;
-  return sum;
+  return Point { x + other.x, y + other.y };
 }
 
 Point Point::operator-(const Point &other) const {
@@ -53,10 +44,7 @@ Point Point::operator-(const Point &other) const {
 }
 
 Point Point::operator*(double scalar) const {
-  Point result;
-  result.x = x * scalar;
-  result.y = y * scalar;
-  return result;
+  return Point { x * scalar, y * scalar };
 }
 
 void EgoCar::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
