@@ -3,18 +3,9 @@
 #include "tests.cpp"
 #include "coordstest.cpp"
 
-void EgoCar::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
-  this->pos_cart = pos_cart;
-  this->pos_frenet = pos_frenet;
-}
-
 void EgoCar::setPos_cart(const Point &pos, const MapWaypoints &map_waypoints) {
   pos_cart = pos;
   pos_frenet = getFrenet(pos, 0, map_waypoints);
-}
-
-Point EgoCar::getPos_cart() const {
-  return pos_cart;
 }
 
 void EgoCar::setPos_frenet(const Frenet &pos,
@@ -23,40 +14,15 @@ void EgoCar::setPos_frenet(const Frenet &pos,
   pos_cart = getXY(pos, map_waypoints);
 }
 
-Frenet EgoCar::getPos_frenet() const {
-  return pos_frenet;
-}
-
-void Vehicle::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
-  this->pos_cart = pos_cart;
-  this->pos_frenet = pos_frenet;
-}
-
 void Vehicle::setPos_cart(const Point &pos, const MapWaypoints &map_waypoints) {
   pos_cart = pos;
   pos_frenet = getFrenet(pos, 0, map_waypoints);
-}
-
-Point Vehicle::getPos_cart() const {
-  return pos_cart;
 }
 
 void Vehicle::setPos_frenet(const Frenet &pos,
                             const MapWaypoints &map_waypoints) {
   pos_frenet = pos;
   pos_cart = getXY(pos, map_waypoints);
-}
-
-Frenet Vehicle::getPos_frenet() const {
-  return pos_frenet;
-}
-
-void Vehicle::setVel_cart_m_per_s(const Point &vel) {
-  this->vel_cart_m_per_s = vel;
-}
-
-Point Vehicle::getVel_cart_m_per_s() const {
-  return vel_cart_m_per_s;
 }
 
 void Vehicle::setVel_frenet_m_per_s(const Frenet &vel,

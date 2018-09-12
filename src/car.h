@@ -36,6 +36,19 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   return os;
 }
 
+void EgoCar::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
+  this->pos_cart = pos_cart;
+  this->pos_frenet = pos_frenet;
+}
+
+Point EgoCar::getPos_cart() const {
+  return pos_cart;
+}
+
+Frenet EgoCar::getPos_frenet() const {
+  return pos_frenet;
+}
+
 class Vehicle {
 
  public:
@@ -71,6 +84,27 @@ ostream& operator<<(ostream& os, const Vehicle& vehicle) {
      << vehicle.vel_cart_m_per_s.y << " m/s)" << endl;
   os << "  pos_frenet = " << vehicle.pos_frenet << endl;
   return os;
+}
+
+void Vehicle::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
+  this->pos_cart = pos_cart;
+  this->pos_frenet = pos_frenet;
+}
+
+Point Vehicle::getPos_cart() const {
+  return pos_cart;
+}
+
+Frenet Vehicle::getPos_frenet() const {
+  return pos_frenet;
+}
+
+void Vehicle::setVel_cart_m_per_s(const Point &vel) {
+  this->vel_cart_m_per_s = vel;
+}
+
+Point Vehicle::getVel_cart_m_per_s() const {
+  return vel_cart_m_per_s;
 }
 
 #endif /* CAR_H_ */
