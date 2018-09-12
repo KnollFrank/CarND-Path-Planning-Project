@@ -33,10 +33,7 @@ struct Point {
   friend ostream& operator<<(ostream& os, const Point& point);
 };
 
-ostream& operator<<(ostream& os, const Point& point) {
-  os << "Point(x = " << point.x << ", y = " << point.y << ")";
-  return os;
-}
+ostream& operator<<(ostream& os, const Point& point);
 
 struct Frenet;
 struct MapWaypoints;

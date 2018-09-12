@@ -35,6 +35,11 @@ Point Point::operator*(double scalar) const {
   return Point { x * scalar, y * scalar };
 }
 
+ostream& operator<<(ostream& os, const Point& point) {
+  os << "Point(x = " << point.x << ", y = " << point.y << ")";
+  return os;
+}
+
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 Frenet getFrenet2(const Point& point, const MapWaypoints& map_waypoints) {
   const vector<Point> &maps = map_waypoints.map_waypoints;
