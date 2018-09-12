@@ -37,18 +37,6 @@ struct ReferencePoint {
   double vel_mph;
 };
 
-Point createCartVectorConnectingStartAndEnd(const Frenet &start,
-                                            const Frenet &end,
-                                            const MapWaypoints &map_waypoints) {
-  return getXY(end, map_waypoints) - getXY(start, map_waypoints);
-}
-
-Frenet createFrenetVectorConnectingStartAndEnd(
-    const Point &start, const Point &end, const MapWaypoints &map_waypoints) {
-
-  return getFrenet(end, 0, map_waypoints) - getFrenet(start, 0, map_waypoints);
-}
-
 void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   auto isCloserToEgoCar =
       [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {

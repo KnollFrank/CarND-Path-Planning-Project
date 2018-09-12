@@ -155,4 +155,16 @@ Frenet getFrenet(const Point &point, double theta_rad,
   return Frenet { frenet_s, frenet_d };
 }
 
+Point createCartVectorConnectingStartAndEnd(const Frenet &start,
+                                            const Frenet &end,
+                                            const MapWaypoints &map_waypoints) {
+  return getXY(end, map_waypoints) - getXY(start, map_waypoints);
+}
+
+Frenet createFrenetVectorConnectingStartAndEnd(
+    const Point &start, const Point &end, const MapWaypoints &map_waypoints) {
+
+  return getFrenet(end, 0, map_waypoints) - getFrenet(start, 0, map_waypoints);
+}
+
 #endif /* COORDS_H_ */
