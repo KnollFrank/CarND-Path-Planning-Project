@@ -33,6 +33,52 @@ struct Point {
   friend ostream& operator<<(ostream& os, const Point& point);
 };
 
+Point Point::fromAngle(double angle_rad) {
+  return Point { cos(angle_rad), sin(angle_rad) };
+}
+
+double Point::len() const {
+  return distanceTo(Point { 0, 0 });
+}
+
+double Point::scalarProd(const Point &point) const {
+  return x * point.x + y * point.y;
+}
+
+double Point::distanceTo(const Point &point) const {
+  Point diff = point - *this;
+  return sqrt(diff.scalarProd(diff));
+}
+
+double Point::getHeading() const {
+  return atan2(y, x);
+}
+
+Point Point::operator+(const Point &other) const {
+  return Point { x + other.x, y + other.y };
+}
+
+Point Point::operator-(const Point &other) const {
+  return *this + (other * -1);
+}
+
+Point Point::operator*(double scalar) const {
+  return Point { x * scalar, y * scalar };
+}
+
+Point& Point::operator=(const Point &point) {
+  // self-assignment guard
+  if (this == &point)
+    return *this;
+
+  // do the copy
+  x = point.x;
+  y = point.y;
+
+  // return the existing object so we can chain this operator
+  return *this;
+}
+
 struct Frenet {
   double s;
   double d;
@@ -43,6 +89,32 @@ struct Frenet {
 
   friend ostream& operator<<(ostream& os, const Frenet& frenet);
 };
+
+Frenet Frenet::operator+(const Frenet &other) const {
+  return Frenet { s + other.s, d + other.d };
+}
+
+Frenet Frenet::operator-(const Frenet &other) const {
+  return *this + (other * -1);
+}
+
+Frenet Frenet::operator*(double scalar) const {
+  return Frenet { s * scalar, d * scalar };
+}
+
+ostream& operator<<(ostream& os, const Point& point) {
+  os << "Point(x = " << point.x << ", y = " << point.y << ")";
+  return os;
+}
+
+ostream& operator<<(ostream& os, const Frenet& frenet) {
+  os << "Frenet(s = " << frenet.s << ", d = " << frenet.d << ")";
+  return os;
+}
+
+bool operator==(const Frenet& lhs, const Frenet& rhs) {
+  return lhs.s == rhs.s && lhs.d == rhs.d;
+}
 
 struct MapWaypoints {
   vector<Point> map_waypoints;
