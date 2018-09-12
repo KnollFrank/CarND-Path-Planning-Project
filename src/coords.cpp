@@ -35,6 +35,19 @@ Point Point::operator*(double scalar) const {
   return Point { x * scalar, y * scalar };
 }
 
+Point& Point::operator=(const Point &point) {
+  // self-assignment guard
+  if (this == &point)
+    return *this;
+
+  // do the copy
+  x = point.x;
+  y = point.y;
+
+  // return the existing object so we can chain this operator
+  return *this;
+}
+
 ostream& operator<<(ostream& os, const Point& point) {
   os << "Point(x = " << point.x << ", y = " << point.y << ")";
   return os;

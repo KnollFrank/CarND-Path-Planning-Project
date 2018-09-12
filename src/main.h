@@ -22,19 +22,6 @@ enum Lane {
   RIGHT = 2
 };
 
-Point& Point::operator=(const Point &point) {
-  // self-assignment guard
-  if (this == &point)
-    return *this;
-
-  // do the copy
-  x = point.x;
-  y = point.y;
-
-  // return the existing object so we can chain this operator
-  return *this;
-}
-
 struct MapWaypoints {
   vector<Point> map_waypoints;
   vector<double> map_waypoints_s;
