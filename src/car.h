@@ -49,6 +49,17 @@ Frenet EgoCar::getPos_frenet() const {
   return pos_frenet;
 }
 
+void EgoCar::setPos_cart(const Point &pos, const MapWaypoints &map_waypoints) {
+  pos_cart = pos;
+  pos_frenet = getFrenet(pos, 0, map_waypoints);
+}
+
+void EgoCar::setPos_frenet(const Frenet &pos,
+                           const MapWaypoints &map_waypoints) {
+  pos_frenet = pos;
+  pos_cart = getXY(pos, map_waypoints);
+}
+
 class Vehicle {
 
  public:
@@ -105,6 +116,17 @@ void Vehicle::setVel_cart_m_per_s(const Point &vel) {
 
 Point Vehicle::getVel_cart_m_per_s() const {
   return vel_cart_m_per_s;
+}
+
+void Vehicle::setPos_cart(const Point &pos, const MapWaypoints &map_waypoints) {
+  pos_cart = pos;
+  pos_frenet = getFrenet(pos, 0, map_waypoints);
+}
+
+void Vehicle::setPos_frenet(const Frenet &pos,
+                            const MapWaypoints &map_waypoints) {
+  pos_frenet = pos;
+  pos_cart = getXY(pos, map_waypoints);
 }
 
 #endif /* CAR_H_ */
