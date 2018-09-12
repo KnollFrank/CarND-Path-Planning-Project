@@ -12,9 +12,10 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 #include <tuple>
+
+#include "coords/cart.h"
+#include "coords/frenet.h"
 #include "mathfuns.h"
-#include "cart.h"
-#include "frenet.h"
 
 using namespace std;
 

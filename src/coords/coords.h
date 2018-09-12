@@ -1,5 +1,5 @@
-#ifndef COORDS_H_
-#define COORDS_H_
+#ifndef COORDS_COORDS_H_
+#define COORDS_COORDS_H_
 
 #include <fstream>
 #include <math.h>
@@ -8,14 +8,12 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
-#include "Eigen-3.3/Eigen/QR"
-#include "json.hpp"
 #include <tuple>
-#include "mathfuns.h"
+
 #include "cart.h"
 #include "frenet.h"
-#include "waypoints.h"
+#include "../mathfuns.h"
+#include "../waypoints.h"
 
 using namespace std;
 
@@ -172,4 +170,4 @@ Frenet getFrenet2(const Point& point, const MapWaypoints& map_waypoints) {
   return Frenet { frenet_s, frenet_d };
 }
 
-#endif /* COORDS_H_ */
+#endif /* COORDS_COORDS_H_ */

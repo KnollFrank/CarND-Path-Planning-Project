@@ -1,5 +1,5 @@
-#ifndef FRENET_H_
-#define FRENET_H_
+#ifndef COORDS_FRENET_H_
+#define COORDS_FRENET_H_
 
 #include <fstream>
 #include <math.h>
@@ -8,11 +8,8 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
-#include "Eigen-3.3/Eigen/QR"
-#include "json.hpp"
 #include <tuple>
-#include "mathfuns.h"
+#include "../mathfuns.h"
 
 using namespace std;
 
@@ -53,4 +50,4 @@ bool operator==(const Frenet& lhs, const Frenet& rhs) {
   return lhs.s == rhs.s && lhs.d == rhs.d;
 }
 
-#endif /* FRENET_H_ */
+#endif /* COORDS_FRENET_H_ */

@@ -1,5 +1,5 @@
-#ifndef CART_H_
-#define CART_H_
+#ifndef COORDS_CART_H_
+#define COORDS_CART_H_
 
 #include <fstream>
 #include <math.h>
@@ -8,11 +8,8 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
-#include "Eigen-3.3/Eigen/QR"
-#include "json.hpp"
 #include <tuple>
-#include "mathfuns.h"
+#include "../mathfuns.h"
 
 using namespace std;
 
@@ -79,4 +76,4 @@ Point& Point::operator=(const Point &point) {
   return *this;
 }
 
-#endif /* CART_H_ */
+#endif /* COORDS_CART_H_ */

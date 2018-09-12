@@ -1,7 +1,7 @@
 #ifndef CAR_H_
 #define CAR_H_
 
-#include "coords.h"
+#include "coords/coords.h"
 
 using namespace std;
 
