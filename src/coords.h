@@ -33,11 +33,6 @@ struct Point {
   friend ostream& operator<<(ostream& os, const Point& point);
 };
 
-struct MapWaypoints {
-  vector<Point> map_waypoints;
-  vector<double> map_waypoints_s;
-};
-
 struct Frenet {
   double s;
   double d;
@@ -49,15 +44,14 @@ struct Frenet {
   friend ostream& operator<<(ostream& os, const Frenet& frenet);
 };
 
+struct MapWaypoints {
+  vector<Point> map_waypoints;
+  vector<double> map_waypoints_s;
+};
+
 bool operator==(const Frenet& lhs, const Frenet& rhs);
-
 ostream& operator<<(ostream& os, const Frenet& frenet);
-
 ostream& operator<<(ostream& os, const Point& point);
-
-struct Frenet;
-struct MapWaypoints;
-
 Frenet getFrenet2(const Point& point, const MapWaypoints& map_waypoints);
 
 #endif /* COORDS_H_ */
