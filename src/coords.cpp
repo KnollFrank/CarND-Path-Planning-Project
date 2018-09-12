@@ -48,6 +48,18 @@ Point& Point::operator=(const Point &point) {
   return *this;
 }
 
+Frenet Frenet::operator+(const Frenet &other) const {
+  return Frenet { s + other.s, d + other.d };
+}
+
+Frenet Frenet::operator-(const Frenet &other) const {
+  return *this + (other * -1);
+}
+
+Frenet Frenet::operator*(double scalar) const {
+  return Frenet { s * scalar, d * scalar };
+}
+
 ostream& operator<<(ostream& os, const Point& point) {
   os << "Point(x = " << point.x << ", y = " << point.y << ")";
   return os;

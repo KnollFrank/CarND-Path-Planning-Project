@@ -3,18 +3,6 @@
 #include "tests.cpp"
 #include "coordstest.cpp"
 
-Frenet Frenet::operator+(const Frenet &other) const {
-  return Frenet { s + other.s, d + other.d };
-}
-
-Frenet Frenet::operator-(const Frenet &other) const {
-  return *this + (other * -1);
-}
-
-Frenet Frenet::operator*(double scalar) const {
-  return Frenet { s * scalar, d * scalar };
-}
-
 void EgoCar::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
   this->pos_cart = pos_cart;
   this->pos_frenet = pos_frenet;

@@ -1,6 +1,10 @@
 #ifndef CAR_H_
 #define CAR_H_
 
+#include "coords.h"
+
+using namespace std;
+
 // TODO: merge EgoCar and Vehicle, because they are essentially the same thing.
 class EgoCar {
 

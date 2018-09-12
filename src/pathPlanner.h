@@ -14,6 +14,7 @@
 #include <tuple>
 #include "main.h"
 #include "spline.h"
+#include "car.h"
 
 using namespace std;
 
