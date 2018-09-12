@@ -3,6 +3,9 @@
 #include "tests.cpp"
 #include "coordstest.cpp"
 
+// for convenience
+using json = nlohmann::json;
+
 void EgoCar::setPos_cart(const Point &pos, const MapWaypoints &map_waypoints) {
   pos_cart = pos;
   pos_frenet = getFrenet(pos, 0, map_waypoints);
@@ -37,6 +40,21 @@ Frenet Vehicle::getVel_frenet_m_per_s(const MapWaypoints &map_waypoints) const {
   const Point &src = getPos_cart();
   const Point &dst = src + getVel_cart_m_per_s();
   return createFrenetVectorConnectingStartAndEnd(src, dst, map_waypoints);
+}
+
+// Checks if the SocketIO event has JSON data.
+// If there is data the JSON object in string format will be returned,
+// else the empty string "" will be returned.
+string hasData(string s) {
+  auto found_null = s.find("null");
+  auto b1 = s.find_first_of("[");
+  auto b2 = s.find_first_of("}");
+  if (found_null != string::npos) {
+    return "";
+  } else if (b1 != string::npos && b2 != string::npos) {
+    return s.substr(b1, b2 - b1 + 2);
+  }
+  return "";
 }
 
 int main(int argc, char **argv) {
