@@ -13,7 +13,7 @@
 #include "cart.h"
 #include "frenet.h"
 #include "../mathfuns.h"
-#include "../waypoints.h"
+#include "waypoints.h"
 
 using namespace std;
 

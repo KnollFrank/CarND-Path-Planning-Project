@@ -1,5 +1,5 @@
-#ifndef WAYPOINTS_H_
-#define WAYPOINTS_H_
+#ifndef COORDS_WAYPOINTS_H_
+#define COORDS_WAYPOINTS_H_
 
 #include <fstream>
 #include <math.h>
@@ -8,14 +8,11 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
-#include "Eigen-3.3/Eigen/QR"
-#include "json.hpp"
 #include <tuple>
 
-#include "coords/cart.h"
-#include "coords/frenet.h"
-#include "mathfuns.h"
+#include "cart.h"
+#include "frenet.h"
+#include "../mathfuns.h"
 
 using namespace std;
 
@@ -60,4 +57,4 @@ MapWaypoints read_map_waypoints() {
   return map_waypoints;
 }
 
-#endif /* WAYPOINTS_H_ */
+#endif /* COORDS_WAYPOINTS_H_ */
