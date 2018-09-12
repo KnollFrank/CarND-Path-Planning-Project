@@ -1,6 +1,7 @@
 #include "pathPlanner.h"
 #include "gtest/gtest.h"
 #include "tests.cpp"
+#include "coordstest.cpp"
 
 Frenet Frenet::operator+(const Frenet &other) const {
   return Frenet { s + other.s, d + other.d };
@@ -120,6 +121,8 @@ Frenet Vehicle::getVel_frenet_m_per_s(const MapWaypoints &map_waypoints) const {
 int main(int argc, char **argv) {
   if (argc > 1 && strcmp(argv[1], "test") == 0) {
     testing::InitGoogleTest(&argc, argv);
+    // see https://stackoverflow.com/questions/7208070/googletest-how-to-skip-a-test
+    testing::GTEST_FLAG(filter) = "CoordsTest.*";
     return RUN_ALL_TESTS();
   }
 

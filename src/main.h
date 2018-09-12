@@ -72,6 +72,11 @@ struct Frenet {
   friend ostream& operator<<(ostream& os, const Frenet& frenet);
 };
 
+bool operator==(const Frenet& lhs, const Frenet& rhs)
+{
+    return lhs.s == rhs.s && lhs.d == rhs.d;
+}
+
 ostream& operator<<(ostream& os, const Frenet& frenet) {
   os << "Frenet(s = " << frenet.s << ", d = " << frenet.d << ")";
   return os;
