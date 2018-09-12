@@ -12,6 +12,7 @@
 #include "json.hpp"
 #include <tuple>
 #include "spline.h"
+#include "path.h"
 
 constexpr int NO_VALUE = -1;
 
@@ -21,13 +22,6 @@ namespace test {
 
 const double carRadius = 1.25;
 const double carSize = 2 * carRadius;
-
-template<typename T, typename R, typename unop>
-vector<R> map2(vector<T> v, unop op) {
-  vector<R> result(v.size());
-  transform(v.begin(), v.end(), result.begin(), op);
-  return result;
-}
 
 vector<Frenet> asFrenets(const vector<Point> &points,
                          const MapWaypoints &map_waypoints) {

@@ -16,6 +16,7 @@
 #include "car.h"
 #include "mathfuns.h"
 #include "lane.h"
+#include "path.h"
 
 using namespace std;
 
