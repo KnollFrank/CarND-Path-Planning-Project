@@ -255,33 +255,4 @@ PreviousData createPreviousData(
   return previousData;
 }
 
-// Sensor Fusion Data, a list of all other cars on the same side of the road.
-vector<Vehicle> createVehicles(
-    const nlohmann::basic_json<std::map, std::vector,
-        std::__cxx11::basic_string<char, std::char_traits<char>,
-            std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &sensor_fusion) {
-  enum sensor_fusion_index {
-    ID = 0,
-    X = 1,
-    Y = 2,
-    VX = 3,
-    VY = 4,
-    S = 5,
-    D = 6
-  };
-
-  vector<Vehicle> vehicles;
-  for (int i = 0; i < sensor_fusion.size(); i++) {
-    Vehicle vehicle;
-    vehicle.id = sensor_fusion[i][ID];
-    vehicle.setPos(Point { sensor_fusion[i][X], sensor_fusion[i][Y] }, Frenet {
-                       sensor_fusion[i][S], sensor_fusion[i][D] });
-    vehicle.setVel_cart_m_per_s(Point { sensor_fusion[i][VX],
-        sensor_fusion[i][VY] });
-    vehicles.push_back(vehicle);
-  }
-  return vehicles;
-}
-
 #endif /* PATHPLANNER_H_ */
