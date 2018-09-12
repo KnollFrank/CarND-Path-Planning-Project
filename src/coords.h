@@ -13,6 +13,7 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 #include <tuple>
+#include "waypoints.h"
 
 using namespace std;
 
@@ -42,11 +43,6 @@ struct Frenet {
   Frenet operator*(double scalar) const;
 
   friend ostream& operator<<(ostream& os, const Frenet& frenet);
-};
-
-struct MapWaypoints {
-  vector<Point> map_waypoints;
-  vector<double> map_waypoints_s;
 };
 
 bool operator==(const Frenet& lhs, const Frenet& rhs);

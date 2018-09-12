@@ -13,6 +13,8 @@
 #include <tuple>
 #include "main.h"
 #include "spline.h"
+#include "waypoints.h"
+#include "waypoints.cpp"
 
 constexpr int NO_VALUE = -1;
 

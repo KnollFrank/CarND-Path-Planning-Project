@@ -5,6 +5,8 @@
 
 using namespace std;
 
+struct MapWaypoints;
+
 // TODO: merge EgoCar and Vehicle, because they are essentially the same thing.
 class EgoCar {
 
