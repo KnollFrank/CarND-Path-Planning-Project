@@ -7,20 +7,6 @@
 // for convenience
 using json = nlohmann::json;
 
-void Vehicle::setVel_frenet_m_per_s(const Frenet &vel,
-                                    const MapWaypoints &map_waypoints) {
-  const Frenet &src = getPos_frenet();
-  const Frenet &dst = Frenet { src.s + vel.s, src.d + vel.d };
-  vel_cart_m_per_s = createCartVectorConnectingStartAndEnd(src, dst,
-                                                           map_waypoints);
-}
-
-Frenet Vehicle::getVel_frenet_m_per_s(const MapWaypoints &map_waypoints) const {
-  const Point &src = getPos_cart();
-  const Point &dst = src + getVel_cart_m_per_s();
-  return createFrenetVectorConnectingStartAndEnd(src, dst, map_waypoints);
-}
-
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
 // else the empty string "" will be returned.
