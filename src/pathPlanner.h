@@ -23,6 +23,21 @@ using namespace std;
 // for convenience
 using json = nlohmann::json;
 
+struct Path {
+  vector<Point> points;
+};
+
+struct PreviousData {
+  Path previous_path;
+  Frenet end_path;
+};
+
+struct ReferencePoint {
+  Point point;
+  double yaw_rad;
+  double vel_mph;
+};
+
 int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
 
   double closestLen = 100000;  //large number

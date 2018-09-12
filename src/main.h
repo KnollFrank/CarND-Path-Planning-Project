@@ -14,22 +14,9 @@
 #include <tuple>
 #include "coords.h"
 #include "car.h"
+#include "pathPlanner.h"
 
 using namespace std;
 
-struct Path {
-  vector<Point> points;
-};
-
-struct PreviousData {
-  Path previous_path;
-  Frenet end_path;
-};
-
-struct ReferencePoint {
-  Point point;
-  double yaw_rad;
-  double vel_mph;
-};
 
 #endif /* MAIN_H_ */
