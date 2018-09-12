@@ -84,7 +84,6 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   const Point x = point - maps[prev_wp];
 
   // find the projection of x onto n
-  // TODO: warum nicht /n.len() ?
   double proj_norm = x.scalarProd(n) / n.scalarProd(n);
   const Point proj = n * proj_norm;
   double frenet_d = x.distanceTo(proj);
