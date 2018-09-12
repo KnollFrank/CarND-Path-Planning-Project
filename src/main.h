@@ -12,6 +12,7 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 #include <tuple>
+#include "coords.h"
 
 using namespace std;
 
@@ -19,23 +20,6 @@ enum Lane {
   LEFT = 0,
   MIDDLE = 1,
   RIGHT = 2
-};
-
-struct Point {
-  double x;
-  double y;
-
-  static Point fromAngle(double angle_rad);
-  double len() const;
-  double scalarProd(const Point &point) const;
-  double distanceTo(const Point &point) const;
-  double getHeading() const;
-  Point& operator=(const Point &point);
-  Point operator+(const Point& other) const;
-  Point operator-(const Point& other) const;
-  Point operator*(double scalar) const;
-
-  friend ostream& operator<<(ostream& os, const Point& point);
 };
 
 Point& Point::operator=(const Point &point) {
@@ -55,11 +39,6 @@ struct MapWaypoints {
   vector<Point> map_waypoints;
   vector<double> map_waypoints_s;
 };
-
-ostream& operator<<(ostream& os, const Point& point) {
-  os << "Point(x = " << point.x << ", y = " << point.y << ")";
-  return os;
-}
 
 struct Frenet {
   double s;
