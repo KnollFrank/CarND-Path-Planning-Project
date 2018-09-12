@@ -16,7 +16,6 @@
 #include "spline.h"
 #include "car.h"
 #include "mathfuns.h"
-#include "waypoints.h"
 
 using namespace std;
 
