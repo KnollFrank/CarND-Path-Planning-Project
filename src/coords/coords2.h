@@ -1,5 +1,5 @@
-#ifndef COORDS_COORDS_H_
-#define COORDS_COORDS_H_
+#ifndef COORDS_COORDS2_H_
+#define COORDS_COORDS2_H_
 
 #include <fstream>
 #include <math.h>
@@ -18,7 +18,7 @@
 using namespace std;
 
 // Transform from Frenet s,d coordinates to Cartesian x,y
-Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
+Point getXY2(const Frenet &pos, const MapWaypoints &map_waypoints) {
   const vector<double> &maps_s = map_waypoints.map_waypoints_s;
   const vector<Point> &maps = map_waypoints.map_waypoints;
 
@@ -40,7 +40,7 @@ Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
   return seg + Point::fromAngle(perp_heading) * pos.d;
 }
 
-int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
+int ClosestWaypoint2(const Point &point, const MapWaypoints &map_waypoints) {
 
   double closestLen = 100000;  //large number
   int closestWaypoint = 0;
@@ -56,10 +56,10 @@ int ClosestWaypoint(const Point &point, const MapWaypoints &map_waypoints) {
   return closestWaypoint;
 }
 
-int NextWaypoint(const Point &point, double theta_rad,
+int NextWaypoint2(const Point &point, double theta_rad,
                  const MapWaypoints &map_waypoints) {
 
-  int closestWaypoint = ClosestWaypoint(point, map_waypoints);
+  int closestWaypoint = ClosestWaypoint2(point, map_waypoints);
   Point map = map_waypoints.map_waypoints[closestWaypoint];
   double heading = (map - point).getHeading();
   double angle = fabs(theta_rad - heading);
@@ -76,10 +76,9 @@ int NextWaypoint(const Point &point, double theta_rad,
 }
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
-Frenet getFrenet(const Point &point, double theta_rad,
-                 const MapWaypoints &map_waypoints) {
+Frenet getFrenet2(const Point& point, const MapWaypoints& map_waypoints) {
   const vector<Point> &maps = map_waypoints.map_waypoints;
-  int next_wp = NextWaypoint(point, theta_rad, map_waypoints);
+  int next_wp = NextWaypoint(point, 0, map_waypoints);
 
   int prev_wp;
   prev_wp = next_wp - 1;
@@ -117,16 +116,16 @@ Frenet getFrenet(const Point &point, double theta_rad,
   return Frenet { frenet_s, frenet_d };
 }
 
-Point createCartVectorConnectingStartAndEnd(const Frenet &start,
+Point createCartVectorConnectingStartAndEnd2(const Frenet &start,
                                             const Frenet &end,
                                             const MapWaypoints &map_waypoints) {
-  return getXY(end, map_waypoints) - getXY(start, map_waypoints);
+  return getXY2(end, map_waypoints) - getXY2(start, map_waypoints);
 }
 
-Frenet createFrenetVectorConnectingStartAndEnd(
+Frenet createFrenetVectorConnectingStartAndEnd2(
     const Point &start, const Point &end, const MapWaypoints &map_waypoints) {
 
-  return getFrenet(end, 0, map_waypoints) - getFrenet(start, 0, map_waypoints);
+  return getFrenet2(end, map_waypoints) - getFrenet2(start, map_waypoints);
 }
 
-#endif /* COORDS_COORDS_H_ */
+#endif /* COORDS_COORDS2_H_ */

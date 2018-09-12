@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "coords/coords.h"
+#include "coords/coords2.h"
 
 TEST(CoordsTest, should_get_frenet) {
   // GIVEN
