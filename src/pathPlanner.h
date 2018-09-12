@@ -15,30 +15,12 @@
 #include "main.h"
 #include "spline.h"
 #include "car.h"
+#include "mathfuns.h"
 
 using namespace std;
 
 // for convenience
 using json = nlohmann::json;
-
-// For converting back and forth between radians and degrees.
-constexpr double pi() {
-  return M_PI;
-}
-double deg2rad(double x) {
-  return x * pi() / 180;
-}
-double rad2deg(double x) {
-  return x * 180 / pi();
-}
-
-double mph2meter_per_sec(double t) {
-  return t / 2.24;
-}
-
-double meter_per_sec2mph(double t) {
-  return t * 2.24;
-}
 
 // Load up map values for waypoint's x,y,s and d normalized normal vectors
 MapWaypoints read_map_waypoints() {
