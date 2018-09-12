@@ -11,7 +11,6 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 #include <tuple>
-#include "main.h"
 #include "spline.h"
 
 constexpr int NO_VALUE = -1;

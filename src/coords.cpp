@@ -1,5 +1,4 @@
 #include "coords.h"
-#include "main.h"
 #include "pathPlanner.h"
 
 Point Point::fromAngle(double angle_rad) {

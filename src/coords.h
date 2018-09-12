@@ -1,7 +1,6 @@
 #ifndef COORDS_H_
 #define COORDS_H_
 
-#include "main.h"
 #include <fstream>
 #include <math.h>
 #include <uWS/uWS.h>
