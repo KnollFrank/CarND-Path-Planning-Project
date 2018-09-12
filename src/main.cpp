@@ -58,6 +58,19 @@ string hasData(string s) {
   return "";
 }
 
+EgoCar createEgoCar(
+    const nlohmann::basic_json<std::map, std::vector,
+        std::__cxx11::basic_string<char, std::char_traits<char>,
+            std::allocator<char> >, bool, long, unsigned long, double,
+        std::allocator, nlohmann::adl_serializer> &j) {
+  EgoCar egoCar;
+  egoCar.setPos(Point { j[1]["x"], j[1]["y"] },
+                Frenet { j[1]["s"], j[1]["d"] });
+  egoCar.yaw_deg = j[1]["yaw"];
+  egoCar.speed_mph = j[1]["speed"];
+  return egoCar;
+}
+
 int main(int argc, char **argv) {
   if (argc > 1 && strcmp(argv[1], "test") == 0) {
     testing::InitGoogleTest(&argc, argv);

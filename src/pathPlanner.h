@@ -236,19 +236,6 @@ Path createPath(ReferencePoint &refPoint, Lane &lane,
   return createNextVals(path, prev_size, previousData, refPoint, dt);
 }
 
-EgoCar createEgoCar(
-    const nlohmann::basic_json<std::map, std::vector,
-        std::__cxx11::basic_string<char, std::char_traits<char>,
-            std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &j) {
-  EgoCar egoCar;
-  egoCar.setPos(Point { j[1]["x"], j[1]["y"] },
-                Frenet { j[1]["s"], j[1]["d"] });
-  egoCar.yaw_deg = j[1]["yaw"];
-  egoCar.speed_mph = j[1]["speed"];
-  return egoCar;
-}
-
 PreviousData createPreviousData(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
