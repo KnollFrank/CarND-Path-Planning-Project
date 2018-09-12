@@ -27,23 +27,22 @@ class CoordsConverter {
   const MapWaypoints &map_waypoints;
 };
 
-CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints):map_waypoints(_map_waypoints) {
+CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
+    : map_waypoints(_map_waypoints) {
 }
 
 int ClosestWaypoint2(const Point &point, const MapWaypoints &map_waypoints) {
+  auto isCloserToPoint = [&point](const Point& point1, const Point& point2) {
+    double distance1 = point.distanceTo(point1);
+    double distance2 = point.distanceTo(point2);
+    return distance1 < distance2;
+  };
 
-  double closestLen = 100000;  //large number
-  int closestWaypoint = 0;
-
-  for (int i = 0; i < map_waypoints.map_waypoints.size(); i++) {
-    double dist = point.distanceTo(map_waypoints.map_waypoints[i]);
-    if (dist < closestLen) {
-      closestLen = dist;
-      closestWaypoint = i;
-    }
-  }
-
-  return closestWaypoint;
+  int index = std::distance(
+      map_waypoints.map_waypoints.begin(),
+      std::min_element(map_waypoints.map_waypoints.begin(),
+                       map_waypoints.map_waypoints.end(), isCloserToPoint));
+  return index;
 }
 
 int NextWaypoint2(const Point &point, double theta_rad,
