@@ -32,21 +32,22 @@ CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
 }
 
+vector<double> get_distances_of_point2points(const Point &point,
+                                             vector<Point> points) {
+  return map2<Point, double>(points, [&point](const Point& p) {
+    return point.distanceTo(p);
+  });
+}
+
 int ClosestWaypoint2(const Point &point, const MapWaypoints &map_waypoints) {
-  auto isCloserToPoint = [&point](const Point& point1, const Point& point2) {
-    double distance1 = point.distanceTo(point1);
-    double distance2 = point.distanceTo(point2);
-    return distance1 < distance2;
+  auto index_of_minimum = [](const vector<double> &v) {
+    return std::distance(
+        v.begin(),
+        std::min_element(v.begin(), v.end()));
   };
 
-  auto index_of_minimum =
-      [&isCloserToPoint](const vector<Point> &points) {
-        return std::distance(
-            points.begin(),
-            std::min_element(points.begin(), points.end(), isCloserToPoint));
-      };
-
-  return index_of_minimum(map_waypoints.map_waypoints);
+  return index_of_minimum(
+      get_distances_of_point2points(point, map_waypoints.map_waypoints));
 }
 
 int NextWaypoint2(const Point &point, double theta_rad,
