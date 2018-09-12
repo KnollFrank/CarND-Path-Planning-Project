@@ -15,39 +15,6 @@ Frenet Frenet::operator*(double scalar) const {
   return Frenet { s * scalar, d * scalar };
 }
 
-Point Point::fromAngle(double angle_rad) {
-  return Point { cos(angle_rad), sin(angle_rad) };
-}
-
-double Point::len() const {
-  return distanceTo(Point { 0, 0 });
-}
-
-double Point::scalarProd(const Point &point) const {
-  return x * point.x + y * point.y;
-}
-
-double Point::distanceTo(const Point &point) const {
-  Point diff = point - *this;
-  return sqrt(diff.scalarProd(diff));
-}
-
-double Point::getHeading() const {
-  return atan2(y, x);
-}
-
-Point Point::operator+(const Point &other) const {
-  return Point { x + other.x, y + other.y };
-}
-
-Point Point::operator-(const Point &other) const {
-  return *this + (other * -1);
-}
-
-Point Point::operator*(double scalar) const {
-  return Point { x * scalar, y * scalar };
-}
-
 void EgoCar::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
   this->pos_cart = pos_cart;
   this->pos_frenet = pos_frenet;
@@ -122,7 +89,7 @@ int main(int argc, char **argv) {
   if (argc > 1 && strcmp(argv[1], "test") == 0) {
     testing::InitGoogleTest(&argc, argv);
     // see https://stackoverflow.com/questions/7208070/googletest-how-to-skip-a-test
-    testing::GTEST_FLAG(filter) = "-CoordsTest.should_drive_with_max_50_mph";
+    testing::GTEST_FLAG(filter) = "-PathPlanningTest.should_drive_with_max_50_mph";
     return RUN_ALL_TESTS();
   }
 

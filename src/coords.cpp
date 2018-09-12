@@ -2,6 +2,39 @@
 #include "main.h"
 #include "pathPlanner.h"
 
+Point Point::fromAngle(double angle_rad) {
+  return Point { cos(angle_rad), sin(angle_rad) };
+}
+
+double Point::len() const {
+  return distanceTo(Point { 0, 0 });
+}
+
+double Point::scalarProd(const Point &point) const {
+  return x * point.x + y * point.y;
+}
+
+double Point::distanceTo(const Point &point) const {
+  Point diff = point - *this;
+  return sqrt(diff.scalarProd(diff));
+}
+
+double Point::getHeading() const {
+  return atan2(y, x);
+}
+
+Point Point::operator+(const Point &other) const {
+  return Point { x + other.x, y + other.y };
+}
+
+Point Point::operator-(const Point &other) const {
+  return *this + (other * -1);
+}
+
+Point Point::operator*(double scalar) const {
+  return Point { x * scalar, y * scalar };
+}
+
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 Frenet getFrenet2(const Point& point, const MapWaypoints& map_waypoints) {
   const vector<Point> &maps = map_waypoints.map_waypoints;
