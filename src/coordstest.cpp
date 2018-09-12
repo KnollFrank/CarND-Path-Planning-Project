@@ -1,6 +1,5 @@
-#include "coords/coords.h"
-
 #include "gtest/gtest.h"
+#include "coords/coords.h"
 
 TEST(CoordsTest, should_get_frenet) {
   // GIVEN
@@ -15,9 +14,17 @@ TEST(CoordsTest, should_get_frenet) {
   mapWaypoints.map_waypoints_s.push_back(20);
   mapWaypoints.map_waypoints_s.push_back(30);
 
-  // WHEN
-  Frenet frenet = getFrenet2(Point {5, 0}, mapWaypoints);
+  // WHEN & THEN
+  // EXPECT_EQ((Frenet { 0, 0 }), getFrenet2(Point { 0, 0 }, mapWaypoints));
 
-  // THEN
-  ASSERT_EQ((Frenet {10, 6}), frenet);
+  EXPECT_EQ((Frenet { 5, 0 }), getFrenet2(Point { 5, 0 }, mapWaypoints));
+  EXPECT_EQ((Frenet { 5, -2 }), getFrenet2(Point { 5, 2 }, mapWaypoints));
+  EXPECT_EQ((Frenet { 5, 2 }), getFrenet2(Point { 5, -2 }, mapWaypoints));
+
+  EXPECT_EQ((Frenet { 10, 0 }), getFrenet2(Point { 10, 0 }, mapWaypoints));
+  EXPECT_EQ((Frenet { 15, 0 }), getFrenet2(Point { 10, 5 }, mapWaypoints));
+  EXPECT_EQ((Frenet { 20, 0 }), getFrenet2(Point { 10, 10 }, mapWaypoints));
+  // EXPECT_EQ((Frenet { 25, 0 }), getFrenet2(Point { 5, 10 }, mapWaypoints));
+  EXPECT_EQ((Frenet { 30, 0 }), getFrenet2(Point { 0, 10 }, mapWaypoints));
+  // EXPECT_EQ((Frenet { 35, 0 }), getFrenet2(Point { 0, 5 }, mapWaypoints));
 }
