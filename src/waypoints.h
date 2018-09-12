@@ -1,0 +1,62 @@
+#ifndef WAYPOINTS_H_
+#define WAYPOINTS_H_
+
+#include <fstream>
+#include <math.h>
+#include <uWS/uWS.h>
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <vector>
+#include "Eigen-3.3/Eigen/Core"
+#include "Eigen-3.3/Eigen/QR"
+#include "json.hpp"
+#include <tuple>
+#include "mathfuns.h"
+#include "cart.h"
+#include "frenet.h"
+
+using namespace std;
+
+struct MapWaypoints {
+  vector<Point> map_waypoints;
+  vector<double> map_waypoints_s;
+};
+
+// Load up map values for waypoint's x,y,s and d normalized normal vectors
+MapWaypoints read_map_waypoints() {
+  // Load up map values for waypoint's x,y,s and d normalized normal vectors
+  MapWaypoints map_waypoints;
+  vector<double> map_waypoints_dx;
+  vector<double> map_waypoints_dy;
+
+  // Waypoint map to read from
+  string map_file_ = "../data/highway_map.csv";
+  // The max s value before wrapping around the track back to 0
+  double max_s = 6945.554;
+
+  ifstream in_map_(map_file_.c_str(), ifstream::in);
+
+  string line;
+  while (getline(in_map_, line)) {
+    istringstream iss(line);
+    double x;
+    double y;
+    float s;
+    float d_x;
+    float d_y;
+    iss >> x;
+    iss >> y;
+    iss >> s;
+    iss >> d_x;
+    iss >> d_y;
+    map_waypoints.map_waypoints.push_back(Point { x, y });
+    map_waypoints.map_waypoints_s.push_back(s);
+    map_waypoints_dx.push_back(d_x);
+    map_waypoints_dy.push_back(d_y);
+  }
+
+  return map_waypoints;
+}
+
+#endif /* WAYPOINTS_H_ */
