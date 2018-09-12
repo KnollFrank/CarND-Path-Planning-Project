@@ -8,6 +8,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <functional>
 #include <tuple>
 
 #include "cart.h"
@@ -38,11 +39,14 @@ int ClosestWaypoint2(const Point &point, const MapWaypoints &map_waypoints) {
     return distance1 < distance2;
   };
 
-  int index = std::distance(
-      map_waypoints.map_waypoints.begin(),
-      std::min_element(map_waypoints.map_waypoints.begin(),
-                       map_waypoints.map_waypoints.end(), isCloserToPoint));
-  return index;
+  auto index_of_minimum =
+      [&isCloserToPoint](const vector<Point> &points) {
+        return std::distance(
+            points.begin(),
+            std::min_element(points.begin(), points.end(), isCloserToPoint));
+      };
+
+  return index_of_minimum(map_waypoints.map_waypoints);
 }
 
 int NextWaypoint2(const Point &point, double theta_rad,
