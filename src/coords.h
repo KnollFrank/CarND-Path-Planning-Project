@@ -33,6 +33,26 @@ struct Point {
   friend ostream& operator<<(ostream& os, const Point& point);
 };
 
+struct MapWaypoints {
+  vector<Point> map_waypoints;
+  vector<double> map_waypoints_s;
+};
+
+struct Frenet {
+  double s;
+  double d;
+
+  Frenet operator+(const Frenet& other) const;
+  Frenet operator-(const Frenet& other) const;
+  Frenet operator*(double scalar) const;
+
+  friend ostream& operator<<(ostream& os, const Frenet& frenet);
+};
+
+bool operator==(const Frenet& lhs, const Frenet& rhs);
+
+ostream& operator<<(ostream& os, const Frenet& frenet);
+
 ostream& operator<<(ostream& os, const Point& point);
 
 struct Frenet;

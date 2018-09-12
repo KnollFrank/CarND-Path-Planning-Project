@@ -22,32 +22,6 @@ enum Lane {
   RIGHT = 2
 };
 
-struct MapWaypoints {
-  vector<Point> map_waypoints;
-  vector<double> map_waypoints_s;
-};
-
-struct Frenet {
-  double s;
-  double d;
-
-  Frenet operator+(const Frenet& other) const;
-  Frenet operator-(const Frenet& other) const;
-  Frenet operator*(double scalar) const;
-
-  friend ostream& operator<<(ostream& os, const Frenet& frenet);
-};
-
-bool operator==(const Frenet& lhs, const Frenet& rhs)
-{
-    return lhs.s == rhs.s && lhs.d == rhs.d;
-}
-
-ostream& operator<<(ostream& os, const Frenet& frenet) {
-  os << "Frenet(s = " << frenet.s << ", d = " << frenet.d << ")";
-  return os;
-}
-
 // TODO: merge EgoCar and Vehicle, because they are essentially the same thing.
 class EgoCar {
 

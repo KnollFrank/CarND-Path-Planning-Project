@@ -53,6 +53,15 @@ ostream& operator<<(ostream& os, const Point& point) {
   return os;
 }
 
+ostream& operator<<(ostream& os, const Frenet& frenet) {
+  os << "Frenet(s = " << frenet.s << ", d = " << frenet.d << ")";
+  return os;
+}
+
+bool operator==(const Frenet& lhs, const Frenet& rhs) {
+  return lhs.s == rhs.s && lhs.d == rhs.d;
+}
+
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 Frenet getFrenet2(const Point& point, const MapWaypoints& map_waypoints) {
   const vector<Point> &maps = map_waypoints.map_waypoints;
