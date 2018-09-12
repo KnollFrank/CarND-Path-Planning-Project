@@ -59,11 +59,6 @@ MapWaypoints read_map_waypoints() {
   return map_waypoints;
 }
 
-bool operator==(const Frenet& lhs, const Frenet& rhs);
-ostream& operator<<(ostream& os, const Frenet& frenet);
-ostream& operator<<(ostream& os, const Point& point);
-MapWaypoints read_map_waypoints();
-
 // Transform from Frenet s,d coordinates to Cartesian x,y
 Point getXY(const Frenet &pos, const MapWaypoints &map_waypoints) {
   const vector<double> &maps_s = map_waypoints.map_waypoints_s;
