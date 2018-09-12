@@ -16,6 +16,7 @@
 #include "spline.h"
 #include "car.h"
 #include "mathfuns.h"
+#include "lane.h"
 
 using namespace std;
 
@@ -147,30 +148,6 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
 
   cout << egoCar;
   cout << vehicle << endl;
-}
-
-double sizeOfLane() {
-  return 4;
-}
-
-double startOfLane(int lane) {
-  return sizeOfLane() * lane;
-}
-
-double getMiddleOfLane(Lane lane) {
-  return startOfLane(lane) + sizeOfLane() / 2;
-}
-
-double endOfLane(Lane lane) {
-  return startOfLane(lane + 1);
-}
-
-bool isInLane(float d, Lane lane) {
-  return startOfLane(lane) < d && d < endOfLane(lane);
-}
-
-bool isVehicleInLane(const Vehicle &vehicle, Lane lane) {
-  return isInLane(vehicle.getPos_frenet().d, lane);
 }
 
 bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,

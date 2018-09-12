@@ -17,12 +17,6 @@
 
 using namespace std;
 
-enum Lane {
-  LEFT = 0,
-  MIDDLE = 1,
-  RIGHT = 2
-};
-
 struct Path {
   vector<Point> points;
 };

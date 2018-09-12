@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include "tests.cpp"
 #include "coordstest.cpp"
+#include "lane.h"
 
 // for convenience
 using json = nlohmann::json;
