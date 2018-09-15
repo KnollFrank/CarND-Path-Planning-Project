@@ -95,17 +95,16 @@ bool isProjectionOfPointOntoLineWithinLineSegment(
 const Point CoordsConverter::projectPointOntoLineSegment(
     const Point& point, const LineSegment& lineSegment) const {
 
-  return lineSegment.asVector().asNormalized() * getFrenetS(lineSegment, point);
+  return lineSegment.start
+      + lineSegment.asVector().asNormalized() * getFrenetS(lineSegment, point);
 }
 
 Frenet CoordsConverter::getFrenet2(const LineSegment& lineSegment,
                                    const Point& point,
                                    const Point& v_outwards) const {
 
-  Point B_perpendicular = (point - lineSegment.start)
-      - projectPointOntoLineSegment(point, lineSegment);
-  double d = B_perpendicular.len()
-      * sgn(B_perpendicular.scalarProd(v_outwards));
+  Point d_vec = point - projectPointOntoLineSegment(point, lineSegment);
+  double d = d_vec.len() * sgn(d_vec.scalarProd(v_outwards));
   return Frenet { getFrenetS(lineSegment, point), d };
 }
 
