@@ -30,6 +30,7 @@ class CoordsConverter {
                    const Point& v_outwards, int waypointIndex) const;
   int getIndexOfClosestWaypoint(const Point& point) const;
   double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
+  int adaptWaypointIndex(int waypointIndex) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -78,15 +79,19 @@ Frenet CoordsConverter::getFrenet(const LineSegment& lineSegment,
       + lineSegment.getFrenet(point, v_outwards);
 }
 
+int CoordsConverter::adaptWaypointIndex(int waypointIndex) const {
+  return ::modulo(waypointIndex, map_waypoints.map_waypoints.size());
+}
+
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 Frenet CoordsConverter::getFrenet(const Point& point) const {
-  int closestIndex = getIndexOfClosestWaypoint(point);
-  int prevIndex = modulo(closestIndex - 1, map_waypoints.map_waypoints.size());
-  int nextIndex = modulo(closestIndex + 1, map_waypoints.map_waypoints.size());
+  const int closestIndex = getIndexOfClosestWaypoint(point);
+  const int prevIndex = adaptWaypointIndex(closestIndex - 1);
+  const int nextIndex = adaptWaypointIndex(closestIndex + 1);
 
-  Point closest = map_waypoints.map_waypoints[closestIndex];
-  Point prev = map_waypoints.map_waypoints[prevIndex];
-  Point next = map_waypoints.map_waypoints[nextIndex];
+  const Point closest = map_waypoints.map_waypoints[closestIndex];
+  const Point prev = map_waypoints.map_waypoints[prevIndex];
+  const Point next = map_waypoints.map_waypoints[nextIndex];
 
   auto isPointInSegmentPrev2Closest =
       [&]() {
