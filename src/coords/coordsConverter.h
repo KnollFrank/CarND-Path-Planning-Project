@@ -98,24 +98,30 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   Point next = map_waypoints.map_waypoints[nextIndex];
   bool pointInSegment1 = isProjectionOfBOntoAWithinA(point - prev,
                                                      closest - prev);
-  bool pointInSegment2 = isProjectionOfBOntoAWithinA(point - closest,
-                                                     next - prev);
-  if (pointInSegment1 && !pointInSegment2) {
+  auto getF1 = [&]() {
     return getFrenet_hat(closest - prev, point - prev,
-                         map_waypoints.map_outwards[prevIndex], prevIndex,
-                         map_waypoints);
-  } else if (!pointInSegment1) {
+        map_waypoints.map_outwards[prevIndex],
+        prevIndex, map_waypoints);
+  };
+
+  auto getF2 = [&]() {
     return getFrenet_hat(next - closest, point - closest,
-                         map_waypoints.map_outwards[closestIndex], closestIndex,
-                         map_waypoints);
-  } else {  // pointInSegment1 && pointInSegment2
-    Frenet f1 = getFrenet_hat(closest - prev, point - prev,
-                              map_waypoints.map_outwards[prevIndex], prevIndex,
-                              map_waypoints);
-    Frenet f2 = getFrenet_hat(next - closest, point - closest,
-                              map_waypoints.map_outwards[closestIndex],
-                              closestIndex, map_waypoints);
-    return fabs(f1.d) < fabs(f2.d) ? f1 : f2;
+        map_waypoints.map_outwards[closestIndex],
+        closestIndex, map_waypoints);
+  };
+
+  if (pointInSegment1) {
+    bool pointInSegment2 = isProjectionOfBOntoAWithinA(point - closest,
+                                                       next - prev);
+    if (pointInSegment2) {
+      Frenet f1 = getF1();
+      Frenet f2 = getF2();
+      return fabs(f1.d) < fabs(f2.d) ? f1 : f2;
+    } else {
+      return getF1();
+    }
+  } else {
+    return getF2();
   }
 }
 
