@@ -18,6 +18,7 @@ class LineSegment {
   Point asVector() const;
   Point getProjectedPoint(const Point& point) const;
   double getFrenetD(const Point& point, const Point& v_outwards) const;
+  Point getBasisVector() const;
 };
 
 Point LineSegment::asVector() const {
@@ -28,12 +29,16 @@ double LineSegment::len() const {
   return asVector().len();
 }
 
+Point LineSegment::getBasisVector() const {
+  return asVector().asNormalized();
+}
+
 Point LineSegment::getProjectedPoint(const Point& point) const {
-  return start + asVector().asNormalized() * getFrenetS(point);
+  return start + getBasisVector() * getFrenetS(point);
 }
 
 double LineSegment::getFrenetS(const Point& point) const {
-  return asVector().asNormalized().scalarProd(point - start);
+  return getBasisVector().scalarProd(point - start);
 }
 
 double LineSegment::getFrenetD(const Point& point,
