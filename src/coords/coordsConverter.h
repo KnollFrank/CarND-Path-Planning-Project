@@ -18,6 +18,11 @@
 
 using namespace std;
 
+struct LineSegment {
+  Point start;
+  Point end;
+};
+
 class CoordsConverter {
 
  public:
@@ -55,9 +60,11 @@ int modulo(int n, int N) {
   return n >= 0 ? n % N : N - ((-n) % N);
 }
 
-bool isProjectionOfBOntoAWithinA(const Point& B, const Point& A) {
-  double s = A.asNormalized().scalarProd(B);
-  return 0 <= s && s <= A.len();
+bool isProjectionOfPointOntoLineWithinLineSegment(
+    const Point& p, const LineSegment& lineSegment) {
+  const Point& v = lineSegment.end - lineSegment.start;
+  double s = v.asNormalized().scalarProd(p - lineSegment.start);
+  return 0 <= s && s <= v.len();
 }
 
 int sgn(double n) {
@@ -65,7 +72,7 @@ int sgn(double n) {
 }
 
 Frenet getFrenet2(const Point& ontoA, const Point& B, const Point& v_outwards) {
-  // TODO: DRY with isProjectionOfBOntoAWithinA
+  // TODO: DRY with isProjectionOfPointOntoLineWithinLineSegment
   Point A_norm = ontoA.asNormalized();
   double s = A_norm.scalarProd(B);
   const Point B_proj = A_norm * s;
@@ -96,9 +103,10 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   Point prev = map_waypoints.map_waypoints[prevIndex];
   Point next = map_waypoints.map_waypoints[nextIndex];
 
-  auto isPointInSegmentPrev2Closest = [&]() {
-    return isProjectionOfBOntoAWithinA(point - prev, closest - prev);
-  };
+  auto isPointInSegmentPrev2Closest =
+      [&]() {
+        return isProjectionOfPointOntoLineWithinLineSegment(point, LineSegment {prev, closest});
+      };
 
   auto getFrenetBasedOnSegmentPrev2Closest = [&]() {
     return getFrenet(closest - prev, point - prev,
@@ -107,7 +115,7 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   };
 
   auto isPointInSegmentClosest2Next = [&]() {
-    return isProjectionOfBOntoAWithinA(point - closest, next - prev);
+    return isProjectionOfPointOntoLineWithinLineSegment(point, LineSegment {closest, next});
   };
 
   auto getFrenetBasedOnSegmentClosest2Next = [&]() {
