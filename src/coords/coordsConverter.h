@@ -114,9 +114,10 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
     bool pointInSegment2 = isProjectionOfBOntoAWithinA(point - closest,
                                                        next - prev);
     if (pointInSegment2) {
-      Frenet f1 = getF1();
-      Frenet f2 = getF2();
-      return fabs(f1.d) < fabs(f2.d) ? f1 : f2;
+      return std::min(
+          getF1(),
+          getF2(),
+          [](const Frenet& f1, const Frenet& f2) {return fabs(f1.d) < fabs(f2.d);});
     } else {
       return getF1();
     }
