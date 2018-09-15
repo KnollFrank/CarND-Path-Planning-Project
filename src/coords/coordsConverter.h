@@ -47,6 +47,8 @@ class CoordsConverter {
                     const Point& v_outwards) const;
   int getIndexOfClosestWaypoint(const Point& point) const;
   double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
+  const Point projectPointOntoLineSegment(const Point& point,
+                                          const LineSegment& lineSegment) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -90,15 +92,21 @@ bool isProjectionOfPointOntoLineWithinLineSegment(
   return 0 <= s && s <= lineSegment.len();
 }
 
+const Point CoordsConverter::projectPointOntoLineSegment(
+    const Point& point, const LineSegment& lineSegment) const {
+
+  return lineSegment.asVector().asNormalized() * getFrenetS(lineSegment, point);
+}
+
 Frenet CoordsConverter::getFrenet2(const LineSegment& lineSegment,
                                    const Point& point,
                                    const Point& v_outwards) const {
   Point point_lineseg = point - lineSegment.start;
-  Point lineSegmentNormalized = (lineSegment.end - lineSegment.start)
-      .asNormalized();
+  Point lineSegmentNormalized = lineSegment.asVector().asNormalized();
 
   double s = getFrenetS(lineSegment, point);
-  const Point pointProjectedOntoLineSegment = lineSegmentNormalized * s;
+  const Point pointProjectedOntoLineSegment = projectPointOntoLineSegment(
+      point, lineSegment);
   Point B_perpendicular = point_lineseg - pointProjectedOntoLineSegment;
   double d = B_perpendicular.len()
       * sgn(B_perpendicular.scalarProd(v_outwards));
