@@ -103,7 +103,7 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
     return isProjectionOfBOntoAWithinA(point - prev, closest - prev);
   };
 
-  auto getFrenetBasedOnPrev2Closest = [&]() {
+  auto getFrenetBasedOnSegmentPrev2Closest = [&]() {
     return getFrenet(closest - prev, point - prev,
         map_waypoints.map_outwards[prevIndex],
         prevIndex);
@@ -113,28 +113,28 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
     return isProjectionOfBOntoAWithinA(point - closest, next - prev);
   };
 
-  auto getFrenetBasedOnClosest2Next = [&]() {
+  auto getFrenetBasedOnSegmentClosest2Next = [&]() {
     return getFrenet(next - closest, point - closest,
         map_waypoints.map_outwards[closestIndex],
         closestIndex);
   };
 
-  auto getFrenetHavingMinimumDCoord =
+  auto getFrenetNearest2LineSegment =
       [&]() {
         return std::min(
-            getFrenetBasedOnPrev2Closest(),
-            getFrenetBasedOnClosest2Next(),
+            getFrenetBasedOnSegmentPrev2Closest(),
+            getFrenetBasedOnSegmentClosest2Next(),
             [](const Frenet& frenet1, const Frenet& frenet2) {return fabs(frenet1.d) < fabs(frenet2.d);});
       };
 
   if (isPointInSegmentPrev2Closest()) {
     if (isPointInSegmentClosest2Next()) {
-      return getFrenetHavingMinimumDCoord();
+      return getFrenetNearest2LineSegment();
     } else {
-      return getFrenetBasedOnPrev2Closest();
+      return getFrenetBasedOnSegmentPrev2Closest();
     }
   } else {
-    return getFrenetBasedOnClosest2Next();
+    return getFrenetBasedOnSegmentClosest2Next();
   }
 }
 
