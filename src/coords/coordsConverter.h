@@ -24,6 +24,8 @@ struct LineSegment {
 
   Point asVector() const;
   double len() const;
+  Point projectPoint(const Point& point) const;
+  double getFrenetS(const Point& point) const;
 };
 
 Point LineSegment::asVector() const {
@@ -32,6 +34,14 @@ Point LineSegment::asVector() const {
 
 double LineSegment::len() const {
   return asVector().len();
+}
+
+Point LineSegment::projectPoint(const Point& point) const {
+  return start + asVector().asNormalized() * getFrenetS(point);
+}
+
+double LineSegment::getFrenetS(const Point& point) const {
+  return asVector().asNormalized().scalarProd(point - start);
 }
 
 class CoordsConverter {
@@ -47,8 +57,6 @@ class CoordsConverter {
                     const Point& v_outwards) const;
   int getIndexOfClosestWaypoint(const Point& point) const;
   double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
-  const Point projectPointOntoLineSegment(const Point& point,
-                                          const LineSegment& lineSegment) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -80,32 +88,20 @@ int sgn(double n) {
   return n >= 0 ? +1 : -1;
 }
 
-double getFrenetS(const LineSegment& lineSegment, const Point& point) {
-  return lineSegment.asVector().asNormalized().scalarProd(
-      point - lineSegment.start);
-}
-
 bool isProjectionOfPointOntoLineWithinLineSegment(
     const Point& point, const LineSegment& lineSegment) {
 
-  double s = getFrenetS(lineSegment, point);
+  double s = lineSegment.getFrenetS(point);
   return 0 <= s && s <= lineSegment.len();
-}
-
-const Point CoordsConverter::projectPointOntoLineSegment(
-    const Point& point, const LineSegment& lineSegment) const {
-
-  return lineSegment.start
-      + lineSegment.asVector().asNormalized() * getFrenetS(lineSegment, point);
 }
 
 Frenet CoordsConverter::getFrenet2(const LineSegment& lineSegment,
                                    const Point& point,
                                    const Point& v_outwards) const {
 
-  Point d_vec = point - projectPointOntoLineSegment(point, lineSegment);
+  Point d_vec = point - lineSegment.projectPoint(point);
   double d = d_vec.len() * sgn(d_vec.scalarProd(v_outwards));
-  return Frenet { getFrenetS(lineSegment, point), d };
+  return Frenet { lineSegment.getFrenetS(point), d };
 }
 
 double CoordsConverter::getDistanceFromWaypointZeroToWaypoint(
