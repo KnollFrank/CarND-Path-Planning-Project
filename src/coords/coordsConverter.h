@@ -89,31 +89,30 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   const int prevIndex = adaptWaypointIndex(closestIndex - 1);
   const int nextIndex = adaptWaypointIndex(closestIndex + 1);
 
-  const Point closest = map_waypoints.map_waypoints[closestIndex];
-  const Point prev = map_waypoints.map_waypoints[prevIndex];
-  const Point next = map_waypoints.map_waypoints[nextIndex];
+  const LineSegment prev2closest = LineSegment {
+      map_waypoints.map_waypoints[prevIndex],
+      map_waypoints.map_waypoints[closestIndex] };
+  const LineSegment closest2next = LineSegment {
+      map_waypoints.map_waypoints[closestIndex],
+      map_waypoints.map_waypoints[nextIndex] };
 
-  auto isPointInSegmentPrev2Closest =
-      [&]() {
-        return isProjectionOfPointOntoLineWithinLineSegment(point, LineSegment {prev, closest});
-      };
-
-  auto getFrenetBasedOnSegmentPrev2Closest = [&]() {
-    return getFrenet(LineSegment {prev, closest}, point,
-        map_waypoints.map_outwards[prevIndex],
-        prevIndex);
+  auto isPointInSegmentPrev2Closest = [&]() {
+    return isProjectionOfPointOntoLineWithinLineSegment(point, prev2closest);
   };
 
-  auto isPointInSegmentClosest2Next =
+  auto getFrenetBasedOnSegmentPrev2Closest =
       [&]() {
-        return isProjectionOfPointOntoLineWithinLineSegment(point, LineSegment {closest, next});
+        return getFrenet(prev2closest, point, map_waypoints.map_outwards[prevIndex], prevIndex);
       };
 
-  auto getFrenetBasedOnSegmentClosest2Next = [&]() {
-    return getFrenet(LineSegment {closest, next}, point,
-        map_waypoints.map_outwards[closestIndex],
-        closestIndex);
+  auto isPointInSegmentClosest2Next = [&]() {
+    return isProjectionOfPointOntoLineWithinLineSegment(point, closest2next);
   };
+
+  auto getFrenetBasedOnSegmentClosest2Next =
+      [&]() {
+        return getFrenet(closest2next, point, map_waypoints.map_outwards[closestIndex], closestIndex);
+      };
 
   auto getFrenetNearest2LineSegment =
       [&]() {
