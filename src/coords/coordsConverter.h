@@ -94,36 +94,45 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   int closestIndex = getIndexOfClosestWaypoint(point, map_waypoints);
   int prevIndex = modulo(closestIndex - 1, map_waypoints.map_waypoints.size());
   int nextIndex = modulo(closestIndex + 1, map_waypoints.map_waypoints.size());
+
   Point closest = map_waypoints.map_waypoints[closestIndex];
   Point prev = map_waypoints.map_waypoints[prevIndex];
   Point next = map_waypoints.map_waypoints[nextIndex];
-  auto getF1 = [&]() {
+
+  auto isPointInSegmentPrev2Closest = [&]() {
+    return isProjectionOfBOntoAWithinA(point - prev, closest - prev);
+  };
+
+  auto getFrenetBasedOnPrev2Closest = [&]() {
     return getFrenet(closest - prev, point - prev,
         map_waypoints.map_outwards[prevIndex],
         prevIndex);
   };
 
-  auto getF2 = [&]() {
+  auto isPointInSegmentClosest2Next = [&]() {
+    return isProjectionOfBOntoAWithinA(point - closest, next - prev);
+  };
+
+  auto getFrenetBasedOnClosest2Next = [&]() {
     return getFrenet(next - closest, point - closest,
         map_waypoints.map_outwards[closestIndex],
         closestIndex);
   };
 
-  bool pointInSegment1 = isProjectionOfBOntoAWithinA(point - prev,
-                                                     closest - prev);
-  if (pointInSegment1) {
-    bool pointInSegment2 = isProjectionOfBOntoAWithinA(point - closest,
-                                                       next - prev);
-    if (pointInSegment2) {
-      return std::min(
-          getF1(),
-          getF2(),
-          [](const Frenet& f1, const Frenet& f2) {return fabs(f1.d) < fabs(f2.d);});
-    } else {
-      return getF1();
-    }
+  auto getFrenetHavingMinimumDCoord =
+      [&]() {
+        return std::min(
+            getFrenetBasedOnPrev2Closest(),
+            getFrenetBasedOnClosest2Next(),
+            [](const Frenet& frenet1, const Frenet& frenet2) {return fabs(frenet1.d) < fabs(frenet2.d);});
+      };
+
+  if (isPointInSegmentPrev2Closest()) {
+    return
+        isPointInSegmentClosest2Next() ?
+            getFrenetHavingMinimumDCoord() : getFrenetBasedOnPrev2Closest();
   } else {
-    return getF2();
+    return getFrenetBasedOnClosest2Next();
   }
 }
 
