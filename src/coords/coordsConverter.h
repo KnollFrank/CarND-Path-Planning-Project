@@ -56,7 +56,7 @@ int modulo(int n, int N) {
 }
 
 bool isProjectionOfBOntoAWithinA(const Point& B, const Point& A) {
-  double s = A.scalarProd(B) / A.len();
+  double s = A.asNormalized().scalarProd(B);
   return 0 <= s && s <= A.len();
 }
 
