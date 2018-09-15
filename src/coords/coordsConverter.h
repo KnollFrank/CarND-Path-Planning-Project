@@ -53,10 +53,6 @@ int CoordsConverter::getIndexOfClosestWaypoint(const Point& point) const {
   return index_of_minimum(distancesFromPoint2Waypoints);
 }
 
-int modulo(int n, int N) {
-  return n >= 0 ? n % N : N - ((-n) % N);
-}
-
 bool isProjectionOfPointOntoLineWithinLineSegment(
     const Point& point, const LineSegment& lineSegment) {
 

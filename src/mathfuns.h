@@ -31,6 +31,10 @@ int sgn(double n) {
   return n >= 0 ? +1 : -1;
 }
 
+int modulo(int n, int N) {
+  return n >= 0 ? n % N : N - ((-n) % N);
+}
+
 template<typename T, typename R, typename unop>
 vector<R> map2(vector<T> v, unop op) {
   vector<R> result(v.size());
