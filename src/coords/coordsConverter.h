@@ -30,8 +30,8 @@ class CoordsConverter {
   Frenet getFrenet(const Point& point) const;
 
  private:
-  Frenet getFrenet(const Point& ontoA, const Point& B, const Point& v_outwards,
-                   int index) const;
+  Frenet getFrenet(const LineSegment& lineSegment, const Point& point,
+                   const Point& v_outwards, int index) const;
   int getIndexOfClosestWaypoint(const Point &point) const;
 
   const MapWaypoints &map_waypoints;
@@ -72,26 +72,32 @@ int sgn(double n) {
   return n >= 0 ? +1 : -1;
 }
 
-Frenet getFrenet2(const Point& ontoA, const Point& B, const Point& v_outwards) {
+Frenet getFrenet2(const LineSegment& lineSegment, const Point& B,
+                  const Point& v_outwards) {
   // TODO: DRY with isProjectionOfPointOntoLineWithinLineSegment
+  // TODO: refactor
+  Point ontoA = lineSegment.end - lineSegment.start;
+  Point b = B - lineSegment.start;
   Point A_norm = ontoA.asNormalized();
-  double s = A_norm.scalarProd(B);
+  double s = A_norm.scalarProd(b);
   const Point B_proj = A_norm * s;
-  Point B_perpendicular = B - B_proj;
+  Point B_perpendicular = b - B_proj;
   double d = B_perpendicular.len()
       * sgn(B_perpendicular.scalarProd(v_outwards));
   return Frenet { s, d };
 }
 
-Frenet CoordsConverter::getFrenet(const Point& ontoA, const Point& B,
-                                  const Point& v_outwards, int index) const {
+Frenet CoordsConverter::getFrenet(const LineSegment& lineSegment,
+                                  const Point& point, const Point& v_outwards,
+                                  int index) const {
+  // TODO: extract method
   const vector<Point> &maps = map_waypoints.map_waypoints;
   double dist = 0;
   for (int i = 0; i < index; i++) {
     dist += maps[i].distanceTo(maps[i + 1]);
   }
 
-  return Frenet { dist, 0 } + getFrenet2(ontoA, B, v_outwards);
+  return Frenet { dist, 0 } + getFrenet2(lineSegment, point, v_outwards);
 }
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
@@ -110,7 +116,7 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
       };
 
   auto getFrenetBasedOnSegmentPrev2Closest = [&]() {
-    return getFrenet(closest - prev, point - prev,
+    return getFrenet(LineSegment {prev, closest}, point,
         map_waypoints.map_outwards[prevIndex],
         prevIndex);
   };
@@ -121,7 +127,7 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
       };
 
   auto getFrenetBasedOnSegmentClosest2Next = [&]() {
-    return getFrenet(next - closest, point - closest,
+    return getFrenet(LineSegment {closest, next}, point,
         map_waypoints.map_outwards[closestIndex],
         closestIndex);
   };
