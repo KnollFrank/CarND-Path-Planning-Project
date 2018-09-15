@@ -62,6 +62,7 @@ int modulo(int n, int N) {
 
 bool isProjectionOfPointOntoLineWithinLineSegment(
     const Point& p, const LineSegment& lineSegment) {
+
   const Point& v = lineSegment.end - lineSegment.start;
   double s = v.asNormalized().scalarProd(p - lineSegment.start);
   return 0 <= s && s <= v.len();
@@ -114,9 +115,10 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
         prevIndex);
   };
 
-  auto isPointInSegmentClosest2Next = [&]() {
-    return isProjectionOfPointOntoLineWithinLineSegment(point, LineSegment {closest, next});
-  };
+  auto isPointInSegmentClosest2Next =
+      [&]() {
+        return isProjectionOfPointOntoLineWithinLineSegment(point, LineSegment {closest, next});
+      };
 
   auto getFrenetBasedOnSegmentClosest2Next = [&]() {
     return getFrenet(next - closest, point - closest,
