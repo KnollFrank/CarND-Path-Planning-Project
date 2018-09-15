@@ -25,7 +25,10 @@ struct LineSegment {
   Point asVector() const;
   double len() const;
   Point getProjectedPoint(const Point& point) const;
+  // TODO: make private
   double getFrenetS(const Point& point) const;
+  double getFrenetD(const Point& point, const Point& v_outwards) const;
+  Frenet getFrenet(const Point& point, const Point& v_outwards) const;
 };
 
 Point LineSegment::asVector() const {
@@ -44,6 +47,18 @@ double LineSegment::getFrenetS(const Point& point) const {
   return asVector().asNormalized().scalarProd(point - start);
 }
 
+double LineSegment::getFrenetD(const Point& point,
+                               const Point& v_outwards) const {
+  Point d_vec = point - getProjectedPoint(point);
+  return d_vec.len() * sgn(d_vec.scalarProd(v_outwards));
+}
+
+Frenet LineSegment::getFrenet(const Point& point,
+                               const Point& v_outwards) const {
+
+  return Frenet { getFrenetS(point), getFrenetD(point, v_outwards) };
+}
+
 class CoordsConverter {
 
  public:
@@ -53,12 +68,8 @@ class CoordsConverter {
  private:
   Frenet getFrenet(const LineSegment& lineSegment, const Point& point,
                    const Point& v_outwards, int waypointIndex) const;
-  Frenet getFrenet2(const LineSegment& lineSegment, const Point& point,
-                    const Point& v_outwards) const;
   int getIndexOfClosestWaypoint(const Point& point) const;
   double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
-  double getFrenetD(const Point& point, const LineSegment& lineSegment,
-                    const Point& v_outwards) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -86,30 +97,11 @@ int modulo(int n, int N) {
   return n >= 0 ? n % N : N - ((-n) % N);
 }
 
-int sgn(double n) {
-  return n >= 0 ? +1 : -1;
-}
-
 bool isProjectionOfPointOntoLineWithinLineSegment(
     const Point& point, const LineSegment& lineSegment) {
 
   double s = lineSegment.getFrenetS(point);
   return 0 <= s && s <= lineSegment.len();
-}
-
-double CoordsConverter::getFrenetD(const Point& point,
-                                   const LineSegment& lineSegment,
-                                   const Point& v_outwards) const {
-  Point d_vec = point - lineSegment.getProjectedPoint(point);
-  return d_vec.len() * sgn(d_vec.scalarProd(v_outwards));
-}
-
-Frenet CoordsConverter::getFrenet2(const LineSegment& lineSegment,
-                                   const Point& point,
-                                   const Point& v_outwards) const {
-
-  double d = getFrenetD(point, lineSegment, v_outwards);
-  return Frenet { lineSegment.getFrenetS(point), d };
 }
 
 double CoordsConverter::getDistanceFromWaypointZeroToWaypoint(
@@ -127,7 +119,7 @@ Frenet CoordsConverter::getFrenet(const LineSegment& lineSegment,
                                   const Point& point, const Point& v_outwards,
                                   int waypointIndex) const {
   return Frenet { getDistanceFromWaypointZeroToWaypoint(waypointIndex), 0 }
-      + getFrenet2(lineSegment, point, v_outwards);
+      + lineSegment.getFrenet(point, v_outwards);
 }
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates

@@ -27,6 +27,10 @@ double meter_per_sec2mph(double t) {
   return t * 2.24;
 }
 
+int sgn(double n) {
+  return n >= 0 ? +1 : -1;
+}
+
 template<typename T, typename R, typename unop>
 vector<R> map2(vector<T> v, unop op) {
   vector<R> result(v.size());
