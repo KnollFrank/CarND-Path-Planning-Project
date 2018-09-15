@@ -54,8 +54,8 @@ int CoordsConverter::getIndexOfClosestWaypoint(const Point& point) const {
   return index_of_minimum(distancesFromPoint2Waypoints);
 }
 
-bool isProjectionOfPointOntoLineWithinLineSegment(
-    const Point& point, const LineSegment& lineSegment) {
+bool isProjectionOfPointWithinLineSegment(const Point& point,
+                                          const LineSegment& lineSegment) {
 
   double s = lineSegment.getFrenetS(point);
   return 0 <= s && s <= lineSegment.len();
@@ -95,16 +95,8 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
       map_waypoints.map_waypoints[closestIndex],
       map_waypoints.map_waypoints[nextIndex] };
 
-  auto isPointInSegmentPrev2Closest = [&]() {
-    return isProjectionOfPointOntoLineWithinLineSegment(point, prev2closest);
-  };
-
   auto getFrenetBasedOnSegmentPrev2Closest = [&]() {
     return getFrenet(prev2closest, point, prevIndex);
-  };
-
-  auto isPointInSegmentClosest2Next = [&]() {
-    return isProjectionOfPointOntoLineWithinLineSegment(point, closest2next);
   };
 
   auto getFrenetBasedOnSegmentClosest2Next = [&]() {
@@ -119,8 +111,8 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
             [](const Frenet& frenet1, const Frenet& frenet2) {return fabs(frenet1.d) < fabs(frenet2.d);});
       };
 
-  if (isPointInSegmentPrev2Closest()) {
-    if (isPointInSegmentClosest2Next()) {
+  if (isProjectionOfPointWithinLineSegment(point, prev2closest)) {
+    if (isProjectionOfPointWithinLineSegment(point, closest2next)) {
       return getFrenetNearest2LineSegment();
     } else {
       return getFrenetBasedOnSegmentPrev2Closest();
