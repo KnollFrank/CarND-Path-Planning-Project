@@ -18,6 +18,7 @@ using namespace std;
 
 struct MapWaypoints {
   vector<Point> map_waypoints;
+  vector<Point> map_outwards;
   vector<double> map_waypoints_s;
 };
 
@@ -50,6 +51,7 @@ MapWaypoints read_map_waypoints() {
     iss >> d_y;
     map_waypoints.map_waypoints.push_back(Point { x, y });
     map_waypoints.map_waypoints_s.push_back(s);
+    map_waypoints.map_outwards.push_back(Point { d_x, d_y });
     map_waypoints_dx.push_back(d_x);
     map_waypoints_dy.push_back(d_y);
   }

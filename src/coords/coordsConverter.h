@@ -39,7 +39,8 @@ vector<double> get_distances_of_point2points(const Point &point,
   });
 }
 
-int ClosestWaypoint2(const Point &point, const MapWaypoints &map_waypoints) {
+int getIndexOfClosestWaypoint(const Point &point,
+                              const MapWaypoints &map_waypoints) {
   auto index_of_minimum = [](const vector<double> &v) {
     return std::distance(
         v.begin(),
@@ -50,63 +51,72 @@ int ClosestWaypoint2(const Point &point, const MapWaypoints &map_waypoints) {
       get_distances_of_point2points(point, map_waypoints.map_waypoints));
 }
 
-int NextWaypoint2(const Point &point, double theta_rad,
-                  const MapWaypoints &map_waypoints) {
+int modulo(int n, int N) {
+  return n >= 0 ? n % N : N - ((-n) % N);
+}
 
-  int closestWaypoint = ClosestWaypoint2(point, map_waypoints);
-  Point map = map_waypoints.map_waypoints[closestWaypoint];
-  double heading = (map - point).getHeading();
-  double angle = fabs(theta_rad - heading);
-  angle = min(2 * pi() - angle, angle);
+bool isProjectionOfBOntoAWithinA(const Point& B, const Point& A) {
+  double s = A.scalarProd(B) / A.len();
+  return 0 <= s && s <= A.len();
+}
 
-  if (angle > pi() / 4) {
-    closestWaypoint++;
-    if (closestWaypoint == map_waypoints.map_waypoints.size()) {
-      closestWaypoint = 0;
-    }
+int sgn(double n) {
+  return n >= 0 ? +1 : -1;
+}
+
+Frenet getFrenet(const Point& ontoA, const Point& B, const Point& v_outwards) {
+  // TODO: DRY with isProjectionOfBOntoAWithinA
+  double s = ontoA.scalarProd(B) / ontoA.len();
+  // TODO: neue Methode A.norm(), d ie A normalisiert.
+  // const Point A_norm = A.norm();
+  // double s = A_norm.scalarProd(B);
+  // const Point B_proj = A_norm * s;
+  const Point B_proj = ontoA * (1.0 / ontoA.len()) * s;
+  double d = (B - B_proj).len() * sgn((B - B_proj).scalarProd(v_outwards));
+  return Frenet { s, d };
+}
+
+Frenet getFrenet_hat(const Point& ontoA, const Point& B,
+                     const Point& v_outwards, int index,
+                     const MapWaypoints &map_waypoints) {
+  const vector<Point> &maps = map_waypoints.map_waypoints;
+  double dist = 0;
+  for (int i = 0; i < index; i++) {
+    dist += maps[i].distanceTo(maps[i + 1]);
   }
 
-  return closestWaypoint;
+  return Frenet { dist, 0 } + getFrenet(ontoA, B, v_outwards);
 }
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 Frenet CoordsConverter::getFrenet(const Point& point) const {
-  const vector<Point> &maps = map_waypoints.map_waypoints;
-  int next_wp = NextWaypoint2(point, 0, map_waypoints);
-
-  int prev_wp;
-  prev_wp = next_wp - 1;
-  if (next_wp == 0) {
-    prev_wp = maps.size() - 1;
+  int closestIndex = getIndexOfClosestWaypoint(point, map_waypoints);
+  int prevIndex = modulo(closestIndex - 1, map_waypoints.map_waypoints.size());
+  int nextIndex = modulo(closestIndex + 1, map_waypoints.map_waypoints.size());
+  Point closest = map_waypoints.map_waypoints[closestIndex];
+  Point prev = map_waypoints.map_waypoints[prevIndex];
+  Point next = map_waypoints.map_waypoints[nextIndex];
+  bool b1 = isProjectionOfBOntoAWithinA(point - prev, closest - prev);
+  bool b2 = isProjectionOfBOntoAWithinA(point - closest, next - prev);
+  if (b1 && !b2) {
+    return getFrenet_hat(closest - prev, point - prev,
+                         map_waypoints.map_outwards[prevIndex], prevIndex,
+                         map_waypoints);
+  } else if (!b1) {
+    return getFrenet_hat(next - closest, point - closest,
+                         map_waypoints.map_outwards[closestIndex], closestIndex,
+                         map_waypoints);
+  } else if (b1 && b2) {
+    Frenet f1 = getFrenet_hat(closest - prev, point - prev,
+                              map_waypoints.map_outwards[prevIndex], prevIndex,
+                              map_waypoints);
+    Frenet f2 = getFrenet_hat(next - closest, point - closest,
+                              map_waypoints.map_outwards[closestIndex],
+                              closestIndex, map_waypoints);
+    return f1.d < f2.d ? f1 : f2;
   }
 
-  const Point n = maps[next_wp] - maps[prev_wp];
-  const Point x = point - maps[prev_wp];
-
-  // find the projection of x onto n
-  double proj_norm = x.scalarProd(n) / n.scalarProd(n);
-  const Point proj = n * proj_norm;
-  double frenet_d = x.distanceTo(proj);
-
-  //see if d value is positive or negative by comparing it to a center point
-
-  const Point center = Point { 1000, 2000 } - maps[prev_wp];
-  double centerToPos = center.distanceTo(x);
-  double centerToRef = center.distanceTo(proj);
-
-  if (centerToPos <= centerToRef) {
-    frenet_d *= -1;
-  }
-
-  // calculate s value
-  double frenet_s = 0;
-  for (int i = 0; i < prev_wp; i++) {
-    frenet_s += maps[i].distanceTo(maps[i + 1]);
-  }
-
-  frenet_s += proj.len();
-
-  return Frenet { frenet_s, frenet_d };
+  return Frenet { 0, 0 };
 }
 
 #endif /* COORDS_COORDSCONVERTER_H_ */
