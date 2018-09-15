@@ -7,8 +7,8 @@
 
 class LineSegment {
  public:
-  Point start;
-  Point end;
+  const Point start;
+  const Point end;
 
   double len() const;
   double getFrenetS(const Point& point) const;
