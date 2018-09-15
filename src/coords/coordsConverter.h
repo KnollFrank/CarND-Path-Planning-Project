@@ -31,7 +31,7 @@ class CoordsConverter {
 
  private:
   Frenet getFrenet(const LineSegment& lineSegment, const Point& point,
-                   const Point& v_outwards, int index) const;
+                   const Point& v_outwards, int waypointIndex) const;
   Frenet getFrenet2(const LineSegment& lineSegment, const Point& B,
                     const Point& v_outwards) const;
   int getIndexOfClosestWaypoint(const Point &point) const;
@@ -104,8 +104,8 @@ double CoordsConverter::getDistanceFromWaypointZeroToWaypoint(
 
 Frenet CoordsConverter::getFrenet(const LineSegment& lineSegment,
                                   const Point& point, const Point& v_outwards,
-                                  int index) const {
-  return Frenet { getDistanceFromWaypointZeroToWaypoint(index), 0 }
+                                  int waypointIndex) const {
+  return Frenet { getDistanceFromWaypointZeroToWaypoint(waypointIndex), 0 }
       + getFrenet2(lineSegment, point, v_outwards);
 }
 
