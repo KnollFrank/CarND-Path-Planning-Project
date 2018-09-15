@@ -27,6 +27,8 @@ class CoordsConverter {
  private:
   Frenet getFrenet(const Point& ontoA, const Point& B, const Point& v_outwards,
                    int index) const;
+  int getIndexOfClosestWaypoint(const Point &point) const;
+  vector<double> getDistances2WaypointsFrom(const Point &point) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -35,23 +37,23 @@ CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
 }
 
-vector<double> get_distances_of_point2points(const Point &point,
-                                             vector<Point> points) {
-  return map2<Point, double>(points, [&point](const Point& p) {
-    return point.distanceTo(p);
-  });
+vector<double> CoordsConverter::getDistances2WaypointsFrom(
+    const Point &point) const {
+
+  return map2<Point, double>(map_waypoints.map_waypoints,
+                             [&point](const Point& p) {
+                               return point.distanceTo(p);
+                             });
 }
 
-int getIndexOfClosestWaypoint(const Point &point,
-                              const MapWaypoints &map_waypoints) {
+int CoordsConverter::getIndexOfClosestWaypoint(const Point &point) const {
   auto index_of_minimum = [](const vector<double> &v) {
     return std::distance(
         v.begin(),
         std::min_element(v.begin(), v.end()));
   };
 
-  return index_of_minimum(
-      get_distances_of_point2points(point, map_waypoints.map_waypoints));
+  return index_of_minimum(getDistances2WaypointsFrom(point));
 }
 
 int modulo(int n, int N) {
@@ -91,7 +93,7 @@ Frenet CoordsConverter::getFrenet(const Point& ontoA, const Point& B,
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 Frenet CoordsConverter::getFrenet(const Point& point) const {
-  int closestIndex = getIndexOfClosestWaypoint(point, map_waypoints);
+  int closestIndex = getIndexOfClosestWaypoint(point);
   int prevIndex = modulo(closestIndex - 1, map_waypoints.map_waypoints.size());
   int nextIndex = modulo(closestIndex + 1, map_waypoints.map_waypoints.size());
 
