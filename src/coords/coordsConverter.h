@@ -69,18 +69,17 @@ int sgn(double n) {
 
 Frenet getFrenet2(const Point& ontoA, const Point& B, const Point& v_outwards) {
   // TODO: DRY with isProjectionOfBOntoAWithinA
-  double s = ontoA.scalarProd(B) / ontoA.len();
-  // TODO: neue Methode A.norm(), d ie A normalisiert.
-  // const Point A_norm = A.norm();
-  // double s = A_norm.scalarProd(B);
-  // const Point B_proj = A_norm * s;
-  const Point B_proj = ontoA * (1.0 / ontoA.len()) * s;
-  double d = (B - B_proj).len() * sgn((B - B_proj).scalarProd(v_outwards));
+  Point A_norm = ontoA.asNormalized();
+  double s = A_norm.scalarProd(B);
+  const Point B_proj = A_norm * s;
+  Point B_perpendicular = B - B_proj;
+  double d = B_perpendicular.len() * sgn(B_perpendicular.scalarProd(v_outwards));
   return Frenet { s, d };
 }
 
 Frenet CoordsConverter::getFrenet_hat(const Point& ontoA, const Point& B,
-                                      const Point& v_outwards, int index) const {
+                                      const Point& v_outwards,
+                                      int index) const {
   const vector<Point> &maps = map_waypoints.map_waypoints;
   double dist = 0;
   for (int i = 0; i < index; i++) {
