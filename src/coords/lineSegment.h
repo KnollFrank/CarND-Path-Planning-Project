@@ -5,17 +5,19 @@
 #include "frenet.h"
 #include "../mathfuns.h"
 
-struct LineSegment {
+class LineSegment {
+ public:
   Point start;
   Point end;
 
-  Point asVector() const;
   double len() const;
-  Point getProjectedPoint(const Point& point) const;
-  // TODO: make private
   double getFrenetS(const Point& point) const;
-  double getFrenetD(const Point& point, const Point& v_outwards) const;
   Frenet getFrenet(const Point& point, const Point& v_outwards) const;
+
+ private:
+  Point asVector() const;
+  Point getProjectedPoint(const Point& point) const;
+  double getFrenetD(const Point& point, const Point& v_outwards) const;
 };
 
 Point LineSegment::asVector() const {
@@ -41,7 +43,7 @@ double LineSegment::getFrenetD(const Point& point,
 }
 
 Frenet LineSegment::getFrenet(const Point& point,
-                               const Point& v_outwards) const {
+                              const Point& v_outwards) const {
 
   return Frenet { getFrenetS(point), getFrenetD(point, v_outwards) };
 }
