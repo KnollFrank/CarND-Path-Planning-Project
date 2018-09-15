@@ -29,6 +29,11 @@ class CoordsConverter {
  private:
   int getIndexOfClosestWaypoint(const Point& point) const;
   int adaptWaypointIndex(int waypointIndex) const;
+  LineSegment createLineSegment(const int startWaypointIndex,
+                                const int endWaypointIndex) const;
+  const CoordSys createCoordSys(const Point& point,
+                                const int startWaypointIndex,
+                                const int endWaypointIndex) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -56,24 +61,34 @@ int CoordsConverter::adaptWaypointIndex(int waypointIndex) const {
   return modulo(waypointIndex, map_waypoints.map_waypoints.size());
 }
 
+LineSegment CoordsConverter::createLineSegment(
+    const int startWaypointIndex, const int endWaypointIndex) const {
+
+  return LineSegment { map_waypoints.map_waypoints[startWaypointIndex],
+      map_waypoints.map_waypoints[endWaypointIndex] };
+}
+
+const CoordSys CoordsConverter::createCoordSys(
+    const Point& point, const int startWaypointIndex,
+    const int endWaypointIndex) const {
+
+  return CoordSys(map_waypoints, point,
+                  createLineSegment(startWaypointIndex, endWaypointIndex),
+                  startWaypointIndex);
+}
+
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 Frenet CoordsConverter::getFrenet(const Point& point) const {
   const int closestIndex = getIndexOfClosestWaypoint(point);
   const int prevIndex = adaptWaypointIndex(closestIndex - 1);
   const int nextIndex = adaptWaypointIndex(closestIndex + 1);
 
-  const CoordSys coordSysPrev2Closest(
-      map_waypoints, point, LineSegment {
-          map_waypoints.map_waypoints[prevIndex],
-          map_waypoints.map_waypoints[closestIndex] },
-      prevIndex);
-  const CoordSys coordSysClosest2Next(
-      map_waypoints, point, LineSegment {
-          map_waypoints.map_waypoints[closestIndex],
-          map_waypoints.map_waypoints[nextIndex] },
-      closestIndex);
+  const CoordSys coordSysPrev2Closest = createCoordSys(point, prevIndex,
+                                                       closestIndex);
+  const CoordSys coordSysClosest2Next = createCoordSys(point, closestIndex,
+                                                       nextIndex);
 
-  auto getFrenetNearest2LineSegment =
+  auto getFrenetOfNearestLineSegment =
       [&]() {
         return std::min(
             coordSysPrev2Closest.getFrenet(),
@@ -83,7 +98,7 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
 
   if (coordSysPrev2Closest.isProjectionOfPointWithinLineSegment()) {
     if (coordSysClosest2Next.isProjectionOfPointWithinLineSegment()) {
-      return getFrenetNearest2LineSegment();
+      return getFrenetOfNearestLineSegment();
     } else {
       return coordSysPrev2Closest.getFrenet();
     }
