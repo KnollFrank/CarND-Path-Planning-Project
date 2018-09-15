@@ -96,17 +96,19 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   Point closest = map_waypoints.map_waypoints[closestIndex];
   Point prev = map_waypoints.map_waypoints[prevIndex];
   Point next = map_waypoints.map_waypoints[nextIndex];
-  bool b1 = isProjectionOfBOntoAWithinA(point - prev, closest - prev);
-  bool b2 = isProjectionOfBOntoAWithinA(point - closest, next - prev);
-  if (b1 && !b2) {
+  bool pointInSegment1 = isProjectionOfBOntoAWithinA(point - prev,
+                                                     closest - prev);
+  bool pointInSegment2 = isProjectionOfBOntoAWithinA(point - closest,
+                                                     next - prev);
+  if (pointInSegment1 && !pointInSegment2) {
     return getFrenet_hat(closest - prev, point - prev,
                          map_waypoints.map_outwards[prevIndex], prevIndex,
                          map_waypoints);
-  } else if (!b1) {
+  } else if (!pointInSegment1) {
     return getFrenet_hat(next - closest, point - closest,
                          map_waypoints.map_outwards[closestIndex], closestIndex,
                          map_waypoints);
-  } else if (b1 && b2) {
+  } else {  // pointInSegment1 && pointInSegment2
     Frenet f1 = getFrenet_hat(closest - prev, point - prev,
                               map_waypoints.map_outwards[prevIndex], prevIndex,
                               map_waypoints);
@@ -115,8 +117,6 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
                               closestIndex, map_waypoints);
     return fabs(f1.d) < fabs(f2.d) ? f1 : f2;
   }
-
-  return Frenet { 0, 0 };
 }
 
 #endif /* COORDS_COORDSCONVERTER_H_ */
