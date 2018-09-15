@@ -101,16 +101,12 @@ const Point CoordsConverter::projectPointOntoLineSegment(
 Frenet CoordsConverter::getFrenet2(const LineSegment& lineSegment,
                                    const Point& point,
                                    const Point& v_outwards) const {
-  Point point_lineseg = point - lineSegment.start;
-  Point lineSegmentNormalized = lineSegment.asVector().asNormalized();
 
-  double s = getFrenetS(lineSegment, point);
-  const Point pointProjectedOntoLineSegment = projectPointOntoLineSegment(
-      point, lineSegment);
-  Point B_perpendicular = point_lineseg - pointProjectedOntoLineSegment;
+  Point B_perpendicular = (point - lineSegment.start)
+      - projectPointOntoLineSegment(point, lineSegment);
   double d = B_perpendicular.len()
       * sgn(B_perpendicular.scalarProd(v_outwards));
-  return Frenet { s, d };
+  return Frenet { getFrenetS(lineSegment, point), d };
 }
 
 double CoordsConverter::getDistanceFromWaypointZeroToWaypoint(
