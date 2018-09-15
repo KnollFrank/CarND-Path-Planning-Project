@@ -21,7 +21,18 @@ using namespace std;
 struct LineSegment {
   Point start;
   Point end;
+
+  Point asVector() const;
+  double len() const;
 };
+
+Point LineSegment::asVector() const {
+  return end - start;
+}
+
+double LineSegment::len() const {
+  return asVector().len();
+}
 
 class CoordsConverter {
 
@@ -32,9 +43,9 @@ class CoordsConverter {
  private:
   Frenet getFrenet(const LineSegment& lineSegment, const Point& point,
                    const Point& v_outwards, int waypointIndex) const;
-  Frenet getFrenet2(const LineSegment& lineSegment, const Point& B,
+  Frenet getFrenet2(const LineSegment& lineSegment, const Point& point,
                     const Point& v_outwards) const;
-  int getIndexOfClosestWaypoint(const Point &point) const;
+  int getIndexOfClosestWaypoint(const Point& point) const;
   double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
 
   const MapWaypoints &map_waypoints;
@@ -44,8 +55,8 @@ CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
 }
 
-int CoordsConverter::getIndexOfClosestWaypoint(const Point &point) const {
-  auto index_of_minimum = [](const vector<double> &v) {
+int CoordsConverter::getIndexOfClosestWaypoint(const Point& point) const {
+  auto index_of_minimum = [](const vector<double>& v) {
     return std::distance(
         v.begin(),
         std::min_element(v.begin(), v.end()));
@@ -63,29 +74,32 @@ int modulo(int n, int N) {
   return n >= 0 ? n % N : N - ((-n) % N);
 }
 
-bool isProjectionOfPointOntoLineWithinLineSegment(
-    const Point& p, const LineSegment& lineSegment) {
-
-  const Point& v = lineSegment.end - lineSegment.start;
-  double s = v.asNormalized().scalarProd(p - lineSegment.start);
-  return 0 <= s && s <= v.len();
-}
-
 int sgn(double n) {
   return n >= 0 ? +1 : -1;
 }
 
+double getFrenetS(const LineSegment& lineSegment, const Point& point) {
+  return lineSegment.asVector().asNormalized().scalarProd(
+      point - lineSegment.start);
+}
+
+bool isProjectionOfPointOntoLineWithinLineSegment(
+    const Point& point, const LineSegment& lineSegment) {
+
+  double s = getFrenetS(lineSegment, point);
+  return 0 <= s && s <= lineSegment.len();
+}
+
 Frenet CoordsConverter::getFrenet2(const LineSegment& lineSegment,
-                                   const Point& B,
+                                   const Point& point,
                                    const Point& v_outwards) const {
-  // TODO: DRY with isProjectionOfPointOntoLineWithinLineSegment
-  // TODO: refactor
-  Point ontoA = lineSegment.end - lineSegment.start;
-  Point b = B - lineSegment.start;
-  Point A_norm = ontoA.asNormalized();
-  double s = A_norm.scalarProd(b);
-  const Point B_proj = A_norm * s;
-  Point B_perpendicular = b - B_proj;
+  Point point_lineseg = point - lineSegment.start;
+  Point lineSegmentNormalized = (lineSegment.end - lineSegment.start)
+      .asNormalized();
+
+  double s = getFrenetS(lineSegment, point);
+  const Point pointProjectedOntoLineSegment = lineSegmentNormalized * s;
+  Point B_perpendicular = point_lineseg - pointProjectedOntoLineSegment;
   double d = B_perpendicular.len()
       * sgn(B_perpendicular.scalarProd(v_outwards));
   return Frenet { s, d };
