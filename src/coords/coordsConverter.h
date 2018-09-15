@@ -25,8 +25,8 @@ class CoordsConverter {
   Frenet getFrenet(const Point& point) const;
 
  private:
-  Frenet getFrenet_hat(const Point& ontoA, const Point& B,
-                       const Point& v_outwards, int index) const;
+  Frenet getFrenet(const Point& ontoA, const Point& B, const Point& v_outwards,
+                   int index) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -73,13 +73,13 @@ Frenet getFrenet2(const Point& ontoA, const Point& B, const Point& v_outwards) {
   double s = A_norm.scalarProd(B);
   const Point B_proj = A_norm * s;
   Point B_perpendicular = B - B_proj;
-  double d = B_perpendicular.len() * sgn(B_perpendicular.scalarProd(v_outwards));
+  double d = B_perpendicular.len()
+      * sgn(B_perpendicular.scalarProd(v_outwards));
   return Frenet { s, d };
 }
 
-Frenet CoordsConverter::getFrenet_hat(const Point& ontoA, const Point& B,
-                                      const Point& v_outwards,
-                                      int index) const {
+Frenet CoordsConverter::getFrenet(const Point& ontoA, const Point& B,
+                                  const Point& v_outwards, int index) const {
   const vector<Point> &maps = map_waypoints.map_waypoints;
   double dist = 0;
   for (int i = 0; i < index; i++) {
@@ -98,13 +98,13 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   Point prev = map_waypoints.map_waypoints[prevIndex];
   Point next = map_waypoints.map_waypoints[nextIndex];
   auto getF1 = [&]() {
-    return getFrenet_hat(closest - prev, point - prev,
+    return getFrenet(closest - prev, point - prev,
         map_waypoints.map_outwards[prevIndex],
         prevIndex);
   };
 
   auto getF2 = [&]() {
-    return getFrenet_hat(next - closest, point - closest,
+    return getFrenet(next - closest, point - closest,
         map_waypoints.map_outwards[closestIndex],
         closestIndex);
   };
