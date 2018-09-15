@@ -32,7 +32,10 @@ class CoordsConverter {
  private:
   Frenet getFrenet(const LineSegment& lineSegment, const Point& point,
                    const Point& v_outwards, int index) const;
+  Frenet getFrenet2(const LineSegment& lineSegment, const Point& B,
+                    const Point& v_outwards) const;
   int getIndexOfClosestWaypoint(const Point &point) const;
+  double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -72,8 +75,9 @@ int sgn(double n) {
   return n >= 0 ? +1 : -1;
 }
 
-Frenet getFrenet2(const LineSegment& lineSegment, const Point& B,
-                  const Point& v_outwards) {
+Frenet CoordsConverter::getFrenet2(const LineSegment& lineSegment,
+                                   const Point& B,
+                                   const Point& v_outwards) const {
   // TODO: DRY with isProjectionOfPointOntoLineWithinLineSegment
   // TODO: refactor
   Point ontoA = lineSegment.end - lineSegment.start;
@@ -87,17 +91,22 @@ Frenet getFrenet2(const LineSegment& lineSegment, const Point& B,
   return Frenet { s, d };
 }
 
+double CoordsConverter::getDistanceFromWaypointZeroToWaypoint(
+    int waypointIndex) const {
+
+  const vector<Point>& maps = map_waypoints.map_waypoints;
+  double dist = 0;
+  for (int i = 0; i < waypointIndex; i++) {
+    dist += maps[i].distanceTo(maps[i + 1]);
+  }
+  return dist;
+}
+
 Frenet CoordsConverter::getFrenet(const LineSegment& lineSegment,
                                   const Point& point, const Point& v_outwards,
                                   int index) const {
-  // TODO: extract method
-  const vector<Point> &maps = map_waypoints.map_waypoints;
-  double dist = 0;
-  for (int i = 0; i < index; i++) {
-    dist += maps[i].distanceTo(maps[i + 1]);
-  }
-
-  return Frenet { dist, 0 } + getFrenet2(lineSegment, point, v_outwards);
+  return Frenet { getDistanceFromWaypointZeroToWaypoint(index), 0 }
+      + getFrenet2(lineSegment, point, v_outwards);
 }
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
