@@ -128,9 +128,11 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
       };
 
   if (isPointInSegmentPrev2Closest()) {
-    return
-        isPointInSegmentClosest2Next() ?
-            getFrenetHavingMinimumDCoord() : getFrenetBasedOnPrev2Closest();
+    if (isPointInSegmentClosest2Next()) {
+      return getFrenetHavingMinimumDCoord();
+    } else {
+      return getFrenetBasedOnPrev2Closest();
+    }
   } else {
     return getFrenetBasedOnClosest2Next();
   }
