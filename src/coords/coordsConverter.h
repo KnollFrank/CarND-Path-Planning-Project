@@ -25,6 +25,9 @@ class CoordsConverter {
   Frenet getFrenet(const Point& point) const;
 
  private:
+  Frenet getFrenet_hat(const Point& ontoA, const Point& B,
+                       const Point& v_outwards, int index) const;
+
   const MapWaypoints &map_waypoints;
 };
 
@@ -64,7 +67,7 @@ int sgn(double n) {
   return n >= 0 ? +1 : -1;
 }
 
-Frenet getFrenet(const Point& ontoA, const Point& B, const Point& v_outwards) {
+Frenet getFrenet2(const Point& ontoA, const Point& B, const Point& v_outwards) {
   // TODO: DRY with isProjectionOfBOntoAWithinA
   double s = ontoA.scalarProd(B) / ontoA.len();
   // TODO: neue Methode A.norm(), d ie A normalisiert.
@@ -76,16 +79,15 @@ Frenet getFrenet(const Point& ontoA, const Point& B, const Point& v_outwards) {
   return Frenet { s, d };
 }
 
-Frenet getFrenet_hat(const Point& ontoA, const Point& B,
-                     const Point& v_outwards, int index,
-                     const MapWaypoints &map_waypoints) {
+Frenet CoordsConverter::getFrenet_hat(const Point& ontoA, const Point& B,
+                                      const Point& v_outwards, int index) const {
   const vector<Point> &maps = map_waypoints.map_waypoints;
   double dist = 0;
   for (int i = 0; i < index; i++) {
     dist += maps[i].distanceTo(maps[i + 1]);
   }
 
-  return Frenet { dist, 0 } + getFrenet(ontoA, B, v_outwards);
+  return Frenet { dist, 0 } + getFrenet2(ontoA, B, v_outwards);
 }
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
@@ -99,13 +101,13 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   auto getF1 = [&]() {
     return getFrenet_hat(closest - prev, point - prev,
         map_waypoints.map_outwards[prevIndex],
-        prevIndex, map_waypoints);
+        prevIndex);
   };
 
   auto getF2 = [&]() {
     return getFrenet_hat(next - closest, point - closest,
         map_waypoints.map_outwards[closestIndex],
-        closestIndex, map_waypoints);
+        closestIndex);
   };
 
   bool pointInSegment1 = isProjectionOfBOntoAWithinA(point - prev,
