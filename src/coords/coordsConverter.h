@@ -80,13 +80,10 @@ const CoordSys CoordsConverter::createCoordSys(
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 Frenet CoordsConverter::getFrenet(const Point& point) const {
   const int closestIndex = getIndexOfClosestWaypoint(point);
-  const int prevIndex = adaptWaypointIndex(closestIndex - 1);
-  const int nextIndex = adaptWaypointIndex(closestIndex + 1);
-
-  const CoordSys coordSysPrev2Closest = createCoordSys(point, prevIndex,
-                                                       closestIndex);
-  const CoordSys coordSysClosest2Next = createCoordSys(point, closestIndex,
-                                                       nextIndex);
+  const CoordSys coordSysPrev2Closest = createCoordSys(
+      point, adaptWaypointIndex(closestIndex - 1), closestIndex);
+  const CoordSys coordSysClosest2Next = createCoordSys(
+      point, closestIndex, adaptWaypointIndex(closestIndex + 1));
 
   auto getFrenetOfNearestLineSegment =
       [&]() {
