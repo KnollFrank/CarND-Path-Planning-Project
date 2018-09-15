@@ -96,8 +96,6 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   Point closest = map_waypoints.map_waypoints[closestIndex];
   Point prev = map_waypoints.map_waypoints[prevIndex];
   Point next = map_waypoints.map_waypoints[nextIndex];
-  bool pointInSegment1 = isProjectionOfBOntoAWithinA(point - prev,
-                                                     closest - prev);
   auto getF1 = [&]() {
     return getFrenet_hat(closest - prev, point - prev,
         map_waypoints.map_outwards[prevIndex],
@@ -110,6 +108,8 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
         closestIndex, map_waypoints);
   };
 
+  bool pointInSegment1 = isProjectionOfBOntoAWithinA(point - prev,
+                                                     closest - prev);
   if (pointInSegment1) {
     bool pointInSegment2 = isProjectionOfBOntoAWithinA(point - closest,
                                                        next - prev);
