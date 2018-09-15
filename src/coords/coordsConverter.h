@@ -113,7 +113,7 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
     Frenet f2 = getFrenet_hat(next - closest, point - closest,
                               map_waypoints.map_outwards[closestIndex],
                               closestIndex, map_waypoints);
-    return f1.d < f2.d ? f1 : f2;
+    return fabs(f1.d) < fabs(f2.d) ? f1 : f2;
   }
 
   return Frenet { 0, 0 };

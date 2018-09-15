@@ -13,19 +13,19 @@ TEST(CoordsConverterTest, should_get_frenet) {
   MapWaypoints map_waypoints;
 
   map_waypoints.map_waypoints.push_back(Point { 0, 10 });
-  map_waypoints.map_outwards.push_back(Point { 0, 1 });
+  map_waypoints.map_outwards.push_back(Point { -1, 1 });
 
   map_waypoints.map_waypoints.push_back(Point { 0, 5 });
   map_waypoints.map_outwards.push_back(Point { -1, 0 });
 
   map_waypoints.map_waypoints.push_back(Point { 5, 0 });
-  map_waypoints.map_outwards.push_back(Point { 0, -1 });
+  map_waypoints.map_outwards.push_back(Point { -1, -1 });
 
   map_waypoints.map_waypoints.push_back(Point { 10, 0 });
-  map_waypoints.map_outwards.push_back(Point { 0, -1 });
+  map_waypoints.map_outwards.push_back(Point { 1, -1 });
 
   map_waypoints.map_waypoints.push_back(Point { 10, 10 });
-  map_waypoints.map_outwards.push_back(Point { 0, 1 });
+  map_waypoints.map_outwards.push_back(Point { 1, 1 });
 
   CoordsConverter coordsConverter(map_waypoints);
 
@@ -39,6 +39,6 @@ TEST(CoordsConverterTest, should_get_frenet) {
   expect_near((Frenet { s1 + s2 - 1 / sqrt(2), 1 / sqrt(2) }),
               coordsConverter.getFrenet(Point { 4, 0 }));
 
-  expect_near((Frenet { s1 + s2 + 2, -1 }), coordsConverter.getFrenet(Point { 7,
-      1 }));
+  expect_near((Frenet { s1 + s2 + 4, -0.5 }), coordsConverter.getFrenet(Point {
+      9, 0.5 }));
 }
