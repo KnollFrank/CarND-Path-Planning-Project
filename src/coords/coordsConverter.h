@@ -28,22 +28,12 @@ class CoordsConverter {
   Frenet getFrenet(const Point& ontoA, const Point& B, const Point& v_outwards,
                    int index) const;
   int getIndexOfClosestWaypoint(const Point &point) const;
-  vector<double> getDistances2WaypointsFrom(const Point &point) const;
 
   const MapWaypoints &map_waypoints;
 };
 
 CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
-}
-
-vector<double> CoordsConverter::getDistances2WaypointsFrom(
-    const Point &point) const {
-
-  return map2<Point, double>(map_waypoints.map_waypoints,
-                             [&point](const Point& p) {
-                               return point.distanceTo(p);
-                             });
 }
 
 int CoordsConverter::getIndexOfClosestWaypoint(const Point &point) const {
@@ -53,7 +43,12 @@ int CoordsConverter::getIndexOfClosestWaypoint(const Point &point) const {
         std::min_element(v.begin(), v.end()));
   };
 
-  return index_of_minimum(getDistances2WaypointsFrom(point));
+  vector<double> distancesFromPoint2Waypoints = map2<Point, double>(
+      map_waypoints.map_waypoints, [&point](const Point& p) {
+        return point.distanceTo(p);
+      });
+
+  return index_of_minimum(distancesFromPoint2Waypoints);
 }
 
 int modulo(int n, int N) {
