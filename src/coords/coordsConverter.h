@@ -121,7 +121,9 @@ Point CoordsConverter::getXY(const Frenet& pos) const {
   // the x,y,s along the segment
   double seg_s = pos.s - maps_s[prev_wp];
 
+  // TODO: Point::fromAngle(heading) == maps[wp2] - maps[prev_wp], oder?
   Point seg = maps[prev_wp] + Point::fromAngle(heading) * seg_s;
+  // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
   double perp_heading = heading - pi() / 2;
 
   return seg + Point::fromAngle(perp_heading) * pos.d;
