@@ -25,6 +25,7 @@ class CoordsConverter {
  public:
   CoordsConverter(const MapWaypoints& map_waypoints);
   Frenet getFrenet(const Point& point) const;
+  Point getXY(const Frenet& pos) const;
 
  private:
   int getIndexOfClosestWaypoint(const Point& point) const;
@@ -102,6 +103,28 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   } else {
     return coordSysClosest2Next.getFrenet();
   }
+}
+
+Point CoordsConverter::getXY(const Frenet& pos) const {
+  const vector<double> &maps_s = map_waypoints.map_waypoints_s;
+  const vector<Point> &maps = map_waypoints.map_waypoints;
+
+  int prev_wp = -1;
+
+  while (pos.s > maps_s[prev_wp + 1] && (prev_wp < (int) (maps_s.size() - 1))) {
+    prev_wp++;
+  }
+
+  int wp2 = (prev_wp + 1) % maps.size();
+
+  double heading = (maps[wp2] - maps[prev_wp]).getHeading();
+  // the x,y,s along the segment
+  double seg_s = pos.s - maps_s[prev_wp];
+
+  Point seg = maps[prev_wp] + Point::fromAngle(heading) * seg_s;
+  double perp_heading = heading - pi() / 2;
+
+  return seg + Point::fromAngle(perp_heading) * pos.d;
 }
 
 #endif /* COORDS_COORDSCONVERTER_H_ */

@@ -20,7 +20,18 @@ struct MapWaypoints {
   vector<Point> map_waypoints;
   vector<Point> map_outwards;
   vector<double> map_waypoints_s;
+
+  double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
 };
+
+double MapWaypoints::getDistanceFromWaypointZeroToWaypoint(
+    int waypointIndex) const {
+  double dist = 0;
+  for (int i = 0; i < waypointIndex; i++) {
+    dist += map_waypoints[i].distanceTo(map_waypoints[i + 1]);
+  }
+  return dist;
+}
 
 // Load up map values for waypoint's x,y,s and d normalized normal vectors
 MapWaypoints read_map_waypoints() {

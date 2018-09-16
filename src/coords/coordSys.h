@@ -33,17 +33,9 @@ CoordSys::CoordSys(const MapWaypoints& _map_waypoints, const Point& _point,
 }
 
 Frenet CoordSys::getFrenet() const {
-  return Frenet { getDistanceFromWaypointZeroToWaypoint(), 0 }
+  return Frenet { map_waypoints.getDistanceFromWaypointZeroToWaypoint(
+      waypointIndex), 0 }
       + lineSegment.getFrenet(point, map_waypoints.map_outwards[waypointIndex]);
-}
-
-double CoordSys::getDistanceFromWaypointZeroToWaypoint() const {
-  const vector<Point>& maps = map_waypoints.map_waypoints;
-  double dist = 0;
-  for (int i = 0; i < waypointIndex; i++) {
-    dist += maps[i].distanceTo(maps[i + 1]);
-  }
-  return dist;
 }
 
 bool CoordSys::isProjectionOfPointWithinLineSegment() const {
