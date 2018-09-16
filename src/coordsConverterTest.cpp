@@ -33,12 +33,12 @@ TEST(CoordsConverterTest, should_get_frenet) {
   double s1 = 5;
   double s2 = sqrt(50);
 
-  expect_near((Frenet { s1 + 1 / sqrt(2), 1 / sqrt(2) }),
+  expect_near(Frenet { s1 + 1 / sqrt(2), 1 / sqrt(2) },
               coordsConverter.getFrenet(Point { 0, 4 }));
 
-  expect_near((Frenet { s1 + s2 - 1 / sqrt(2), 1 / sqrt(2) }),
+  expect_near(Frenet { s1 + s2 - 1 / sqrt(2), 1 / sqrt(2) },
               coordsConverter.getFrenet(Point { 4, 0 }));
 
-  expect_near((Frenet { s1 + s2 + 4, -0.5 }), coordsConverter.getFrenet(Point {
-      9, 0.5 }));
+  expect_near(Frenet { s1 + s2 + 4, -0.5 }, coordsConverter.getFrenet(Point { 9,
+      0.5 }));
 }
