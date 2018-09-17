@@ -26,7 +26,7 @@ class CoordsConverter {
  public:
   CoordsConverter(const MapWaypoints& map_waypoints);
   Frenet getFrenet(const Point& point) const;
-  Point getXY(const Frenet& pos) const;
+  Point getXY(const Frenet& point) const;
 
  private:
   int getIndexOfClosestWaypoint(const Point& point) const;
@@ -36,9 +36,10 @@ class CoordsConverter {
   const CoordSys createCoordSys(const Point& point,
                                 const int startWaypointIndex,
                                 const int endWaypointIndex) const;
-  int getStartIndex(const Frenet& pos) const;
+  int getStartIndex(const Frenet& point) const;
   Point getClockwisePerpendicular(Point v) const;
   CoordinateSystem createCoordinateSystem(const LineSegment& lineSegment) const;
+  LineSegment getLineSegmentContaining(const Frenet& point) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -109,9 +110,9 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   }
 }
 
-int CoordsConverter::getStartIndex(const Frenet& pos) const {
+int CoordsConverter::getStartIndex(const Frenet& point) const {
   int startIndex = -1;
-  while (pos.s > map_waypoints.map_waypoints_s[startIndex + 1]
+  while (point.s > map_waypoints.map_waypoints_s[startIndex + 1]
       && (startIndex < (int) ((map_waypoints.map_waypoints_s.size() - 1)))) {
     startIndex++;
   }
@@ -129,13 +130,18 @@ CoordinateSystem CoordsConverter::createCoordinateSystem(
   return CoordinateSystem { lineSegment.start, e1, getClockwisePerpendicular(e1) };
 }
 
-Point CoordsConverter::getXY(const Frenet& pos) const {
-  int startIndex = getStartIndex(pos);
+LineSegment CoordsConverter::getLineSegmentContaining(const Frenet& point) const {
+  int startIndex = getStartIndex(point);
   LineSegment lineSegment = map_waypoints.getLineSegment(
       startIndex, adaptWaypointIndex(startIndex + 1));
+  return lineSegment;
+}
+
+Point CoordsConverter::getXY(const Frenet& point) const {
+  LineSegment lineSegment = getLineSegmentContaining(point);
   CoordinateSystem coordinateSystem = createCoordinateSystem(lineSegment);
   return coordinateSystem.transform(
-      pos.s - map_waypoints.map_waypoints_s[startIndex], pos.d);
+      point.s - map_waypoints.map_waypoints_s[getStartIndex(point)], point.d);
 }
 
 #endif /* COORDS_COORDSCONVERTER_H_ */
