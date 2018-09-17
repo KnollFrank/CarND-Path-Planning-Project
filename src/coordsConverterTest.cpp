@@ -14,12 +14,6 @@ void expect_near(const Point& expected, const Point& actual) {
   EXPECT_NEAR(expected.y, actual.y, abs_error);
 }
 
-void test_convert(const CoordsConverter &coordsConverter, const Point& point,
-                  const Frenet& frenet) {
-  expect_near(frenet, coordsConverter.getFrenet(point));
-  expect_near(point, coordsConverter.getXY(frenet));
-}
-
 TEST(CoordsConverterTest, should_convert) {
   // GIVEN
   MapWaypoints map_waypoints;
@@ -46,15 +40,16 @@ TEST(CoordsConverterTest, should_convert) {
 
   CoordsConverter coordsConverter(map_waypoints);
 
+  auto test_convert = [&](const Point& point, const Frenet& frenet) {
+    expect_near(frenet, coordsConverter.getFrenet(point));
+    expect_near(point, coordsConverter.getXY(frenet));
+  };
+
   // WHEN & THEN
   double s1 = 5;
   double s2 = sqrt(50);
 
-  test_convert(coordsConverter, Point { 0, 4 },
-               Frenet { s1 + 1 / sqrt(2), 1 / sqrt(2) });
-
-  test_convert(coordsConverter, Point { 4, 0 },
-               Frenet { s1 + s2 - 1 / sqrt(2), 1 / sqrt(2) });
-
-  test_convert(coordsConverter, Point { 9, 0.5 }, Frenet { s1 + s2 + 4, -0.5 });
+  test_convert(Point { 0, 4 }, Frenet { s1 + 1 / sqrt(2), 1 / sqrt(2) });
+  test_convert(Point { 4, 0 }, Frenet { s1 + s2 - 1 / sqrt(2), 1 / sqrt(2) });
+  test_convert(Point { 9, 0.5 }, Frenet { s1 + s2 + 4, -0.5 });
 }
