@@ -109,18 +109,18 @@ Point CoordsConverter::getXY(const Frenet& pos) const {
   const vector<double> &maps_s = map_waypoints.map_waypoints_s;
   const vector<Point> &maps = map_waypoints.map_waypoints;
 
-  int prev_wp = -1;
+  int startIndex = -1;
 
-  while (pos.s > maps_s[prev_wp + 1] && (prev_wp < (int) (maps_s.size() - 1))) {
-    prev_wp++;
+  while (pos.s > maps_s[startIndex + 1] && (startIndex < (int) (maps_s.size() - 1))) {
+    startIndex++;
   }
 
-  int wp2 = (prev_wp + 1) % maps.size();
-  Point seg_v = (maps[wp2] - maps[prev_wp]).asNormalized();
+  int endIndex = adaptWaypointIndex(startIndex + 1);
+  Point seg_v = (maps[endIndex] - maps[startIndex]).asNormalized();
   // the x,y,s along the segment
-  double seg_s = pos.s - maps_s[prev_wp];
+  double seg_s = pos.s - maps_s[startIndex];
 
-  Point seg = maps[prev_wp] + seg_v * seg_s;
+  Point seg = maps[startIndex] + seg_v * seg_s;
   // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
   double perp_heading = seg_v.getHeading() - pi() / 2;
 
