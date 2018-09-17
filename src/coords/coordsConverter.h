@@ -120,11 +120,11 @@ struct CoordinateSystem {
   Point e1;
   Point e2;
 
-  Point transform(const Point& p) const;
+  Point transform(double e1_coord, double e2_coord) const;
 };
 
-Point CoordinateSystem::transform(const Point &p) const {
-  return e1 * p.x + e2 * p.y;
+Point CoordinateSystem::transform(double e1_coord, double e2_coord) const {
+  return e1 * e1_coord + e2 * e2_coord;
 }
 
 Point CoordsConverter::getClockwisePerpendicular(Point v) const {
@@ -141,7 +141,7 @@ Point CoordsConverter::getXY(const Frenet& pos) const {
   // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
   return lineSegment.start
       + coordinateSystem.transform(
-          Point { pos.s - map_waypoints.map_waypoints_s[startIndex], pos.d });
+          pos.s - map_waypoints.map_waypoints_s[startIndex], pos.d);
 }
 
 #endif /* COORDS_COORDSCONVERTER_H_ */
