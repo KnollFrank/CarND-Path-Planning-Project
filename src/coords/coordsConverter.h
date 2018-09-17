@@ -124,9 +124,7 @@ Point CoordsConverter::getXY(const Frenet& pos) const {
 
   Point seg = lineSegment.start + seg_v * seg_s;
   // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
-  double perp_heading = seg_v.getHeading() - pi() / 2;
-
-  return seg + Point::fromAngle(perp_heading) * pos.d;
+  return seg + Point { seg_v.y, -seg_v.x } * pos.d;
 }
 
 #endif /* COORDS_COORDSCONVERTER_H_ */
