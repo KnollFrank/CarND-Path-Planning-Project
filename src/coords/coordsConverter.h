@@ -17,6 +17,7 @@
 #include "waypoints.h"
 #include "lineSegment.h"
 #include "coordSys.h"
+#include "coordinateSystem.h"
 
 using namespace std;
 
@@ -114,17 +115,6 @@ int CoordsConverter::getStartIndex(const Frenet& pos) const {
     startIndex++;
   }
   return startIndex;
-}
-
-struct CoordinateSystem {
-  Point e1;
-  Point e2;
-
-  Point transform(double e1_coord, double e2_coord) const;
-};
-
-Point CoordinateSystem::transform(double e1_coord, double e2_coord) const {
-  return e1 * e1_coord + e2 * e2_coord;
 }
 
 Point CoordsConverter::getClockwisePerpendicular(Point v) const {
