@@ -125,18 +125,17 @@ Point CoordsConverter::getClockwisePerpendicular(Point v) const {
 CoordinateSystem CoordsConverter::createCoordinateSystem(
     const LineSegment& lineSegment) const {
   Point e1 = lineSegment.getBasisVector();
-  Point e2 = getClockwisePerpendicular(e1);
-  return CoordinateSystem { e1, e2 };
+  // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
+  return CoordinateSystem { lineSegment.start, e1, getClockwisePerpendicular(e1) };
 }
 
 Point CoordsConverter::getXY(const Frenet& pos) const {
   int startIndex = getStartIndex(pos);
   LineSegment lineSegment = map_waypoints.getLineSegment(
       startIndex, adaptWaypointIndex(startIndex + 1));
-  // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
-  return lineSegment.start
-      + createCoordinateSystem(lineSegment).transform(
-          pos.s - map_waypoints.map_waypoints_s[startIndex], pos.d);
+  CoordinateSystem coordinateSystem = createCoordinateSystem(lineSegment);
+  return coordinateSystem.transform(
+      pos.s - map_waypoints.map_waypoints_s[startIndex], pos.d);
 }
 
 #endif /* COORDS_COORDSCONVERTER_H_ */

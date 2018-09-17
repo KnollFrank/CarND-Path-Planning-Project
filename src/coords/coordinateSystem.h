@@ -9,6 +9,7 @@
 #include "coordSys.h"
 
 struct CoordinateSystem {
+  Point origin;
   Point e1;
   Point e2;
 
@@ -16,7 +17,7 @@ struct CoordinateSystem {
 };
 
 Point CoordinateSystem::transform(double e1_coord, double e2_coord) const {
-  return e1 * e1_coord + e2 * e2_coord;
+  return origin + e1 * e1_coord + e2 * e2_coord;
 }
 
 #endif /* COORDS_COORDINATESYSTEM_H_ */
