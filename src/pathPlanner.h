@@ -18,6 +18,7 @@
 #include "lane.h"
 #include "path.h"
 #include "previousData.h"
+#include "coords/coordinateSystem.h"
 
 using namespace std;
 
@@ -87,16 +88,10 @@ Lane getNewLane(bool too_close, Lane lane) {
   return lane;
 }
 
-tuple<Point, Point> createRotatedVectors(double angle_rad) {
+CoordinateSystem createRotatedVectors(const Point& origin, double angle_rad) {
   Point e1 = Point { cos(angle_rad), sin(angle_rad) };
   Point e2 = Point { -sin(angle_rad), cos(angle_rad) };
-  return make_tuple(e1, e2);
-}
-
-// TODO: DRY with CoordinateSystem
-Point transform(const tuple<Point, Point> &rotatedVectors, const Point& point) {
-  return std::get < 0 > (rotatedVectors) * point.x + std::get < 1
-      > (rotatedVectors) * point.y;
+  return CoordinateSystem { origin, e1, e2 };
 }
 
 Path createPoints(const int prev_size, const EgoCar& egoCar,
@@ -130,9 +125,11 @@ Path createPoints(const int prev_size, const EgoCar& egoCar,
   path.points.push_back(next_wp1);
   path.points.push_back(next_wp2);
 
-  tuple<Point, Point> rotatedVectors = createRotatedVectors(-refPoint.yaw_rad);
+  CoordinateSystem coordinateSystem = createRotatedVectors(Point { 0, 0 },
+                                                           -refPoint.yaw_rad);
   for (int i = 0; i < path.points.size(); i++) {
-    path.points[i] = transform(rotatedVectors, path.points[i] - refPoint.point);
+    Point point = path.points[i] - refPoint.point;
+    path.points[i] = coordinateSystem.transform(point.x, point.y);
   }
 
   // TODO: extract method, sort_and_remove_duplicates
@@ -178,13 +175,13 @@ Path createNextVals(const Path &path, const int prev_size,
   Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
   const int path_size = 50;
-  tuple<Point, Point> rotatedVectors = createRotatedVectors(refPoint.yaw_rad);
+  CoordinateSystem coordinateSystem = createRotatedVectors(refPoint.point,
+                                                           refPoint.yaw_rad);
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 1; i < path_size - prev_size; i++) {
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
-    next_vals.points.push_back(
-        transform(rotatedVectors, point) + refPoint.point);
+    next_vals.points.push_back(coordinateSystem.transform(point.x, point.y));
   }
 
   return next_vals;
