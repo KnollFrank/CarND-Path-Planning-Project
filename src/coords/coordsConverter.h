@@ -115,16 +115,20 @@ int CoordsConverter::getStartIndex(const Frenet& pos) const {
   return startIndex;
 }
 
+Point transform(const Point& e1, const Point& e2, double e1_coord,
+                double e2_coord) {
+  return (e1 * e1_coord) + (e2 * e2_coord);
+}
+
 Point CoordsConverter::getXY(const Frenet& pos) const {
   int startIndex = getStartIndex(pos);
   LineSegment lineSegment = map_waypoints.getLineSegment(
       startIndex, adaptWaypointIndex(startIndex + 1));
   Point seg_v = lineSegment.getBasisVector();
-  double seg_s = pos.s - map_waypoints.map_waypoints_s[startIndex];
-
-  Point seg = lineSegment.start + seg_v * seg_s;
   // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
-  return seg + Point { seg_v.y, -seg_v.x } * pos.d;
+  return lineSegment.start
+      + transform(seg_v, Point { seg_v.y, -seg_v.x },
+                  pos.s - map_waypoints.map_waypoints_s[startIndex], pos.d);
 }
 
 #endif /* COORDS_COORDSCONVERTER_H_ */
