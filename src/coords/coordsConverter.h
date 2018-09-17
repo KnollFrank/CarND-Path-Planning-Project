@@ -38,6 +38,7 @@ class CoordsConverter {
                                 const int endWaypointIndex) const;
   int getStartIndex(const Frenet& pos) const;
   Point getClockwisePerpendicular(Point v) const;
+  CoordinateSystem createCoordinateSystem(const LineSegment& lineSegment) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -121,16 +122,20 @@ Point CoordsConverter::getClockwisePerpendicular(Point v) const {
   return Point { v.y, -v.x };
 }
 
+CoordinateSystem CoordsConverter::createCoordinateSystem(
+    const LineSegment& lineSegment) const {
+  Point e1 = lineSegment.getBasisVector();
+  Point e2 = getClockwisePerpendicular(e1);
+  return CoordinateSystem { e1, e2 };
+}
+
 Point CoordsConverter::getXY(const Frenet& pos) const {
   int startIndex = getStartIndex(pos);
   LineSegment lineSegment = map_waypoints.getLineSegment(
       startIndex, adaptWaypointIndex(startIndex + 1));
-  Point seg_v = lineSegment.getBasisVector();
-  CoordinateSystem coordinateSystem = CoordinateSystem { seg_v,
-      getClockwisePerpendicular(seg_v) };
   // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
   return lineSegment.start
-      + coordinateSystem.transform(
+      + createCoordinateSystem(lineSegment).transform(
           pos.s - map_waypoints.map_waypoints_s[startIndex], pos.d);
 }
 

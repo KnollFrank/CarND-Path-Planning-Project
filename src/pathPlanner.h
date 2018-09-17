@@ -93,6 +93,7 @@ tuple<Point, Point> createRotatedVectors(double angle_rad) {
   return make_tuple(e1, e2);
 }
 
+// TODO: DRY with CoordinateSystem
 Point transform(const tuple<Point, Point> &rotatedVectors, const Point& point) {
   return std::get < 0 > (rotatedVectors) * point.x + std::get < 1
       > (rotatedVectors) * point.y;
