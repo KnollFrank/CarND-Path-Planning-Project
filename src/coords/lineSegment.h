@@ -13,12 +13,12 @@ class LineSegment {
   double len() const;
   double getFrenetS(const Point& point) const;
   Frenet getFrenet(const Point& point, const Point& v_outwards) const;
+  Point getBasisVector() const;
 
  private:
   Point asVector() const;
   Point getProjectedPoint(const Point& point) const;
   double getFrenetD(const Point& point, const Point& v_outwards) const;
-  Point getBasisVector() const;
 };
 
 Point LineSegment::asVector() const {

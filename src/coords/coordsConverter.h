@@ -35,6 +35,7 @@ class CoordsConverter {
   const CoordSys createCoordSys(const Point& point,
                                 const int startWaypointIndex,
                                 const int endWaypointIndex) const;
+  int getStartIndex(const Frenet& pos) const;
 
   const MapWaypoints &map_waypoints;
 };
@@ -105,22 +106,22 @@ Frenet CoordsConverter::getFrenet(const Point& point) const {
   }
 }
 
-Point CoordsConverter::getXY(const Frenet& pos) const {
-  const vector<double> &maps_s = map_waypoints.map_waypoints_s;
-  const vector<Point> &maps = map_waypoints.map_waypoints;
-
+int CoordsConverter::getStartIndex(const Frenet& pos) const {
   int startIndex = -1;
-
-  while (pos.s > maps_s[startIndex + 1] && (startIndex < (int) (maps_s.size() - 1))) {
+  while (pos.s > map_waypoints.map_waypoints_s[startIndex + 1]
+      && (startIndex < (int) ((map_waypoints.map_waypoints_s.size() - 1)))) {
     startIndex++;
   }
+  return startIndex;
+}
 
+Point CoordsConverter::getXY(const Frenet& pos) const {
+  int startIndex = getStartIndex(pos);
   int endIndex = adaptWaypointIndex(startIndex + 1);
-  Point seg_v = (maps[endIndex] - maps[startIndex]).asNormalized();
-  // the x,y,s along the segment
-  double seg_s = pos.s - maps_s[startIndex];
+  Point seg_v = map_waypoints.getLineSegment(startIndex, endIndex).getBasisVector();
+  double seg_s = pos.s - map_waypoints.map_waypoints_s[startIndex];
 
-  Point seg = maps[startIndex] + seg_v * seg_s;
+  Point seg = map_waypoints.map_waypoints[startIndex] + seg_v * seg_s;
   // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
   double perp_heading = seg_v.getHeading() - pi() / 2;
 
