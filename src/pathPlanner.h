@@ -189,7 +189,7 @@ void PathPlanner::rotate(vector<Point>& points, const Point& center,
       Point { 0, 0 }, angle_rad);
   mapInPlace(points, [&](const Point& point2) {
     Point point = point2 - center;
-    return coordinateSystem.transform(point.x, point.y);
+    return coordinateSystem.transform(point);
   });
 }
 
@@ -236,7 +236,7 @@ Path PathPlanner::createNextVals(const Path& path,
   for (int i = 1; i < path_size - previousData.sizeOfPreviousPath(); i++) {
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
-    next_vals.points.push_back(coordinateSystem.transform(point.x, point.y));
+    next_vals.points.push_back(coordinateSystem.transform(point));
   }
 
   return next_vals;
