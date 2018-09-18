@@ -46,10 +46,6 @@ void printInfo(const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
   cout << vehicle << endl;
 }
 
-Point createSplinePoint(double x, const tk::spline& s) {
-  return Point { x, s(x) };
-}
-
 class PathPlanner {
 
  public:
@@ -73,7 +69,9 @@ class PathPlanner {
   Path createNextVals(const Path& path, const int prev_size,
                       const PreviousData& previousData);
   Lane getNewLane(bool too_close, Lane lane);
-  CoordinateSystem createRotatedVectors(const Point& origin, double angle_rad);
+  CoordinateSystem createRotatedCoordinateSystem(const Point& origin,
+                                                 double angle_rad);
+  Point createSplinePoint(double x, const tk::spline& s);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
@@ -172,8 +170,8 @@ Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
   path.points.push_back(next_wp1);
   path.points.push_back(next_wp2);
 
-  CoordinateSystem coordinateSystem = createRotatedVectors(Point { 0, 0 },
-                                                           -refPoint.yaw_rad);
+  CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
+      Point { 0, 0 }, -refPoint.yaw_rad);
   for (int i = 0; i < path.points.size(); i++) {
     Point point = path.points[i] - refPoint.point;
     path.points[i] = coordinateSystem.transform(point.x, point.y);
@@ -206,8 +204,8 @@ Path PathPlanner::createNextVals(const Path& path, const int prev_size,
   Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
   const int path_size = 50;
-  CoordinateSystem coordinateSystem = createRotatedVectors(refPoint.point,
-                                                           refPoint.yaw_rad);
+  CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
+      refPoint.point, refPoint.yaw_rad);
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 1; i < path_size - prev_size; i++) {
     Point point = createSplinePoint(x_add_on + target.x / N, s);
@@ -226,8 +224,8 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
   return lane;
 }
 
-CoordinateSystem PathPlanner::createRotatedVectors(const Point& origin,
-                                                   double angle_rad) {
+CoordinateSystem PathPlanner::createRotatedCoordinateSystem(const Point& origin,
+                                                            double angle_rad) {
   Point e1 = Point { cos(angle_rad), sin(angle_rad) };
   Point e2 = Point { -sin(angle_rad), cos(angle_rad) };
   return CoordinateSystem { origin, e1, e2 };
@@ -242,6 +240,10 @@ tuple<vector<double>, vector<double>> PathPlanner::getPoints(const Path& path) {
   }
 
   return make_tuple(xs, ys);
+}
+
+Point PathPlanner::createSplinePoint(double x, const tk::spline& s) {
+  return Point { x, s(x) };
 }
 
 #endif /* PATHPLANNER_H_ */
