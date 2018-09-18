@@ -46,14 +46,6 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
-Lane getNewLane(bool too_close, Lane lane) {
-  if (too_close && lane > Lane::LEFT) {
-    lane = Lane::LEFT;
-  }
-
-  return lane;
-}
-
 CoordinateSystem createRotatedVectors(const Point& origin, double angle_rad) {
   Point e1 = Point { cos(angle_rad), sin(angle_rad) };
   Point e2 = Point { -sin(angle_rad), cos(angle_rad) };
@@ -96,6 +88,7 @@ class PathPlanner {
                     const PreviousData& previousData);
   Path createNextVals(const Path &path, const int prev_size,
                       const PreviousData& previousData);
+  Lane getNewLane(bool too_close, Lane lane);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
@@ -238,6 +231,14 @@ Path PathPlanner::createNextVals(const Path &path, const int prev_size,
   }
 
   return next_vals;
+}
+
+Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
+  if (too_close && lane > Lane::LEFT) {
+    lane = Lane::LEFT;
+  }
+
+  return lane;
 }
 
 #endif /* PATHPLANNER_H_ */

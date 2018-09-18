@@ -150,6 +150,7 @@ double driveEgoCarAndVehicles(ReferencePoint& refPoint, Lane& lane,
   return secsDriven;
 }
 
+// TODO: make drive method a class
 void drive(ReferencePoint& refPoint, Lane& lane,
            const CoordsConverter& coordsConverter, EgoCar& egoCar,
            PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
