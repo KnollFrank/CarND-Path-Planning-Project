@@ -31,7 +31,7 @@ struct ReferencePoint {
   double vel_mph;
 };
 
-void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
+void printInfo(const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
   auto isCloserToEgoCar =
       [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
         double distance1 = egoCar.getPos_cart().distanceTo(vehicle1.getPos_cart());
@@ -46,17 +46,6 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
-tuple<vector<double>, vector<double>> getPoints(const Path &path) {
-  vector<double> xs;
-  vector<double> ys;
-  for (const Point &point : path.points) {
-    xs.push_back(point.x);
-    ys.push_back(point.y);
-  }
-
-  return make_tuple(xs, ys);
-}
-
 Point createSplinePoint(double x, const tk::spline& s) {
   return Point { x, s(x) };
 }
@@ -67,20 +56,21 @@ class PathPlanner {
   PathPlanner(const CoordsConverter& coordsConverter, ReferencePoint& refPoint,
               Lane& lane, double dt);
 
-  Path createPath(EgoCar egoCar, const PreviousData &previousData,
-                  const vector<Vehicle> &vehicles);
+  Path createPath(EgoCar egoCar, const PreviousData& previousData,
+                  const vector<Vehicle>& vehicles);
+  tuple<vector<double>, vector<double>> getPoints(const Path& path);
 
  private:
   bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
                                           const vector<Vehicle>& vehicles,
                                           const int prev_size);
   bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
-                                                const Vehicle &vehicle,
+                                                const Vehicle& vehicle,
                                                 const int prev_size);
   double getNewVelocity(bool too_close, double vel_mph);
   Path createPoints(const int prev_size, const EgoCar& egoCar,
                     const PreviousData& previousData);
-  Path createNextVals(const Path &path, const int prev_size,
+  Path createNextVals(const Path& path, const int prev_size,
                       const PreviousData& previousData);
   Lane getNewLane(bool too_close, Lane lane);
   CoordinateSystem createRotatedVectors(const Point& origin, double angle_rad);
@@ -99,8 +89,8 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
       dt(_dt) {
 }
 
-Path PathPlanner::createPath(EgoCar egoCar, const PreviousData &previousData,
-                             const vector<Vehicle> &vehicles) {
+Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
+                             const vector<Vehicle>& vehicles) {
 
   // printInfo(egoCar, vehicles);
 
@@ -128,7 +118,7 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
     const int prev_size) {
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
-      (const Vehicle &vehicle) {
+      (const Vehicle& vehicle) {
         return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
@@ -136,7 +126,7 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
 }
 
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
-    const EgoCar& egoCar, const Vehicle &vehicle, const int prev_size) {
+    const EgoCar& egoCar, const Vehicle& vehicle, const int prev_size) {
   double check_speed = vehicle.getVel_cart_m_per_s().len();
   double check_vehicle_s = vehicle.getPos_frenet().s
       + prev_size * dt * check_speed;
@@ -191,16 +181,16 @@ Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
 
   // TODO: extract method, sort_and_remove_duplicates
   std::sort(path.points.begin(), path.points.end(),
-            [](const Point &p1, const Point &p2) {return p1.x < p2.x;});
+            [](const Point& p1, const Point& p2) {return p1.x < p2.x;});
   path.points.erase(
       unique(path.points.begin(), path.points.end(),
-             [](const Point &p1, const Point &p2) {return p1.x == p2.x;}),
+             [](const Point& p1, const Point& p2) {return p1.x == p2.x;}),
       path.points.end());
 
   return path;
 }
 
-Path PathPlanner::createNextVals(const Path &path, const int prev_size,
+Path PathPlanner::createNextVals(const Path& path, const int prev_size,
                                  const PreviousData& previousData) {
   Path next_vals;
 
@@ -236,10 +226,22 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
   return lane;
 }
 
-CoordinateSystem PathPlanner::createRotatedVectors(const Point& origin, double angle_rad) {
+CoordinateSystem PathPlanner::createRotatedVectors(const Point& origin,
+                                                   double angle_rad) {
   Point e1 = Point { cos(angle_rad), sin(angle_rad) };
   Point e2 = Point { -sin(angle_rad), cos(angle_rad) };
   return CoordinateSystem { origin, e1, e2 };
+}
+
+tuple<vector<double>, vector<double>> PathPlanner::getPoints(const Path& path) {
+  vector<double> xs;
+  vector<double> ys;
+  for (const Point& point : path.points) {
+    xs.push_back(point.x);
+    ys.push_back(point.y);
+  }
+
+  return make_tuple(xs, ys);
 }
 
 #endif /* PATHPLANNER_H_ */
