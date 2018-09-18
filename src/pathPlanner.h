@@ -122,14 +122,19 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   Path path;
   addPointsFromPreviousData(path, egoCar, previousData);
   addNewPoints(path, egoCar);
+
   rotate(path.points, refPoint.point, -refPoint.yaw_rad);
 
-  sort_and_remove_duplicates(path.points);
-
   Path next_vals;
-  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-  vector<Point> bla = createSplinePoints(
-      path.asSpline(), path_size - previousData.sizeOfPreviousPath());
+  auto fn = [&]() {
+    sort_and_remove_duplicates(path.points);
+    appendSnd2Fst(next_vals.points, previousData.previous_path.points);
+    vector<Point> bla = createSplinePoints(
+        path.asSpline(), path_size - previousData.sizeOfPreviousPath());
+    return bla;
+  };
+  vector<Point> bla = fn();
+
   vector<Point> blub = transform(
       createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), bla);
 
