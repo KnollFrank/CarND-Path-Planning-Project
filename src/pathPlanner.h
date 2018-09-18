@@ -75,35 +75,6 @@ Point createSplinePoint(double x, const tk::spline& s) {
   return Point { x, s(x) };
 }
 
-Path createNextVals(const Path &path, const int prev_size,
-                    const PreviousData& previousData,
-                    const ReferencePoint &refPoint, double dt) {
-  Path next_vals;
-
-  vector<double> xs;
-  vector<double> ys;
-  tie(xs, ys) = getPoints(path);
-
-  tk::spline s;
-  s.set_points(xs, ys);
-  for (int i = 0; i < prev_size; i++) {
-    next_vals.points.push_back(previousData.previous_path.points[i]);
-  }
-  Point target = createSplinePoint(30.0, s);
-  double x_add_on = 0;
-  const int path_size = 50;
-  CoordinateSystem coordinateSystem = createRotatedVectors(refPoint.point,
-                                                           refPoint.yaw_rad);
-  double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
-  for (int i = 1; i < path_size - prev_size; i++) {
-    Point point = createSplinePoint(x_add_on + target.x / N, s);
-    x_add_on = point.x;
-    next_vals.points.push_back(coordinateSystem.transform(point.x, point.y));
-  }
-
-  return next_vals;
-}
-
 class PathPlanner {
 
  public:
@@ -123,6 +94,8 @@ class PathPlanner {
   double getNewVelocity(bool too_close, double vel_mph);
   Path createPoints(const int prev_size, const EgoCar& egoCar,
                     const PreviousData& previousData);
+  Path createNextVals(const Path &path, const int prev_size,
+                      const PreviousData& previousData, double dt);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
@@ -157,7 +130,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData &previousData,
 
   Path path = createPoints(prev_size, egoCar, previousData);
 
-  return createNextVals(path, prev_size, previousData, refPoint, dt);
+  return createNextVals(path, prev_size, previousData, dt);
 }
 
 bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
@@ -236,6 +209,34 @@ Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
       path.points.end());
 
   return path;
+}
+
+Path PathPlanner::createNextVals(const Path &path, const int prev_size,
+                                 const PreviousData& previousData, double dt) {
+  Path next_vals;
+
+  vector<double> xs;
+  vector<double> ys;
+  tie(xs, ys) = getPoints(path);
+
+  tk::spline s;
+  s.set_points(xs, ys);
+  for (int i = 0; i < prev_size; i++) {
+    next_vals.points.push_back(previousData.previous_path.points[i]);
+  }
+  Point target = createSplinePoint(30.0, s);
+  double x_add_on = 0;
+  const int path_size = 50;
+  CoordinateSystem coordinateSystem = createRotatedVectors(refPoint.point,
+                                                           refPoint.yaw_rad);
+  double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
+  for (int i = 1; i < path_size - prev_size; i++) {
+    Point point = createSplinePoint(x_add_on + target.x / N, s);
+    x_add_on = point.x;
+    next_vals.points.push_back(coordinateSystem.transform(point.x, point.y));
+  }
+
+  return next_vals;
 }
 
 #endif /* PATHPLANNER_H_ */
