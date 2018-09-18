@@ -75,6 +75,8 @@ class PathPlanner {
       const EgoCar& egoCar, const PreviousData& previousData);
   void appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd);
   std::vector<Point> createNewPoints(const EgoCar& egoCar);
+  void rotate(vector<Point>& points, const Point& center,
+              const double angle_rad);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -181,20 +183,23 @@ vector<Point> PathPlanner::createNewPoints(const EgoCar& egoCar) {
   return points;
 }
 
+void PathPlanner::rotate(vector<Point>& points, const Point& center,
+                         const double angle_rad) {
+  CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
+      Point { 0, 0 }, angle_rad);
+  for (int i = 0; i < points.size(); i++) {
+    Point point = points[i] - center;
+    points[i] = coordinateSystem.transform(point.x, point.y);
+  }
+}
+
 Path PathPlanner::createPoints(const EgoCar& egoCar,
                                const PreviousData& previousData) {
   Path path;
   appendSnd2Fst(path.points,
                 createPointsFromPreviousData(egoCar, previousData));
   appendSnd2Fst(path.points, createNewPoints(egoCar));
-
-  CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
-      Point { 0, 0 }, -refPoint.yaw_rad);
-  for (int i = 0; i < path.points.size(); i++) {
-    Point point = path.points[i] - refPoint.point;
-    path.points[i] = coordinateSystem.transform(point.x, point.y);
-  }
-
+  rotate(path.points, refPoint.point, -refPoint.yaw_rad);
   sort_and_remove_duplicates(path.points);
   return path;
 }
