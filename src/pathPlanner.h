@@ -187,9 +187,8 @@ void PathPlanner::rotate(vector<Point>& points, const Point& center,
                          const double angle_rad) {
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Point { 0, 0 }, angle_rad);
-  mapInPlace(points, [&](const Point& point2) {
-    Point point = point2 - center;
-    return coordinateSystem.transform(point);
+  mapInPlace(points, [&](const Point& point) {
+    return coordinateSystem.transform(point - center);
   });
 }
 
