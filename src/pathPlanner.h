@@ -31,8 +31,6 @@ struct ReferencePoint {
   double vel_mph;
 };
 
-// TODO: make PathPlanner a class
-
 void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   auto isCloserToEgoCar =
       [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
@@ -57,19 +55,6 @@ bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
   // TODO: replace magic number 30 with constant
   return check_vehicle_s > egoCar.getPos_frenet().s
       && check_vehicle_s - egoCar.getPos_frenet().s < 30;
-}
-
-bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
-                                        const vector<Vehicle>& vehicles,
-                                        const int prev_size, Lane lane,
-                                        double dt) {
-  auto isEgoCarTooCloseToVehicleInLane =
-      [&egoCar, prev_size, lane, dt]
-      (const Vehicle &vehicle) {
-        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size, dt);};
-
-  return std::any_of(vehicles.cbegin(), vehicles.cend(),
-                     isEgoCarTooCloseToVehicleInLane);
 }
 
 double getNewVelocity(bool too_close, double vel_mph) {
@@ -196,6 +181,11 @@ class PathPlanner {
                   const vector<Vehicle> &vehicles, double dt);
 
  private:
+  bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
+                                          const vector<Vehicle>& vehicles,
+                                          const int prev_size, double dt);
+
+ private:
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
   Lane& lane;
@@ -221,7 +211,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData &previousData,
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(egoCar, vehicles,
-                                                      prev_size, lane, dt);
+                                                      prev_size, dt);
   lane = getNewLane(too_close, lane);
   refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
   refPoint.point = egoCar.getPos_cart();
@@ -231,6 +221,18 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData &previousData,
                            coordsConverter);
 
   return createNextVals(path, prev_size, previousData, refPoint, dt);
+}
+
+bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
+    const EgoCar& egoCar, const vector<Vehicle>& vehicles, const int prev_size,
+    double dt) {
+  auto isEgoCarTooCloseToVehicleInLane =
+      [&, &egoCar, prev_size, dt]
+      (const Vehicle &vehicle) {
+        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size, dt);};
+
+  return std::any_of(vehicles.cbegin(), vehicles.cend(),
+                     isEgoCarTooCloseToVehicleInLane);
 }
 
 #endif /* PATHPLANNER_H_ */
