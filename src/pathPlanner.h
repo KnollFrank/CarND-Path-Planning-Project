@@ -76,6 +76,7 @@ class PathPlanner {
   void appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd);
 
   const CoordsConverter& coordsConverter;
+  // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
   ReferencePoint& refPoint;
   Lane& lane;
   double dt;
@@ -172,8 +173,7 @@ Path PathPlanner::createPoints(const EgoCar& egoCar,
                                const PreviousData& previousData) {
   Path path;
 
-  vector<Point> points = createPointsFromPreviousData(egoCar, previousData);
-  appendSnd2Fst(path.points, points);
+  appendSnd2Fst(path.points, createPointsFromPreviousData(egoCar, previousData));
 
   Point next_wp0 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 30,
       getMiddleOfLane(lane) });
