@@ -84,6 +84,7 @@ class PathPlanner {
   ReferencePoint& refPoint;
   Lane& lane;
   double dt;
+  const int path_size = 50;
 };
 
 PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
@@ -237,9 +238,10 @@ Path PathPlanner::createNextVals(const Path& path,
   Path next_vals;
   tk::spline s = path.asSpline();
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-  const int path_size = 50;
-  int num = path_size - previousData.sizeOfPreviousPath();
-  appendSnd2Fst(next_vals.points, createTransformedSplinePoints(s, num));
+  appendSnd2Fst(
+      next_vals.points,
+      createTransformedSplinePoints(
+          s, path_size - previousData.sizeOfPreviousPath()));
 
   return next_vals;
 }
