@@ -129,10 +129,10 @@ vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
                                                    path.points);
   sort_and_remove_duplicates(carsPath.points);
 
-  vector<Point> bla = fn(carsPath);
+  vector<Point> points = fn(carsPath);
 
   return transformFromCarsCoordinateSystem(refPoint.point, refPoint.yaw_rad,
-                                           bla);
+                                           points);
 }
 
 Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
