@@ -78,6 +78,8 @@ class PathPlanner {
               const double angle_rad);
   std::vector<Point> createTransformedSplinePoints(const tk::spline& s,
                                                    const int num);
+  vector<Point> transform(const CoordinateSystem& coordinateSystem,
+                          const vector<Point>& points) const;
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -213,6 +215,13 @@ void PathPlanner::sort_and_remove_duplicates(vector<Point>& points) {
       points.end());
 }
 
+vector<Point> PathPlanner::transform(const CoordinateSystem& coordinateSystem,
+                                     const vector<Point>& points) const {
+  return map2<Point, Point>(points, [&](const Point& point) {
+    return coordinateSystem.transform(point);
+  });
+}
+
 // TODO: refactor
 vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
                                                          const int num) {
@@ -229,10 +238,7 @@ vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
 
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       refPoint.point, refPoint.yaw_rad);
-  mapInPlace(
-      points,
-      [&](const Point& point) {return coordinateSystem.transform(point);});
-  return points;
+  return transform(coordinateSystem, points);
 }
 
 // TODO: refactor
