@@ -74,6 +74,7 @@ class PathPlanner {
   std::vector<Point> createPointsFromPreviousData(
       const EgoCar& egoCar, const PreviousData& previousData);
   void appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd);
+  std::vector<Point> createNewPoints(const EgoCar& egoCar);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -169,22 +170,23 @@ void PathPlanner::appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd) {
   fst.insert(std::end(fst), std::begin(snd), std::end(snd));
 }
 
+vector<Point> PathPlanner::createNewPoints(const EgoCar& egoCar) {
+  vector<Point> points;
+  points.push_back(coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 30,
+      getMiddleOfLane(lane) }));
+  points.push_back(coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 60,
+      getMiddleOfLane(lane) }));
+  points.push_back(coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 90,
+      getMiddleOfLane(lane) }));
+  return points;
+}
+
 Path PathPlanner::createPoints(const EgoCar& egoCar,
                                const PreviousData& previousData) {
   Path path;
-
-  appendSnd2Fst(path.points, createPointsFromPreviousData(egoCar, previousData));
-
-  Point next_wp0 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 30,
-      getMiddleOfLane(lane) });
-  Point next_wp1 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 60,
-      getMiddleOfLane(lane) });
-  Point next_wp2 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 90,
-      getMiddleOfLane(lane) });
-
-  path.points.push_back(next_wp0);
-  path.points.push_back(next_wp1);
-  path.points.push_back(next_wp2);
+  appendSnd2Fst(path.points,
+                createPointsFromPreviousData(egoCar, previousData));
+  appendSnd2Fst(path.points, createNewPoints(egoCar));
 
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Point { 0, 0 }, -refPoint.yaw_rad);
