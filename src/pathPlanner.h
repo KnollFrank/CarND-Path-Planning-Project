@@ -103,7 +103,10 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
     Path& path, function<vector<Point>(Path& path)> fn) {
   rotate(path.points, refPoint.point, -refPoint.yaw_rad);
-  return fn(path);
+  vector<Point> bla = fn(path);
+  vector<Point> blub = transform(
+      createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), bla);
+  return blub;
 }
 
 Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
@@ -135,10 +138,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
         path.asSpline(), path_size - previousData.sizeOfPreviousPath());
     return bla;
   };
-  vector<Point> bla = doWithinCarsCoordinateSystem(path, fn);
-
-  vector<Point> blub = transform(
-      createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), bla);
+  vector<Point> blub = doWithinCarsCoordinateSystem(path, fn);
 
   appendSnd2Fst(next_vals.points, blub);
 
