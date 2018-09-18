@@ -26,6 +26,7 @@ struct Point {
   Point operator+(const Point& other) const;
   Point operator-(const Point& other) const;
   Point operator*(double scalar) const;
+  Point asNormalized() const;
 
   friend ostream& operator<<(ostream& os, const Point& point);
 };
@@ -74,6 +75,10 @@ Point& Point::operator=(const Point &point) {
 
   // return the existing object so we can chain this operator
   return *this;
+}
+
+Point Point::asNormalized() const {
+  return *this * (1.0 / len());
 }
 
 #endif /* COORDS_CART_H_ */

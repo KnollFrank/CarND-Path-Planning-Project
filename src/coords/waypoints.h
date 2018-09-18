@@ -13,13 +13,31 @@
 #include "cart.h"
 #include "frenet.h"
 #include "../mathfuns.h"
+#include "lineSegment.h"
 
 using namespace std;
 
 struct MapWaypoints {
   vector<Point> map_waypoints;
+  vector<Point> map_outwards;
   vector<double> map_waypoints_s;
+
+  double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
+  LineSegment getLineSegment(int start, int end) const;
 };
+
+double MapWaypoints::getDistanceFromWaypointZeroToWaypoint(
+    int waypointIndex) const {
+  double dist = 0;
+  for (int i = 0; i < waypointIndex; i++) {
+    dist += map_waypoints[i].distanceTo(map_waypoints[i + 1]);
+  }
+  return dist;
+}
+
+LineSegment MapWaypoints::getLineSegment(int start, int end) const {
+  return LineSegment { map_waypoints[start], map_waypoints[end] };
+}
 
 // Load up map values for waypoint's x,y,s and d normalized normal vectors
 MapWaypoints read_map_waypoints() {
@@ -50,6 +68,7 @@ MapWaypoints read_map_waypoints() {
     iss >> d_y;
     map_waypoints.map_waypoints.push_back(Point { x, y });
     map_waypoints.map_waypoints_s.push_back(s);
+    map_waypoints.map_outwards.push_back(Point { d_x, d_y });
     map_waypoints_dx.push_back(d_x);
     map_waypoints_dy.push_back(d_y);
   }
