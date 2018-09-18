@@ -105,9 +105,8 @@ vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
   path.points = rotate(path.points, refPoint.point, -refPoint.yaw_rad);
   sort_and_remove_duplicates(path.points);
   vector<Point> bla = fn(path);
-  vector<Point> blub = transform(
+  return transform(
       createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), bla);
-  return blub;
 }
 
 Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
