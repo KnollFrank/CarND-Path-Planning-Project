@@ -54,7 +54,6 @@ class PathPlanner {
 
   Path createPath(EgoCar egoCar, const PreviousData& previousData,
                   const vector<Vehicle>& vehicles);
-  tuple<vector<double>, vector<double>> getPoints(const Path& path);
 
  private:
   bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
@@ -111,7 +110,6 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
   Path path = createPoints(egoCar, previousData);
-
   return createNextVals(path, previousData);
 }
 
@@ -212,13 +210,14 @@ void PathPlanner::sort_and_remove_duplicates(vector<Point>& points) {
       points.end());
 }
 
+// TODO: refactor
 Path PathPlanner::createNextVals(const Path& path,
                                  const PreviousData& previousData) {
   Path next_vals;
 
   vector<double> xs;
   vector<double> ys;
-  tie(xs, ys) = getPoints(path);
+  tie(xs, ys) = path.asXValsAndYVals();
 
   tk::spline s;
   s.set_points(xs, ys);
@@ -233,6 +232,7 @@ Path PathPlanner::createNextVals(const Path& path,
       refPoint.point, refPoint.yaw_rad);
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 1; i < path_size - previousData.sizeOfPreviousPath(); i++) {
+    // TODO: createSplinePoint und coordinateSystem.transform mit map auseinanderziehen
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
     next_vals.points.push_back(coordinateSystem.transform(point));
@@ -254,17 +254,6 @@ CoordinateSystem PathPlanner::createRotatedCoordinateSystem(const Point& origin,
   Point e1 = Point { cos(angle_rad), sin(angle_rad) };
   Point e2 = Point { -sin(angle_rad), cos(angle_rad) };
   return CoordinateSystem { origin, e1, e2 };
-}
-
-tuple<vector<double>, vector<double>> PathPlanner::getPoints(const Path& path) {
-  vector<double> xs;
-  vector<double> ys;
-  for (const Point& point : path.points) {
-    xs.push_back(point.x);
-    ys.push_back(point.y);
-  }
-
-  return make_tuple(xs, ys);
 }
 
 Point PathPlanner::createSplinePoint(double x, const tk::spline& s) {

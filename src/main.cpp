@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
               json msgJson;
               vector<double> xs;
               vector<double> ys;
-              tie(xs, ys) = pathPlanner.getPoints(next_vals);
+              tie(xs, ys) = next_vals.asXValsAndYVals();
               msgJson["next_x"] = xs;
               msgJson["next_y"] = ys;
 
