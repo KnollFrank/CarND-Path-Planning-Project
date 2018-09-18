@@ -80,7 +80,7 @@ void drive2PointOfEgoCar(const Point& dst, EgoCar& egoCar, double dt,
   egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
   egoCar.setPos_cart(dst);
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
-  // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet();
+  // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
   ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar << vehicles[0];
   check();
@@ -89,7 +89,7 @@ void drive2PointOfEgoCar(const Point& dst, EgoCar& egoCar, double dt,
 void driveVehicle(Vehicle& vehicle, double dt) {
   const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s();
   vehicle.setPos_frenet(vehicle.getPos_frenet() + (vel_frenet * dt));
-  // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet();
+  // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
 void driveVehicles(vector<Vehicle>& vehicles, double dt) {
@@ -238,7 +238,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
       refPoint, lane, coordsConverter, egoCar, previousData, vehicles, dt,
       NO_VALUE, [&egoCar]() {
         ASSERT_LT(egoCar.speed_mph, 50);
-        ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos_frenet().d, 0.1);});
+        ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos_frenet().d, 0.9);});
 
 // THEN
 }
