@@ -27,8 +27,9 @@ EgoCar createEgoCar(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &j) {
-  EgoCar egoCar;
+        std::allocator, nlohmann::adl_serializer> &j,
+    const CoordsConverter& coordsConverter) {
+  EgoCar egoCar(coordsConverter);
   egoCar.setPos(Point { j[1]["x"], j[1]["y"] },
                 Frenet { j[1]["s"], j[1]["d"] });
   egoCar.yaw_deg = j[1]["yaw"];
@@ -41,7 +42,8 @@ vector<Vehicle> createVehicles(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &sensor_fusion) {
+        std::allocator, nlohmann::adl_serializer> &sensor_fusion,
+    const CoordsConverter& coordsConverter) {
   enum sensor_fusion_index {
     ID = 0,
     X = 1,
@@ -54,7 +56,7 @@ vector<Vehicle> createVehicles(
 
   vector<Vehicle> vehicles;
   for (int i = 0; i < sensor_fusion.size(); i++) {
-    Vehicle vehicle;
+    Vehicle vehicle(coordsConverter);
     vehicle.id = sensor_fusion[i][ID];
     vehicle.setPos(Point { sensor_fusion[i][X], sensor_fusion[i][Y] }, Frenet {
                        sensor_fusion[i][S], sensor_fusion[i][D] });
@@ -70,13 +72,13 @@ int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     // see https://stackoverflow.com/questions/7208070/googletest-how-to-skip-a-test
     // testing::GTEST_FLAG(filter) = "-PathPlanningTest.should_drive_with_max_50_mph";
-    testing::GTEST_FLAG(filter) = "CoordsConverterTest.*";
+    // testing::GTEST_FLAG(filter) = "CoordsConverterTest.*";
     return RUN_ALL_TESTS();
   }
 
   uWS::Hub h;
 
-  MapWaypoints map_waypoints = read_map_waypoints();
+  const CoordsConverter coordsConverter(read_map_waypoints());
 
   Lane lane = Lane::MIDDLE;
   ReferencePoint refPoint;
@@ -84,7 +86,7 @@ int main(int argc, char **argv) {
   double dt = 0.02;
 
   h.onMessage(
-      [dt, &refPoint,&lane,&map_waypoints](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+      [dt, &refPoint,&lane,&coordsConverter](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
           uWS::OpCode opCode) {
         // "42" at the start of the message means there's a websocket message event.
         // The 4 signifies a websocket message
@@ -102,8 +104,14 @@ int main(int argc, char **argv) {
             if (event == "telemetry") {
               // j[1] is the data JSON object
 
-              EgoCar egoCar = createEgoCar(j);
-              Path next_vals = createPath(refPoint, lane, map_waypoints, egoCar, createPreviousData(j), createVehicles(j[1]["sensor_fusion"]), dt);
+              EgoCar egoCar = createEgoCar(j, coordsConverter);
+              Path next_vals = createPath(refPoint,
+                  lane,
+                  coordsConverter,
+                  egoCar,
+                  createPreviousData(j),
+                  createVehicles(j[1]["sensor_fusion"], coordsConverter),
+                  dt);
 
               json msgJson;
               vector<double> xs;

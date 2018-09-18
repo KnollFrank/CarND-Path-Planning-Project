@@ -27,6 +27,10 @@ class CoordsConverter {
   CoordsConverter(const MapWaypoints& map_waypoints);
   Frenet getFrenet(const Point& point) const;
   Point getXY(const Frenet& point) const;
+  Point createCartVectorFromStart2End(const Frenet &start,
+                                              const Frenet &end) const;
+  Frenet createFrenetVectorFromStart2End(const Point &start,
+                                                 const Point &end) const;
 
  private:
   int getIndexOfClosestWaypoint(const Point& point) const;
@@ -130,7 +134,8 @@ CoordinateSystem CoordsConverter::createCoordinateSystem(
   return CoordinateSystem { lineSegment.start, e1, getClockwisePerpendicular(e1) };
 }
 
-LineSegment CoordsConverter::getLineSegmentContaining(const Frenet& point) const {
+LineSegment CoordsConverter::getLineSegmentContaining(
+    const Frenet& point) const {
   int startIndex = getStartIndex(point);
   LineSegment lineSegment = map_waypoints.getLineSegment(
       startIndex, adaptWaypointIndex(startIndex + 1));
@@ -142,6 +147,16 @@ Point CoordsConverter::getXY(const Frenet& point) const {
   CoordinateSystem coordinateSystem = createCoordinateSystem(lineSegment);
   return coordinateSystem.transform(
       point.s - map_waypoints.map_waypoints_s[getStartIndex(point)], point.d);
+}
+
+Point CoordsConverter::createCartVectorFromStart2End(
+    const Frenet &start, const Frenet &end) const {
+  return getXY(end) - getXY(start);
+}
+
+Frenet CoordsConverter::createFrenetVectorFromStart2End(
+    const Point &start, const Point &end) const {
+  return getFrenet(end) - getFrenet(start);
 }
 
 #endif /* COORDS_COORDSCONVERTER_H_ */

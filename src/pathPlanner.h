@@ -31,6 +31,8 @@ struct ReferencePoint {
   double vel_mph;
 };
 
+// TODO: make PathPlanner a class
+
 void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   auto isCloserToEgoCar =
       [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
@@ -96,7 +98,7 @@ CoordinateSystem createRotatedVectors(const Point& origin, double angle_rad) {
 
 Path createPoints(const int prev_size, const EgoCar& egoCar,
                   ReferencePoint &refPoint, const PreviousData& previousData,
-                  Lane lane, const MapWaypoints &map_waypoints) {
+                  Lane lane, const CoordsConverter &coordsConverter) {
   Path path;
 
   if (prev_size < 2) {
@@ -111,15 +113,12 @@ Path createPoints(const int prev_size, const EgoCar& egoCar,
     path.points.push_back(prev);
     path.points.push_back(refPoint.point);
   }
-  Point next_wp0 = getXY(Frenet { egoCar.getPos_frenet().s + 30,
-                             getMiddleOfLane(lane) },
-                         map_waypoints);
-  Point next_wp1 = getXY(Frenet { egoCar.getPos_frenet().s + 60,
-                             getMiddleOfLane(lane) },
-                         map_waypoints);
-  Point next_wp2 = getXY(Frenet { egoCar.getPos_frenet().s + 90,
-                             getMiddleOfLane(lane) },
-                         map_waypoints);
+  Point next_wp0 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 30,
+      getMiddleOfLane(lane) });
+  Point next_wp1 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 60,
+      getMiddleOfLane(lane) });
+  Point next_wp2 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 90,
+      getMiddleOfLane(lane) });
 
   path.points.push_back(next_wp0);
   path.points.push_back(next_wp1);
@@ -188,7 +187,7 @@ Path createNextVals(const Path &path, const int prev_size,
 }
 
 Path createPath(ReferencePoint &refPoint, Lane &lane,
-                const MapWaypoints &map_waypoints, EgoCar egoCar,
+                const CoordsConverter& coordsConverter, EgoCar egoCar,
                 const PreviousData &previousData,
                 const vector<Vehicle> &vehicles, double dt) {
 
@@ -198,8 +197,7 @@ Path createPath(ReferencePoint &refPoint, Lane &lane,
 
   if (prev_size > 0) {
     egoCar.setPos_frenet(Frenet { previousData.end_path.s,
-                             egoCar.getPos_frenet().d },
-                         map_waypoints);
+        egoCar.getPos_frenet().d });
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(egoCar, vehicles,
@@ -210,7 +208,7 @@ Path createPath(ReferencePoint &refPoint, Lane &lane,
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
   Path path = createPoints(prev_size, egoCar, refPoint, previousData, lane,
-                           map_waypoints);
+                           coordsConverter);
 
   return createNextVals(path, prev_size, previousData, refPoint, dt);
 }
