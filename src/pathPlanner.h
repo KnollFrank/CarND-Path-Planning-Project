@@ -82,7 +82,7 @@ class PathPlanner {
                                  const PreviousData& previousData);
   void addNewPoints(Path& path, const EgoCar& egoCar);
   vector<Point> doWithinCarsCoordinateSystem(
-      const Path& path, const function<vector<Point>(const Path&)>& fn);
+      const Path& path, const function<vector<Point>(const Path& carsPath)>& fn);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -101,11 +101,11 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 }
 
 vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
-    const Path& path, const function<vector<Point>(const Path&)>& fn) {
-  Path new_path;
-  new_path.points = rotate(path.points, refPoint.point, -refPoint.yaw_rad);
-  sort_and_remove_duplicates(new_path.points);
-  vector<Point> bla = fn(new_path);
+    const Path& path, const function<vector<Point>(const Path& carsPath)>& fn) {
+  Path carsPath;
+  carsPath.points = rotate(path.points, refPoint.point, -refPoint.yaw_rad);
+  sort_and_remove_duplicates(carsPath.points);
+  vector<Point> bla = fn(carsPath);
   return transform(
       createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), bla);
 }
@@ -131,15 +131,15 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   addPointsFromPreviousData(path, egoCar, previousData);
   addNewPoints(path, egoCar);
 
-  Path next_vals;
-  auto fn = [&](const Path& new_path) {
-    appendSnd2Fst(next_vals.points, previousData.previous_path.points);
+  auto fn = [&](const Path& carsPath) {
     return createSplinePoints(
-        new_path.asSpline(), path_size - previousData.sizeOfPreviousPath());
+        carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
   };
-  vector<Point> blub = doWithinCarsCoordinateSystem(path, fn);
+  vector<Point> points = doWithinCarsCoordinateSystem(path, fn);
 
-  appendSnd2Fst(next_vals.points, blub);
+  Path next_vals;
+  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
+  appendSnd2Fst(next_vals.points, points);
 
   return next_vals;
 }
