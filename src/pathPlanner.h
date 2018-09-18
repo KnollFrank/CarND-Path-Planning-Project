@@ -82,7 +82,7 @@ class PathPlanner {
                                  const PreviousData& previousData);
   void addNewPoints(Path& path, const EgoCar& egoCar);
   vector<Point> doWithinCarsCoordinateSystem(
-      Path& path, function<vector<Point>(Path& path)> fn);
+      const Path& path, function<vector<Point>(const Path& path)> fn);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -101,10 +101,11 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 }
 
 vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
-    Path& path, function<vector<Point>(Path& path)> fn) {
-  path.points = rotate(path.points, refPoint.point, -refPoint.yaw_rad);
-  sort_and_remove_duplicates(path.points);
-  vector<Point> bla = fn(path);
+    const Path& path, function<vector<Point>(const Path& path)> fn) {
+  Path new_path;
+  new_path.points = rotate(path.points, refPoint.point, -refPoint.yaw_rad);
+  sort_and_remove_duplicates(new_path.points);
+  vector<Point> bla = fn(new_path);
   return transform(
       createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), bla);
 }
@@ -131,11 +132,10 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   addNewPoints(path, egoCar);
 
   Path next_vals;
-  auto fn = [&](Path& path) {
+  auto fn = [&](const Path& new_path) {
     appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-    vector<Point> bla = createSplinePoints(
-        path.asSpline(), path_size - previousData.sizeOfPreviousPath());
-    return bla;
+    return createSplinePoints(
+        new_path.asSpline(), path_size - previousData.sizeOfPreviousPath());
   };
   vector<Point> blub = doWithinCarsCoordinateSystem(path, fn);
 
