@@ -46,16 +46,6 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
-double getNewVelocity(bool too_close, double vel_mph) {
-  if (too_close || vel_mph > 50) {
-    vel_mph -= .224;
-  } else if (vel_mph < 49.5) {
-    vel_mph += .224;
-  }
-
-  return vel_mph;
-}
-
 Lane getNewLane(bool too_close, Lane lane) {
   if (too_close && lane > Lane::LEFT) {
     lane = Lane::LEFT;
@@ -176,6 +166,7 @@ class PathPlanner {
   bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
                                                 const Vehicle &vehicle,
                                                 const int prev_size, double dt);
+  double getNewVelocity(bool too_close, double vel_mph);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
@@ -235,6 +226,16 @@ bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
   // TODO: replace magic number 30 with constant
   return check_vehicle_s > egoCar.getPos_frenet().s
       && check_vehicle_s - egoCar.getPos_frenet().s < 30;
+}
+
+double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
+  if (too_close || vel_mph > 50) {
+    vel_mph -= .224;
+  } else if (vel_mph < 49.5) {
+    vel_mph += .224;
+  }
+
+  return vel_mph;
 }
 
 #endif /* PATHPLANNER_H_ */
