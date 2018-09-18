@@ -81,6 +81,8 @@ class PathPlanner {
   void addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
                                  const PreviousData& previousData);
   void addNewPoints(Path& path, const EgoCar& egoCar);
+  vector<Point> doWithinCarsCoordinateSystem(
+      Path& path, function<vector<Point>(Path& path)> fn);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -98,8 +100,9 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
       dt(_dt) {
 }
 
-vector<Point> doWithinCarsCoordinateSystem(
+vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
     Path& path, function<vector<Point>(Path& path)> fn) {
+  rotate(path.points, refPoint.point, -refPoint.yaw_rad);
   return fn(path);
 }
 
@@ -123,8 +126,6 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   Path path;
   addPointsFromPreviousData(path, egoCar, previousData);
   addNewPoints(path, egoCar);
-
-  rotate(path.points, refPoint.point, -refPoint.yaw_rad);
 
   Path next_vals;
   auto fn = [&](Path& path) {
