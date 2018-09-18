@@ -82,7 +82,7 @@ class PathPlanner {
                                  const PreviousData& previousData);
   void addNewPoints(Path& path, const EgoCar& egoCar);
   vector<Point> doWithinCarsCoordinateSystem(
-      const Path& path, const function<vector<Point>(const Path& path)>& fn);
+      const Path& path, const function<vector<Point>(const Path&)>& fn);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -101,7 +101,7 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 }
 
 vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
-    const Path& path, const function<vector<Point>(const Path& path)>& fn) {
+    const Path& path, const function<vector<Point>(const Path&)>& fn) {
   Path new_path;
   new_path.points = rotate(path.points, refPoint.point, -refPoint.yaw_rad);
   sort_and_remove_duplicates(new_path.points);
