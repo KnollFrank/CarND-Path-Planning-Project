@@ -82,7 +82,8 @@ class PathPlanner {
                                  const PreviousData& previousData);
   void addNewPoints(Path& path, const EgoCar& egoCar);
   vector<Point> doWithinCarsCoordinateSystem(
-      const Path& path, const function<vector<Point>(const Path& carsPath)>& fn);
+      const Path& path,
+      const function<vector<Point>(const Path& carsPath)>& fn);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -131,11 +132,11 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   addPointsFromPreviousData(path, egoCar, previousData);
   addNewPoints(path, egoCar);
 
-  auto fn = [&](const Path& carsPath) {
-    return createSplinePoints(
-        carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
-  };
-  vector<Point> points = doWithinCarsCoordinateSystem(path, fn);
+  vector<Point> points = doWithinCarsCoordinateSystem(
+      path, [&](const Path& carsPath) {
+        return createSplinePoints(
+            carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
+      });
 
   Path next_vals;
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
