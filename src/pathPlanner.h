@@ -221,10 +221,8 @@ Path PathPlanner::createNextVals(const Path& path,
 
   tk::spline s;
   s.set_points(xs, ys);
-  // TODO: use appendSnd2Fst()
-  for (int i = 0; i < previousData.sizeOfPreviousPath(); i++) {
-    next_vals.points.push_back(previousData.previous_path.points[i]);
-  }
+  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
+
   Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
   const int path_size = 50;
