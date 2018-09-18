@@ -46,17 +46,6 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
-bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
-                                              const Vehicle &vehicle,
-                                              const int prev_size, double dt) {
-  double check_speed = vehicle.getVel_cart_m_per_s().len();
-  double check_vehicle_s = vehicle.getPos_frenet().s
-      + prev_size * dt * check_speed;
-  // TODO: replace magic number 30 with constant
-  return check_vehicle_s > egoCar.getPos_frenet().s
-      && check_vehicle_s - egoCar.getPos_frenet().s < 30;
-}
-
 double getNewVelocity(bool too_close, double vel_mph) {
   if (too_close || vel_mph > 50) {
     vel_mph -= .224;
@@ -184,8 +173,10 @@ class PathPlanner {
   bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
                                           const vector<Vehicle>& vehicles,
                                           const int prev_size, double dt);
+  bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
+                                                const Vehicle &vehicle,
+                                                const int prev_size, double dt);
 
- private:
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
   Lane& lane;
@@ -233,6 +224,17 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isEgoCarTooCloseToVehicleInLane);
+}
+
+bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
+    const EgoCar& egoCar, const Vehicle &vehicle, const int prev_size,
+    double dt) {
+  double check_speed = vehicle.getVel_cart_m_per_s().len();
+  double check_vehicle_s = vehicle.getPos_frenet().s
+      + prev_size * dt * check_speed;
+  // TODO: replace magic number 30 with constant
+  return check_vehicle_s > egoCar.getPos_frenet().s
+      && check_vehicle_s - egoCar.getPos_frenet().s < 30;
 }
 
 #endif /* PATHPLANNER_H_ */
