@@ -187,11 +187,10 @@ void PathPlanner::rotate(vector<Point>& points, const Point& center,
                          const double angle_rad) {
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Point { 0, 0 }, angle_rad);
-  std::transform(points.begin(), points.end(), points.begin(),
-                 [&](const Point& point2) {
-                   Point point = point2 - center;
-                   return coordinateSystem.transform(point.x, point.y);
-                 });
+  mapInPlace(points, [&](const Point& point2) {
+    Point point = point2 - center;
+    return coordinateSystem.transform(point.x, point.y);
+  });
 }
 
 Path PathPlanner::createPoints(const EgoCar& egoCar,

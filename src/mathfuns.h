@@ -36,10 +36,14 @@ int modulo(int n, int N) {
 }
 
 template<typename T, typename R, typename unop>
-vector<R> map2(vector<T> v, unop op) {
+vector<R> map2(const vector<T> &v, unop op) {
   vector<R> result(v.size());
   transform(v.begin(), v.end(), result.begin(), op);
   return result;
 }
 
+template<typename T, typename unop>
+void mapInPlace(vector<T> &v, unop op) {
+  transform(v.begin(), v.end(), v.begin(), op);
+}
 #endif /* MATHFUNS_H_ */
