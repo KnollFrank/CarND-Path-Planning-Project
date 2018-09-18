@@ -64,18 +64,15 @@ class PathPlanner {
                                                 const Vehicle& vehicle,
                                                 const int prev_size);
   double getNewVelocity(bool too_close, double vel_mph);
-  Path createPoints(const int prev_size, const EgoCar& egoCar,
-                    const PreviousData& previousData);
-  Path createNextVals(const Path& path, const int prev_size,
-                      const PreviousData& previousData);
+  Path createPoints(const EgoCar& egoCar, const PreviousData& previousData);
+  Path createNextVals(const Path& path, const PreviousData& previousData);
   Lane getNewLane(bool too_close, Lane lane);
   CoordinateSystem createRotatedCoordinateSystem(const Point& origin,
                                                  double angle_rad);
   Point createSplinePoint(double x, const tk::spline& s);
   void sort_and_remove_duplicates(vector<Point>& points);
   std::vector<Point> createPointsFromPreviousData(
-      const int prev_size, const EgoCar& egoCar,
-      const PreviousData& previousData);
+      const EgoCar& egoCar, const PreviousData& previousData);
   void appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd);
 
   const CoordsConverter& coordsConverter;
@@ -97,24 +94,21 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
 
   // printInfo(egoCar, vehicles);
 
-  // TODO; make prev_size a method within PreviousData.
-  const int prev_size = previousData.previous_path.points.size();
-
-  if (prev_size > 0) {
+  if (previousData.sizeOfPreviousPath() > 0) {
     egoCar.setPos_frenet(Frenet { previousData.end_path.s,
         egoCar.getPos_frenet().d });
   }
 
-  bool too_close = isEgoCarTooCloseToAnyVehicleInLane(egoCar, vehicles,
-                                                      prev_size);
+  bool too_close = isEgoCarTooCloseToAnyVehicleInLane(
+      egoCar, vehicles, previousData.sizeOfPreviousPath());
   lane = getNewLane(too_close, lane);
   refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
   refPoint.point = egoCar.getPos_cart();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
-  Path path = createPoints(prev_size, egoCar, previousData);
+  Path path = createPoints(egoCar, previousData);
 
-  return createNextVals(path, prev_size, previousData);
+  return createNextVals(path, previousData);
 }
 
 bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
@@ -150,18 +144,19 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
 }
 
 vector<Point> PathPlanner::createPointsFromPreviousData(
-    const int prev_size, const EgoCar& egoCar,
-    const PreviousData& previousData) {
+    const EgoCar& egoCar, const PreviousData& previousData) {
 
   vector<Point> points;
-  if (prev_size < 2) {
+  if (previousData.sizeOfPreviousPath() < 2) {
     Point prev = egoCar.getPos_cart()
         - Point::fromAngle(deg2rad(egoCar.yaw_deg));
     points.push_back(prev);
     points.push_back(egoCar.getPos_cart());
   } else {
-    refPoint.point = previousData.previous_path.points[prev_size - 1];
-    Point prev = previousData.previous_path.points[prev_size - 2];
+    refPoint.point = previousData.previous_path.points[previousData
+        .sizeOfPreviousPath() - 1];
+    Point prev = previousData.previous_path.points[previousData
+        .sizeOfPreviousPath() - 2];
     refPoint.yaw_rad = (refPoint.point - prev).getHeading();
     points.push_back(prev);
     points.push_back(refPoint.point);
@@ -173,12 +168,11 @@ void PathPlanner::appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd) {
   fst.insert(std::end(fst), std::begin(snd), std::end(snd));
 }
 
-Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
+Path PathPlanner::createPoints(const EgoCar& egoCar,
                                const PreviousData& previousData) {
   Path path;
 
-  vector<Point> points = createPointsFromPreviousData(prev_size, egoCar,
-                                                      previousData);
+  vector<Point> points = createPointsFromPreviousData(egoCar, previousData);
   appendSnd2Fst(path.points, points);
 
   Point next_wp0 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 30,
@@ -212,7 +206,7 @@ void PathPlanner::sort_and_remove_duplicates(vector<Point>& points) {
       points.end());
 }
 
-Path PathPlanner::createNextVals(const Path& path, const int prev_size,
+Path PathPlanner::createNextVals(const Path& path,
                                  const PreviousData& previousData) {
   Path next_vals;
 
@@ -222,7 +216,8 @@ Path PathPlanner::createNextVals(const Path& path, const int prev_size,
 
   tk::spline s;
   s.set_points(xs, ys);
-  for (int i = 0; i < prev_size; i++) {
+  // TODO: use appendSnd2Fst()
+  for (int i = 0; i < previousData.sizeOfPreviousPath(); i++) {
     next_vals.points.push_back(previousData.previous_path.points[i]);
   }
   Point target = createSplinePoint(30.0, s);
@@ -231,7 +226,7 @@ Path PathPlanner::createNextVals(const Path& path, const int prev_size,
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       refPoint.point, refPoint.yaw_rad);
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
-  for (int i = 1; i < path_size - prev_size; i++) {
+  for (int i = 1; i < path_size - previousData.sizeOfPreviousPath(); i++) {
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
     next_vals.points.push_back(coordinateSystem.transform(point.x, point.y));

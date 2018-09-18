@@ -26,7 +26,13 @@ using json = nlohmann::json;
 struct PreviousData {
   Path previous_path;
   Frenet end_path;
+
+  int sizeOfPreviousPath() const;
 };
+
+int PreviousData::sizeOfPreviousPath() const {
+  return previous_path.points.size();
+}
 
 PreviousData createPreviousData(
     const nlohmann::basic_json<std::map, std::vector,
