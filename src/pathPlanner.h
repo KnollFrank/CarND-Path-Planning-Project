@@ -189,14 +189,21 @@ Path createNextVals(const Path &path, const int prev_size,
 class PathPlanner {
 
  public:
-  Path createPath(ReferencePoint &refPoint, Lane &lane,
-                  const CoordsConverter& coordsConverter, EgoCar egoCar,
+  PathPlanner(const CoordsConverter& coordsConverter);
+
+  Path createPath(ReferencePoint &refPoint, Lane &lane, EgoCar egoCar,
                   const PreviousData &previousData,
                   const vector<Vehicle> &vehicles, double dt);
+
+ private:
+  const CoordsConverter& coordsConverter;
 };
 
+PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter)
+    : coordsConverter(_coordsConverter) {
+}
+
 Path PathPlanner::createPath(ReferencePoint &refPoint, Lane &lane,
-                             const CoordsConverter& coordsConverter,
                              EgoCar egoCar, const PreviousData &previousData,
                              const vector<Vehicle> &vehicles, double dt) {
 
