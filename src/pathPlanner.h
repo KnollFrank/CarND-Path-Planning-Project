@@ -72,6 +72,7 @@ class PathPlanner {
   CoordinateSystem createRotatedCoordinateSystem(const Point& origin,
                                                  double angle_rad);
   Point createSplinePoint(double x, const tk::spline& s);
+  void sort_and_remove_duplicates(vector<Point>& points);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
@@ -177,15 +178,17 @@ Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
     path.points[i] = coordinateSystem.transform(point.x, point.y);
   }
 
-  // TODO: extract method, sort_and_remove_duplicates
-  std::sort(path.points.begin(), path.points.end(),
-            [](const Point& p1, const Point& p2) {return p1.x < p2.x;});
-  path.points.erase(
-      unique(path.points.begin(), path.points.end(),
-             [](const Point& p1, const Point& p2) {return p1.x == p2.x;}),
-      path.points.end());
-
+  sort_and_remove_duplicates(path.points);
   return path;
+}
+
+void PathPlanner::sort_and_remove_duplicates(vector<Point>& points) {
+  std::sort(points.begin(), points.end(),
+            [](const Point& p1, const Point& p2) {return p1.x < p2.x;});
+  points.erase(
+      unique(points.begin(), points.end(),
+             [](const Point& p1, const Point& p2) {return p1.x == p2.x;}),
+      points.end());
 }
 
 Path PathPlanner::createNextVals(const Path& path, const int prev_size,
