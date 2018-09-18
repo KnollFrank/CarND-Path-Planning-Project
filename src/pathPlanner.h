@@ -236,17 +236,14 @@ vector<double> PathPlanner::createXVals(const tk::spline& s, const int num) {
   return x_vals;
 }
 
-// TODO: refactor. erst Werte x_add_on + target.x / N erzeugen, dann mit map createSplinePoint(), dann transform()
 vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
                                                          const int num) {
 
   vector<double> x_vals = createXVals(s, num);
   vector<Point> points = map2<double, Point>(
       x_vals, [&](const double x_val) {return createSplinePoint(x_val, s);});
-
-  CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
-      refPoint.point, refPoint.yaw_rad);
-  return transform(coordinateSystem, points);
+  return transform(
+      createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), points);
 }
 
 // TODO: refactor
