@@ -217,9 +217,11 @@ vector<Point> PathPlanner::rotate(const vector<Point>& points,
                                   const Point& center, const double angle_rad) {
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Point { 0, 0 }, angle_rad);
-  return map2<Point, Point>(points, [&](const Point& point) {
-    return coordinateSystem.transform(point - center);
-  });
+  vector<Point> center2points = map2<Point, Point>(points,
+                                                   [&](const Point& point) {
+                                                     return point - center;
+                                                   });
+  return transform(coordinateSystem, center2points);
 }
 
 void PathPlanner::addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
