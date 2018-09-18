@@ -74,8 +74,7 @@ class PathPlanner {
   std::vector<Point> createNewPoints(const EgoCar& egoCar);
   void rotate(vector<Point>& points, const Point& center,
               const double angle_rad);
-  std::vector<Point> createTransformedSplinePoints(const tk::spline& s,
-                                                   const int num);
+  std::vector<Point> createSplinePoints(const tk::spline& s, const int num);
   vector<Point> transform(const CoordinateSystem& coordinateSystem,
                           const vector<Point>& points) const;
   std::vector<double> createXVals(const tk::spline& s, const int num);
@@ -99,6 +98,10 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
       dt(_dt) {
 }
 
+//double doWithinCarsCoordinateSystem(Path& path, function<Path(Path& path)> func) {
+//
+//}
+
 Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
                              const vector<Vehicle>& vehicles) {
 
@@ -120,15 +123,17 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   addPointsFromPreviousData(path, egoCar, previousData);
   addNewPoints(path, egoCar);
   rotate(path.points, refPoint.point, -refPoint.yaw_rad);
-  sort_and_remove_duplicates(path.points);
 
+  sort_and_remove_duplicates(path.points);
 
   Path next_vals;
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-  appendSnd2Fst(
-      next_vals.points,
-      createTransformedSplinePoints(
-          path.asSpline(), path_size - previousData.sizeOfPreviousPath()));
+  vector<Point> bla = createSplinePoints(
+      path.asSpline(), path_size - previousData.sizeOfPreviousPath());
+  vector<Point> blub = transform(
+      createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), bla);
+
+  appendSnd2Fst(next_vals.points, blub);
 
   return next_vals;
 }
@@ -249,14 +254,13 @@ vector<double> PathPlanner::createXVals(const tk::spline& s, const int num) {
   return x_vals;
 }
 
-vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
-                                                         const int num) {
+vector<Point> PathPlanner::createSplinePoints(const tk::spline& s,
+                                              const int num) {
 
   vector<double> x_vals = createXVals(s, num);
   vector<Point> points = map2<double, Point>(
       x_vals, [&](const double x_val) {return createSplinePoint(x_val, s);});
-  return transform(
-      createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), points);
+  return points;
 }
 
 Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
