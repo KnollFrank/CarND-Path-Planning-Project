@@ -60,52 +60,6 @@ CoordinateSystem createRotatedVectors(const Point& origin, double angle_rad) {
   return CoordinateSystem { origin, e1, e2 };
 }
 
-Path createPoints(const int prev_size, const EgoCar& egoCar,
-                  ReferencePoint &refPoint, const PreviousData& previousData,
-                  Lane lane, const CoordsConverter &coordsConverter) {
-  Path path;
-
-  if (prev_size < 2) {
-    Point prev = egoCar.getPos_cart()
-        - Point::fromAngle(deg2rad(egoCar.yaw_deg));
-    path.points.push_back(prev);
-    path.points.push_back(egoCar.getPos_cart());
-  } else {
-    refPoint.point = previousData.previous_path.points[prev_size - 1];
-    Point prev = previousData.previous_path.points[prev_size - 2];
-    refPoint.yaw_rad = (refPoint.point - prev).getHeading();
-    path.points.push_back(prev);
-    path.points.push_back(refPoint.point);
-  }
-  Point next_wp0 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 30,
-      getMiddleOfLane(lane) });
-  Point next_wp1 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 60,
-      getMiddleOfLane(lane) });
-  Point next_wp2 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 90,
-      getMiddleOfLane(lane) });
-
-  path.points.push_back(next_wp0);
-  path.points.push_back(next_wp1);
-  path.points.push_back(next_wp2);
-
-  CoordinateSystem coordinateSystem = createRotatedVectors(Point { 0, 0 },
-                                                           -refPoint.yaw_rad);
-  for (int i = 0; i < path.points.size(); i++) {
-    Point point = path.points[i] - refPoint.point;
-    path.points[i] = coordinateSystem.transform(point.x, point.y);
-  }
-
-  // TODO: extract method, sort_and_remove_duplicates
-  std::sort(path.points.begin(), path.points.end(),
-            [](const Point &p1, const Point &p2) {return p1.x < p2.x;});
-  path.points.erase(
-      unique(path.points.begin(), path.points.end(),
-             [](const Point &p1, const Point &p2) {return p1.x == p2.x;}),
-      path.points.end());
-
-  return path;
-}
-
 tuple<vector<double>, vector<double>> getPoints(const Path &path) {
   vector<double> xs;
   vector<double> ys;
@@ -167,6 +121,8 @@ class PathPlanner {
                                                 const Vehicle &vehicle,
                                                 const int prev_size, double dt);
   double getNewVelocity(bool too_close, double vel_mph);
+  Path createPoints(const int prev_size, const EgoCar& egoCar,
+                    const PreviousData& previousData);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
@@ -199,8 +155,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData &previousData,
   refPoint.point = egoCar.getPos_cart();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
-  Path path = createPoints(prev_size, egoCar, refPoint, previousData, lane,
-                           coordsConverter);
+  Path path = createPoints(prev_size, egoCar, previousData);
 
   return createNextVals(path, prev_size, previousData, refPoint, dt);
 }
@@ -236,6 +191,51 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
   }
 
   return vel_mph;
+}
+
+Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
+                               const PreviousData& previousData) {
+  Path path;
+
+  if (prev_size < 2) {
+    Point prev = egoCar.getPos_cart()
+        - Point::fromAngle(deg2rad(egoCar.yaw_deg));
+    path.points.push_back(prev);
+    path.points.push_back(egoCar.getPos_cart());
+  } else {
+    refPoint.point = previousData.previous_path.points[prev_size - 1];
+    Point prev = previousData.previous_path.points[prev_size - 2];
+    refPoint.yaw_rad = (refPoint.point - prev).getHeading();
+    path.points.push_back(prev);
+    path.points.push_back(refPoint.point);
+  }
+  Point next_wp0 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 30,
+      getMiddleOfLane(lane) });
+  Point next_wp1 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 60,
+      getMiddleOfLane(lane) });
+  Point next_wp2 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 90,
+      getMiddleOfLane(lane) });
+
+  path.points.push_back(next_wp0);
+  path.points.push_back(next_wp1);
+  path.points.push_back(next_wp2);
+
+  CoordinateSystem coordinateSystem = createRotatedVectors(Point { 0, 0 },
+                                                           -refPoint.yaw_rad);
+  for (int i = 0; i < path.points.size(); i++) {
+    Point point = path.points[i] - refPoint.point;
+    path.points[i] = coordinateSystem.transform(point.x, point.y);
+  }
+
+  // TODO: extract method, sort_and_remove_duplicates
+  std::sort(path.points.begin(), path.points.end(),
+            [](const Point &p1, const Point &p2) {return p1.x < p2.x;});
+  path.points.erase(
+      unique(path.points.begin(), path.points.end(),
+             [](const Point &p1, const Point &p2) {return p1.x == p2.x;}),
+      path.points.end());
+
+  return path;
 }
 
 #endif /* PATHPLANNER_H_ */
