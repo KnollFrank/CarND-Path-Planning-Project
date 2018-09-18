@@ -63,8 +63,6 @@ class PathPlanner {
                                                 const Vehicle& vehicle,
                                                 const int prev_size);
   double getNewVelocity(bool too_close, double vel_mph);
-  Path createPath(const EgoCar& egoCar, const PreviousData& previousData);
-  Path createNextVals(const Path& path, const PreviousData& previousData);
   Lane getNewLane(bool too_close, Lane lane);
   CoordinateSystem createRotatedCoordinateSystem(const Point& origin,
                                                  double angle_rad);
@@ -118,8 +116,21 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   refPoint.point = egoCar.getPos_cart();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
-  Path path = createPath(egoCar, previousData);
-  return createNextVals(path, previousData);
+  Path path;
+  addPointsFromPreviousData(path, egoCar, previousData);
+  addNewPoints(path, egoCar);
+  rotate(path.points, refPoint.point, -refPoint.yaw_rad);
+  sort_and_remove_duplicates(path.points);
+
+
+  Path next_vals;
+  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
+  appendSnd2Fst(
+      next_vals.points,
+      createTransformedSplinePoints(
+          path.asSpline(), path_size - previousData.sizeOfPreviousPath()));
+
+  return next_vals;
 }
 
 bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
@@ -209,16 +220,6 @@ void PathPlanner::addNewPoints(Path& path, const EgoCar& egoCar) {
   appendSnd2Fst(path.points, createNewPoints(egoCar));
 }
 
-Path PathPlanner::createPath(const EgoCar& egoCar,
-                             const PreviousData& previousData) {
-  Path path;
-  addPointsFromPreviousData(path, egoCar, previousData);
-  addNewPoints(path, egoCar);
-  rotate(path.points, refPoint.point, -refPoint.yaw_rad);
-  sort_and_remove_duplicates(path.points);
-  return path;
-}
-
 void PathPlanner::sort_and_remove_duplicates(vector<Point>& points) {
   std::sort(points.begin(), points.end(),
             [](const Point& p1, const Point& p2) {return p1.x < p2.x;});
@@ -256,18 +257,6 @@ vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
       x_vals, [&](const double x_val) {return createSplinePoint(x_val, s);});
   return transform(
       createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), points);
-}
-
-Path PathPlanner::createNextVals(const Path& path,
-                                 const PreviousData& previousData) {
-  Path next_vals;
-  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-  appendSnd2Fst(
-      next_vals.points,
-      createTransformedSplinePoints(
-          path.asSpline(), path_size - previousData.sizeOfPreviousPath()));
-
-  return next_vals;
 }
 
 Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
