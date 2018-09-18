@@ -227,7 +227,7 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
     const EgoCar& egoCar, const vector<Vehicle>& vehicles, const int prev_size,
     double dt) {
   auto isEgoCarTooCloseToVehicleInLane =
-      [&, &egoCar, prev_size, dt]
+      [&]
       (const Vehicle &vehicle) {
         return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size, dt);};
 
