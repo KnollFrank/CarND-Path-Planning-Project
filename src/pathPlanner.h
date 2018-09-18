@@ -72,9 +72,11 @@ class PathPlanner {
       const EgoCar& egoCar, const PreviousData& previousData);
   void appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd);
   std::vector<Point> createNewPoints(const EgoCar& egoCar);
-  vector<Point> transform2CarsCoordinateSystem(const Point& origin,
-                                               const double angle_rad,
-                                               const vector<Point>& points);
+  vector<Point> enterCarsCoordinateSystem(const Point& origin,
+                                          const double angle_rad,
+                                          const vector<Point>& points);
+  vector<Point> leaveCarsCoordinateSystem(const Point& origin, double angle_rad,
+                                          const vector<Point>& points);
   std::vector<Point> createSplinePoints(const tk::spline& s, const int num);
   vector<Point> transform(const CoordinateSystem& coordinateSystem,
                           const vector<Point>& points) const;
@@ -84,10 +86,7 @@ class PathPlanner {
   void addNewPoints(Path& path, const EgoCar& egoCar);
   vector<Point> doWithinCarsCoordinateSystem(
       const Path& path,
-      const function<vector<Point>(const Path& carsPath)>& fn);
-  vector<Point> transformFromCarsCoordinateSystem(const Point& origin,
-                                                  double angle_rad,
-                                                  const vector<Point>& points);
+      const function<vector<Point>(const Path& carsPath)>& transformCarsPath2Points);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -105,7 +104,7 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
       dt(_dt) {
 }
 
-vector<Point> PathPlanner::transform2CarsCoordinateSystem(
+vector<Point> PathPlanner::enterCarsCoordinateSystem(
     const Point& origin, const double angle_rad, const vector<Point>& points) {
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Point { 0, 0 }, angle_rad);
@@ -116,23 +115,22 @@ vector<Point> PathPlanner::transform2CarsCoordinateSystem(
   return transform(coordinateSystem, center2points);
 }
 
-vector<Point> PathPlanner::transformFromCarsCoordinateSystem(
+vector<Point> PathPlanner::leaveCarsCoordinateSystem(
     const Point& origin, double angle_rad, const vector<Point>& points) {
   return transform(createRotatedCoordinateSystem(origin, angle_rad), points);
 }
 
 vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
-    const Path& path, const function<vector<Point>(const Path& carsPath)>& fn) {
+    const Path& path,
+    const function<vector<Point>(const Path& carsPath)>& transformCarsPath2Points) {
   Path carsPath;
-  carsPath.points = transform2CarsCoordinateSystem(refPoint.point,
-                                                   -refPoint.yaw_rad,
-                                                   path.points);
+  carsPath.points = enterCarsCoordinateSystem(refPoint.point, -refPoint.yaw_rad,
+                                              path.points);
   sort_and_remove_duplicates(carsPath.points);
 
-  vector<Point> points = fn(carsPath);
+  vector<Point> points = transformCarsPath2Points(carsPath);
 
-  return transformFromCarsCoordinateSystem(refPoint.point, refPoint.yaw_rad,
-                                           points);
+  return leaveCarsCoordinateSystem(refPoint.point, refPoint.yaw_rad, points);
 }
 
 Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
