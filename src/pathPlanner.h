@@ -81,6 +81,9 @@ class PathPlanner {
   vector<Point> transform(const CoordinateSystem& coordinateSystem,
                           const vector<Point>& points) const;
   std::vector<double> createXVals(const tk::spline& s, const int num);
+  void addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
+                                 const PreviousData& previousData);
+  void addNewPoints(Path& path, const EgoCar& egoCar);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -196,12 +199,21 @@ void PathPlanner::rotate(vector<Point>& points, const Point& center,
   });
 }
 
-Path PathPlanner::createPath(const EgoCar& egoCar,
-                               const PreviousData& previousData) {
-  Path path;
+void PathPlanner::addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
+                                            const PreviousData& previousData) {
   appendSnd2Fst(path.points,
                 createPointsFromPreviousData(egoCar, previousData));
+}
+
+void PathPlanner::addNewPoints(Path& path, const EgoCar& egoCar) {
   appendSnd2Fst(path.points, createNewPoints(egoCar));
+}
+
+Path PathPlanner::createPath(const EgoCar& egoCar,
+                             const PreviousData& previousData) {
+  Path path;
+  addPointsFromPreviousData(path, egoCar, previousData);
+  addNewPoints(path, egoCar);
   rotate(path.points, refPoint.point, -refPoint.yaw_rad);
   sort_and_remove_duplicates(path.points);
   return path;
@@ -246,16 +258,14 @@ vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
       createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), points);
 }
 
-// TODO: refactor
 Path PathPlanner::createNextVals(const Path& path,
                                  const PreviousData& previousData) {
   Path next_vals;
-  tk::spline s = path.asSpline();
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
   appendSnd2Fst(
       next_vals.points,
       createTransformedSplinePoints(
-          s, path_size - previousData.sizeOfPreviousPath()));
+          path.asSpline(), path_size - previousData.sizeOfPreviousPath()));
 
   return next_vals;
 }
