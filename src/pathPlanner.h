@@ -220,15 +220,18 @@ vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
   vector<Point> points;
   Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
-  CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
-      refPoint.point, refPoint.yaw_rad);
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 0; i < num; i++) {
-    // TODO: createSplinePoint und coordinateSystem.transform mit map auseinanderziehen
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
-    points.push_back(coordinateSystem.transform(point));
+    points.push_back(point);
   }
+
+  CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
+      refPoint.point, refPoint.yaw_rad);
+  mapInPlace(
+      points,
+      [&](const Point& point) {return coordinateSystem.transform(point);});
   return points;
 }
 
