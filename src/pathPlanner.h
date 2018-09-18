@@ -80,6 +80,7 @@ class PathPlanner {
                                                    const int num);
   vector<Point> transform(const CoordinateSystem& coordinateSystem,
                           const vector<Point>& points) const;
+  std::vector<double> createXVals(const tk::spline& s, const int num);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -223,18 +224,25 @@ vector<Point> PathPlanner::transform(const CoordinateSystem& coordinateSystem,
 }
 
 // TODO: refactor
-vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
-                                                         const int num) {
-
-  vector<Point> points;
+vector<double> PathPlanner::createXVals(const tk::spline& s, const int num) {
+  vector<double> x_vals;
   Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 0; i < num; i++) {
-    Point point = createSplinePoint(x_add_on + target.x / N, s);
-    x_add_on = point.x;
-    points.push_back(point);
+    x_add_on += target.x / N;
+    x_vals.push_back(x_add_on);
   }
+  return x_vals;
+}
+
+// TODO: refactor. erst Werte x_add_on + target.x / N erzeugen, dann mit map createSplinePoint(), dann transform()
+vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
+                                                         const int num) {
+
+  vector<double> x_vals = createXVals(s, num);
+  vector<Point> points = map2<double, Point>(
+      x_vals, [&](const double x_val) {return createSplinePoint(x_val, s);});
 
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       refPoint.point, refPoint.yaw_rad);
