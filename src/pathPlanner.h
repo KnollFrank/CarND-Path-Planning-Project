@@ -46,12 +46,6 @@ void printInfo(const EgoCar &egoCar, const vector<Vehicle> &vehicles) {
   cout << vehicle << endl;
 }
 
-CoordinateSystem createRotatedVectors(const Point& origin, double angle_rad) {
-  Point e1 = Point { cos(angle_rad), sin(angle_rad) };
-  Point e2 = Point { -sin(angle_rad), cos(angle_rad) };
-  return CoordinateSystem { origin, e1, e2 };
-}
-
 tuple<vector<double>, vector<double>> getPoints(const Path &path) {
   vector<double> xs;
   vector<double> ys;
@@ -89,6 +83,7 @@ class PathPlanner {
   Path createNextVals(const Path &path, const int prev_size,
                       const PreviousData& previousData);
   Lane getNewLane(bool too_close, Lane lane);
+  CoordinateSystem createRotatedVectors(const Point& origin, double angle_rad);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
@@ -239,6 +234,12 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
   }
 
   return lane;
+}
+
+CoordinateSystem PathPlanner::createRotatedVectors(const Point& origin, double angle_rad) {
+  Point e1 = Point { cos(angle_rad), sin(angle_rad) };
+  Point e2 = Point { -sin(angle_rad), cos(angle_rad) };
+  return CoordinateSystem { origin, e1, e2 };
 }
 
 #endif /* PATHPLANNER_H_ */
