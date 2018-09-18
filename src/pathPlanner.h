@@ -76,6 +76,7 @@ class PathPlanner {
   std::vector<Point> createPointsFromPreviousData(
       const int prev_size, const EgoCar& egoCar,
       const PreviousData& previousData);
+  void appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
@@ -168,14 +169,17 @@ vector<Point> PathPlanner::createPointsFromPreviousData(
   return points;
 }
 
+void PathPlanner::appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd) {
+  fst.insert(std::end(fst), std::begin(snd), std::end(snd));
+}
+
 Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
                                const PreviousData& previousData) {
   Path path;
 
   vector<Point> points = createPointsFromPreviousData(prev_size, egoCar,
                                                       previousData);
-  path.points.insert(std::end(path.points), std::begin(points),
-                     std::end(points));
+  appendSnd2Fst(path.points, points);
 
   Point next_wp0 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 30,
       getMiddleOfLane(lane) });
