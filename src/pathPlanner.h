@@ -72,8 +72,8 @@ class PathPlanner {
       const EgoCar& egoCar, const PreviousData& previousData);
   void appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd);
   std::vector<Point> createNewPoints(const EgoCar& egoCar);
-  void rotate(vector<Point>& points, const Point& center,
-              const double angle_rad);
+  vector<Point> rotate(const vector<Point>& points, const Point& center,
+                       const double angle_rad);
   std::vector<Point> createSplinePoints(const tk::spline& s, const int num);
   vector<Point> transform(const CoordinateSystem& coordinateSystem,
                           const vector<Point>& points) const;
@@ -102,7 +102,8 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 
 vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
     Path& path, function<vector<Point>(Path& path)> fn) {
-  rotate(path.points, refPoint.point, -refPoint.yaw_rad);
+  path.points = rotate(path.points, refPoint.point, -refPoint.yaw_rad);
+  sort_and_remove_duplicates(path.points);
   vector<Point> bla = fn(path);
   vector<Point> blub = transform(
       createRotatedCoordinateSystem(refPoint.point, refPoint.yaw_rad), bla);
@@ -132,7 +133,6 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
 
   Path next_vals;
   auto fn = [&](Path& path) {
-    sort_and_remove_duplicates(path.points);
     appendSnd2Fst(next_vals.points, previousData.previous_path.points);
     vector<Point> bla = createSplinePoints(
         path.asSpline(), path_size - previousData.sizeOfPreviousPath());
@@ -213,11 +213,11 @@ vector<Point> PathPlanner::createNewPoints(const EgoCar& egoCar) {
   return points;
 }
 
-void PathPlanner::rotate(vector<Point>& points, const Point& center,
-                         const double angle_rad) {
+vector<Point> PathPlanner::rotate(const vector<Point>& points,
+                                  const Point& center, const double angle_rad) {
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Point { 0, 0 }, angle_rad);
-  mapInPlace(points, [&](const Point& point) {
+  return map2<Point, Point>(points, [&](const Point& point) {
     return coordinateSystem.transform(point - center);
   });
 }
