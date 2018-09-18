@@ -63,7 +63,7 @@ class PathPlanner {
                                                 const Vehicle& vehicle,
                                                 const int prev_size);
   double getNewVelocity(bool too_close, double vel_mph);
-  Path createPoints(const EgoCar& egoCar, const PreviousData& previousData);
+  Path createPath(const EgoCar& egoCar, const PreviousData& previousData);
   Path createNextVals(const Path& path, const PreviousData& previousData);
   Lane getNewLane(bool too_close, Lane lane);
   CoordinateSystem createRotatedCoordinateSystem(const Point& origin,
@@ -115,7 +115,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   refPoint.point = egoCar.getPos_cart();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
-  Path path = createPoints(egoCar, previousData);
+  Path path = createPath(egoCar, previousData);
   return createNextVals(path, previousData);
 }
 
@@ -196,7 +196,7 @@ void PathPlanner::rotate(vector<Point>& points, const Point& center,
   });
 }
 
-Path PathPlanner::createPoints(const EgoCar& egoCar,
+Path PathPlanner::createPath(const EgoCar& egoCar,
                                const PreviousData& previousData) {
   Path path;
   appendSnd2Fst(path.points,
