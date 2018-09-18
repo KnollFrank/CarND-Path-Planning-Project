@@ -76,8 +76,8 @@ class PathPlanner {
   std::vector<Point> createNewPoints(const EgoCar& egoCar);
   void rotate(vector<Point>& points, const Point& center,
               const double angle_rad);
-  std::vector<Point> createTransformedSplinePoints(
-      const tk::spline& s, const PreviousData& previousData);
+  std::vector<Point> createTransformedSplinePoints(const tk::spline& s,
+                                                   const int num);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -213,17 +213,16 @@ void PathPlanner::sort_and_remove_duplicates(vector<Point>& points) {
 }
 
 // TODO: refactor
-vector<Point> PathPlanner::createTransformedSplinePoints(
-    const tk::spline& s, const PreviousData& previousData) {
+vector<Point> PathPlanner::createTransformedSplinePoints(const tk::spline& s,
+                                                         const int num) {
 
   vector<Point> points;
   Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
-  const int path_size = 50;
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       refPoint.point, refPoint.yaw_rad);
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
-  for (int i = 1; i < path_size - previousData.sizeOfPreviousPath(); i++) {
+  for (int i = 0; i < num; i++) {
     // TODO: createSplinePoint und coordinateSystem.transform mit map auseinanderziehen
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
@@ -238,7 +237,9 @@ Path PathPlanner::createNextVals(const Path& path,
   Path next_vals;
   tk::spline s = path.asSpline();
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-  appendSnd2Fst(next_vals.points, createTransformedSplinePoints(s, previousData));
+  const int path_size = 50;
+  int num = path_size - previousData.sizeOfPreviousPath();
+  appendSnd2Fst(next_vals.points, createTransformedSplinePoints(s, num));
 
   return next_vals;
 }
