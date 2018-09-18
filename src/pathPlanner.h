@@ -73,6 +73,9 @@ class PathPlanner {
                                                  double angle_rad);
   Point createSplinePoint(double x, const tk::spline& s);
   void sort_and_remove_duplicates(vector<Point>& points);
+  std::vector<Point> createPointsFromPreviousData(
+      const int prev_size, const EgoCar& egoCar,
+      const PreviousData& previousData);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
@@ -93,6 +96,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
 
   // printInfo(egoCar, vehicles);
 
+  // TODO; make prev_size a method within PreviousData.
   const int prev_size = previousData.previous_path.points.size();
 
   if (prev_size > 0) {
@@ -144,22 +148,35 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
   return vel_mph;
 }
 
-Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
-                               const PreviousData& previousData) {
-  Path path;
+vector<Point> PathPlanner::createPointsFromPreviousData(
+    const int prev_size, const EgoCar& egoCar,
+    const PreviousData& previousData) {
 
+  vector<Point> points;
   if (prev_size < 2) {
     Point prev = egoCar.getPos_cart()
         - Point::fromAngle(deg2rad(egoCar.yaw_deg));
-    path.points.push_back(prev);
-    path.points.push_back(egoCar.getPos_cart());
+    points.push_back(prev);
+    points.push_back(egoCar.getPos_cart());
   } else {
     refPoint.point = previousData.previous_path.points[prev_size - 1];
     Point prev = previousData.previous_path.points[prev_size - 2];
     refPoint.yaw_rad = (refPoint.point - prev).getHeading();
-    path.points.push_back(prev);
-    path.points.push_back(refPoint.point);
+    points.push_back(prev);
+    points.push_back(refPoint.point);
   }
+  return points;
+}
+
+Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
+                               const PreviousData& previousData) {
+  Path path;
+
+  vector<Point> points = createPointsFromPreviousData(prev_size, egoCar,
+                                                      previousData);
+  path.points.insert(std::end(path.points), std::begin(points),
+                     std::end(points));
+
   Point next_wp0 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 30,
       getMiddleOfLane(lane) });
   Point next_wp1 = coordsConverter.getXY(Frenet { egoCar.getPos_frenet().s + 60,
