@@ -139,8 +139,9 @@ double driveEgoCarAndVehicles(ReferencePoint& refPoint, Lane& lane,
                               vector<Vehicle>& vehicles, double dt,
                               const function<void(void)>& check) {
 
-  Path path = createPath(refPoint, lane, coordsConverter, egoCar, previousData,
-                         vehicles, dt);
+  PathPlanner pathPlanner;
+  Path path = pathPlanner.createPath(refPoint, lane, coordsConverter, egoCar,
+                                     previousData, vehicles, dt);
   int numberOfUnprocessedPathElements = 10;
   double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(
       path.points, numberOfUnprocessedPathElements, dt, check, egoCar,
@@ -208,9 +209,11 @@ TEST(PathPlanningTest, should_drive_in_same_lane) {
 
   double dt = 0.02;
 
+  PathPlanner pathPlanner;
+
 // WHEN
-  Path path = createPath(refPoint, lane, coordsConverter, egoCar, previousData,
-                         vehicles, dt);
+  Path path = pathPlanner.createPath(refPoint, lane, coordsConverter, egoCar,
+                                     previousData, vehicles, dt);
 
 // THEN
   test::assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE,
