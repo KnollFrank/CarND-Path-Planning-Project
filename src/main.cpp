@@ -106,13 +106,9 @@ int main(int argc, char **argv) {
               // j[1] is the data JSON object
 
               EgoCar egoCar = createEgoCar(j, coordsConverter);
-              Path next_vals = createPath(refPoint,
-                  lane,
-                  coordsConverter,
-                  egoCar,
-                  createPreviousData(j),
-                  createVehicles(j[1]["sensor_fusion"], coordsConverter),
-                  dt);
+              PreviousData previousData = createPreviousData(j);
+              vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"], coordsConverter);
+              Path next_vals = createPath(refPoint, lane, coordsConverter, egoCar, previousData, vehicles, dt);
 
               json msgJson;
               vector<double> xs;
