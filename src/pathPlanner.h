@@ -79,38 +79,40 @@ class PathPlanner {
 
  public:
   PathPlanner(const CoordsConverter& coordsConverter, ReferencePoint& refPoint,
-              Lane& lane);
+              Lane& lane, double dt);
 
   Path createPath(EgoCar egoCar, const PreviousData &previousData,
-                  const vector<Vehicle> &vehicles, double dt);
+                  const vector<Vehicle> &vehicles);
 
  private:
   bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
                                           const vector<Vehicle>& vehicles,
-                                          const int prev_size, double dt);
+                                          const int prev_size);
   bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
                                                 const Vehicle &vehicle,
-                                                const int prev_size, double dt);
+                                                const int prev_size);
   double getNewVelocity(bool too_close, double vel_mph);
   Path createPoints(const int prev_size, const EgoCar& egoCar,
                     const PreviousData& previousData);
   Path createNextVals(const Path &path, const int prev_size,
-                      const PreviousData& previousData, double dt);
+                      const PreviousData& previousData);
 
   const CoordsConverter& coordsConverter;
   ReferencePoint& refPoint;
   Lane& lane;
+  double dt;
 };
 
 PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
-                         ReferencePoint& _refPoint, Lane& _lane)
+                         ReferencePoint& _refPoint, Lane& _lane, double _dt)
     : coordsConverter(_coordsConverter),
       refPoint(_refPoint),
-      lane(_lane) {
+      lane(_lane),
+      dt(_dt) {
 }
 
 Path PathPlanner::createPath(EgoCar egoCar, const PreviousData &previousData,
-                             const vector<Vehicle> &vehicles, double dt) {
+                             const vector<Vehicle> &vehicles) {
 
   // printInfo(egoCar, vehicles);
 
@@ -122,7 +124,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData &previousData,
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(egoCar, vehicles,
-                                                      prev_size, dt);
+                                                      prev_size);
   lane = getNewLane(too_close, lane);
   refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
   refPoint.point = egoCar.getPos_cart();
@@ -130,24 +132,23 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData &previousData,
 
   Path path = createPoints(prev_size, egoCar, previousData);
 
-  return createNextVals(path, prev_size, previousData, dt);
+  return createNextVals(path, prev_size, previousData);
 }
 
 bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
-    const EgoCar& egoCar, const vector<Vehicle>& vehicles, const int prev_size,
-    double dt) {
+    const EgoCar& egoCar, const vector<Vehicle>& vehicles,
+    const int prev_size) {
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
       (const Vehicle &vehicle) {
-        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size, dt);};
+        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isEgoCarTooCloseToVehicleInLane);
 }
 
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
-    const EgoCar& egoCar, const Vehicle &vehicle, const int prev_size,
-    double dt) {
+    const EgoCar& egoCar, const Vehicle &vehicle, const int prev_size) {
   double check_speed = vehicle.getVel_cart_m_per_s().len();
   double check_vehicle_s = vehicle.getPos_frenet().s
       + prev_size * dt * check_speed;
@@ -212,7 +213,7 @@ Path PathPlanner::createPoints(const int prev_size, const EgoCar& egoCar,
 }
 
 Path PathPlanner::createNextVals(const Path &path, const int prev_size,
-                                 const PreviousData& previousData, double dt) {
+                                 const PreviousData& previousData) {
   Path next_vals;
 
   vector<double> xs;

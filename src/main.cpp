@@ -108,8 +108,8 @@ int main(int argc, char **argv) {
               EgoCar egoCar = createEgoCar(j, coordsConverter);
               PreviousData previousData = createPreviousData(j);
               vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"], coordsConverter);
-              PathPlanner pathPlanner(coordsConverter, refPoint, lane);
-              Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles, dt);
+              PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
+              Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles);
 
               json msgJson;
               vector<double> xs;
