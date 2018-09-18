@@ -4,6 +4,7 @@
 #include <vector>
 #include "coords/cart.h"
 #include "json.hpp"
+#include "spline.h"
 
 using namespace std;
 
@@ -14,6 +15,7 @@ struct Path {
   vector<Point> points;
 
   tuple<vector<double>, vector<double>> asXValsAndYVals() const;
+  tk::spline asSpline() const;
 };
 
 tuple<vector<double>, vector<double>> Path::asXValsAndYVals() const {
@@ -25,6 +27,15 @@ tuple<vector<double>, vector<double>> Path::asXValsAndYVals() const {
   }
 
   return make_tuple(xs, ys);
+}
+
+tk::spline Path::asSpline() const {
+  vector<double> xs;
+  vector<double> ys;
+  tie(xs, ys) = asXValsAndYVals();
+  tk::spline s;
+  s.set_points(xs, ys);
+  return s;
 }
 
 #endif /* PATH_H_ */

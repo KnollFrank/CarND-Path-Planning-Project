@@ -76,6 +76,8 @@ class PathPlanner {
   std::vector<Point> createNewPoints(const EgoCar& egoCar);
   void rotate(vector<Point>& points, const Point& center,
               const double angle_rad);
+  std::vector<Point> createTransformedSplinePoints(
+      const tk::spline& s, const PreviousData& previousData);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -211,18 +213,10 @@ void PathPlanner::sort_and_remove_duplicates(vector<Point>& points) {
 }
 
 // TODO: refactor
-Path PathPlanner::createNextVals(const Path& path,
-                                 const PreviousData& previousData) {
-  Path next_vals;
+vector<Point> PathPlanner::createTransformedSplinePoints(
+    const tk::spline& s, const PreviousData& previousData) {
 
-  vector<double> xs;
-  vector<double> ys;
-  tie(xs, ys) = path.asXValsAndYVals();
-
-  tk::spline s;
-  s.set_points(xs, ys);
-  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-
+  vector<Point> points;
   Point target = createSplinePoint(30.0, s);
   double x_add_on = 0;
   const int path_size = 50;
@@ -233,8 +227,18 @@ Path PathPlanner::createNextVals(const Path& path,
     // TODO: createSplinePoint und coordinateSystem.transform mit map auseinanderziehen
     Point point = createSplinePoint(x_add_on + target.x / N, s);
     x_add_on = point.x;
-    next_vals.points.push_back(coordinateSystem.transform(point));
+    points.push_back(coordinateSystem.transform(point));
   }
+  return points;
+}
+
+// TODO: refactor
+Path PathPlanner::createNextVals(const Path& path,
+                                 const PreviousData& previousData) {
+  Path next_vals;
+  tk::spline s = path.asSpline();
+  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
+  appendSnd2Fst(next_vals.points, createTransformedSplinePoints(s, previousData));
 
   return next_vals;
 }
