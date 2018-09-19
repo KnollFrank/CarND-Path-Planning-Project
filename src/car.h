@@ -139,9 +139,8 @@ void Vehicle::setPos_frenet(const Frenet &pos) {
 }
 
 void Vehicle::setVel_frenet_m_per_s(const Frenet &vel) {
-  const Frenet &src = getPos_frenet();
-  const Frenet &dst = Frenet { src.s + vel.s, src.d + vel.d };
-  vel_cart_m_per_s = coordsConverter.createCartVectorFromStart2End(src, dst);
+  vel_cart_m_per_s = coordsConverter.createCartVectorFromStart2End(
+      getPos_frenet(), getPos_frenet() + vel);
 }
 
 Frenet Vehicle::getVel_frenet_m_per_s() const {
