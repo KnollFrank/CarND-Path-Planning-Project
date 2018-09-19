@@ -108,11 +108,11 @@ vector<Point> PathPlanner::enterCarsCoordinateSystem(
     const Point& origin, const double angle_rad, const vector<Point>& points) {
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Point { 0, 0 }, angle_rad);
-  vector<Point> center2points = map2<Point, Point>(points,
+  vector<Point> origin2points = map2<Point, Point>(points,
                                                    [&](const Point& point) {
                                                      return point - origin;
                                                    });
-  return transform(coordinateSystem, center2points);
+  return transform(coordinateSystem, origin2points);
 }
 
 vector<Point> PathPlanner::leaveCarsCoordinateSystem(
