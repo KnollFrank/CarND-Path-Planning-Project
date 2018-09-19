@@ -194,7 +194,7 @@ bool staysOvertaken(vector<bool>::const_iterator egoCarJustOvertakesVehicle,
 
 }
 
-TEST(PathPlanningTest, should_drive_in_same_lane) {
+TEST(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
@@ -220,7 +220,7 @@ TEST(PathPlanningTest, should_drive_in_same_lane) {
   test::assert_car_drives_straight_ahead(path, coordsConverter);
 }
 
-TEST(PathPlanningTest, should_drive_with_max_50_mph) {
+TEST(PathPlannerTest, should_drive_with_max_50_mph) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
@@ -245,7 +245,7 @@ TEST(PathPlanningTest, should_drive_with_max_50_mph) {
 // THEN
 }
 
-TEST(PathPlanningTest, should_collide) {
+TEST(PathPlannerTest, should_collide) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
@@ -261,7 +261,7 @@ TEST(PathPlanningTest, should_collide) {
   ASSERT_TRUE(test::isCollision(egoCar, vehicle));
 }
 
-TEST(PathPlanningTest, should_not_collide) {
+TEST(PathPlannerTest, should_not_collide) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
@@ -285,7 +285,7 @@ TEST(PathPlanningTest, should_not_collide) {
 // THEN
 }
 
-TEST(PathPlanningTest, should_overtake_vehicle) {
+TEST(PathPlannerTest, should_overtake_vehicle) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
@@ -323,7 +323,7 @@ TEST(PathPlanningTest, should_overtake_vehicle) {
   ASSERT_TRUE(test::staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
 }
 
-TEST(PathPlanningTest, should_overtake_vehicle2) {
+TEST(PathPlannerTest, should_overtake_vehicle2) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
