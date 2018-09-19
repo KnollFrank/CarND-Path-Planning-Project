@@ -72,6 +72,9 @@ class PathPlanner {
       const EgoCar& egoCar, const PreviousData& previousData);
   void appendSnd2Fst(vector<Point>& fst, const vector<Point>& snd);
   std::vector<Point> createNewPoints(const EgoCar& egoCar);
+  vector<Point> workWithPathInCarsCoordinateSystem(
+      const Path& path,
+      const function<vector<Point>(const Path& carsPath)>& transformCarsPath2Points);
   vector<Point> enterCarsCoordinateSystem(const Point& origin,
                                           const double angle_rad,
                                           const vector<Point>& points);
@@ -84,9 +87,6 @@ class PathPlanner {
   void addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
                                  const PreviousData& previousData);
   void addNewPoints(Path& path, const EgoCar& egoCar);
-  vector<Point> doWithinCarsCoordinateSystem(
-      const Path& path,
-      const function<vector<Point>(const Path& carsPath)>& transformCarsPath2Points);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -120,16 +120,15 @@ vector<Point> PathPlanner::leaveCarsCoordinateSystem(
   return transform(createRotatedCoordinateSystem(origin, angle_rad), points);
 }
 
-vector<Point> PathPlanner::doWithinCarsCoordinateSystem(
+vector<Point> PathPlanner::workWithPathInCarsCoordinateSystem(
     const Path& path,
     const function<vector<Point>(const Path& carsPath)>& transformCarsPath2Points) {
+
   Path carsPath;
   carsPath.points = enterCarsCoordinateSystem(refPoint.point, -refPoint.yaw_rad,
                                               path.points);
   sort_and_remove_duplicates(carsPath.points);
-
   vector<Point> points = transformCarsPath2Points(carsPath);
-
   return leaveCarsCoordinateSystem(refPoint.point, refPoint.yaw_rad, points);
 }
 
@@ -154,7 +153,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   addPointsFromPreviousData(path, egoCar, previousData);
   addNewPoints(path, egoCar);
 
-  vector<Point> points = doWithinCarsCoordinateSystem(
+  vector<Point> points = workWithPathInCarsCoordinateSystem(
       path, [&](const Path& carsPath) {
         return createSplinePoints(
             carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
