@@ -83,19 +83,6 @@ class PathPlannerTest : public ::testing::Test {
   PreviousData previousData;
 };
 
-std::vector<bool>::iterator getEgoCarJustOvertakesVehicleIterator(
-    vector<bool>& overtakens) {
-
-  auto it = find(begin(overtakens), end(overtakens), true);
-  return begin(overtakens) + (it - begin(overtakens));
-}
-
-bool staysOvertaken(vector<bool>::const_iterator egoCarJustOvertakesVehicle,
-                    const vector<bool>& overtakens) {
-  return all_of(egoCarJustOvertakesVehicle, end(overtakens),
-                [](bool overtaken) {return overtaken;});
-}
-
 TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
@@ -158,6 +145,19 @@ TEST_F(PathPlannerTest, should_not_collide) {
     ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));});
 
 // THEN
+}
+
+std::vector<bool>::iterator getEgoCarJustOvertakesVehicleIterator(
+    vector<bool>& overtakens) {
+
+  auto it = find(begin(overtakens), end(overtakens), true);
+  return begin(overtakens) + (it - begin(overtakens));
+}
+
+bool staysOvertaken(vector<bool>::const_iterator egoCarJustOvertakesVehicle,
+                    const vector<bool>& overtakens) {
+  return all_of(egoCarJustOvertakesVehicle, end(overtakens),
+                [](bool overtaken) {return overtaken;});
 }
 
 TEST_F(PathPlannerTest, should_overtake_vehicle) {
