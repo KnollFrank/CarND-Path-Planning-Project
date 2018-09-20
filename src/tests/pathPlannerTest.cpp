@@ -94,7 +94,8 @@ TEST_F(PathPlannerTest, should_collide) {
   EgoCar egoCar = createEgoCar(
       Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) });
   Vehicle vehicle = createVehicle(
-      0, egoCar.getPos_frenet() + Frenet { carRadius / 2, 0 }, Frenet { 0, 0 });
+      0, egoCar.getPos_frenet() + Frenet { EgoCar::carRadius() / 2, 0 },
+      Frenet { 0, 0 });
 
 // WHEN
 
@@ -107,7 +108,8 @@ TEST_F(PathPlannerTest, should_not_collide) {
   Lane lane = Lane::MIDDLE;
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   Vehicle vehicle = createVehicle(
-      0, egoCar.getPos_frenet() + Frenet { 10 * carSize, 0 }, Frenet { 5, 0 });
+      0, egoCar.getPos_frenet() + Frenet { 10 * EgoCar::carSize(), 0 }, Frenet {
+          5, 0 });
   vector<Vehicle> vehicles = { vehicle };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, NO_VALUE);

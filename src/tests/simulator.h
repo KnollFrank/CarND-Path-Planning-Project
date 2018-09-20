@@ -7,9 +7,6 @@ constexpr int NO_VALUE = -1;
 
 #define GTEST_COUT std::cerr
 
-const double carRadius = 1.25;
-const double carSize = 2 * carRadius;
-
 vector<Frenet> asFrenets(const vector<Point>& points,
                          const CoordsConverter& coordsConverter) {
 
@@ -180,7 +177,7 @@ void Simulator::drive2PointOfEgoCar(
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
-  return egoCar.getPos_cart().distanceTo(vehicle.getPos_cart()) <= carSize;
+  return egoCar.getPos_cart().distanceTo(vehicle.getPos_cart()) <= EgoCar::carSize();
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar,

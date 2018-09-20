@@ -23,6 +23,13 @@ class EgoCar {
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
+  static double carRadius() {
+    return 1.25;
+  }
+  static double carSize() {
+    return 2 * carRadius();
+  }
+
  private:
   Point pos_cart;
   Frenet pos_frenet;
