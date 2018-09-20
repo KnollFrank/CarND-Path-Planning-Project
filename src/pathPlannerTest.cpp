@@ -86,12 +86,6 @@ void drive2PointOfEgoCar(const Point& dst, EgoCar& egoCar, double dt,
   check();
 }
 
-void driveVehicle(Vehicle& vehicle, double dt) {
-  const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s();
-  vehicle.setPos_frenet(vehicle.getPos_frenet() + (vel_frenet * dt));
-  // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
-}
-
 void updatePreviousData(const vector<Point>& points,
                         int numberOfUnprocessedPathElements, const Path& path,
                         const CoordsConverter& coordsConverter,
@@ -150,6 +144,7 @@ class Simulator {
   double drive2PointsOfEgoCarAndDriveVehicles(
       const vector<Point>& points, int numberOfUnprocessedPathElements);
   void driveVehicles();
+  void driveVehicle(Vehicle& vehicle);
 
   ReferencePoint& refPoint;
   Lane& lane;
@@ -213,8 +208,14 @@ double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
 
 void Simulator::driveVehicles() {
   for (Vehicle& vehicle : vehicles) {
-    driveVehicle(vehicle, dt);
+    driveVehicle(vehicle);
   }
+}
+
+void Simulator::driveVehicle(Vehicle& vehicle) {
+  const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s();
+  vehicle.setPos_frenet(vehicle.getPos_frenet() + (vel_frenet * dt));
+  // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
 }
