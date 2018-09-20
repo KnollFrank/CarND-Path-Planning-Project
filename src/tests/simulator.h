@@ -28,14 +28,6 @@ bool isCollision(const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
       [&egoCar](const Vehicle& vehicle) {return isCollision(egoCar, vehicle);});
 }
 
-EgoCar createEgoCar(const Frenet& pos, const CoordsConverter& coordsConverter) {
-  EgoCar egoCar(coordsConverter);
-  egoCar.setPos_frenet(pos);
-  egoCar.yaw_deg = 0;
-  egoCar.speed_mph = 0;
-  return egoCar;
-}
-
 void assert_car_drives_in_middle_of_lane(
     const Path& path, Lane lane, const CoordsConverter& coordsConverter) {
 
