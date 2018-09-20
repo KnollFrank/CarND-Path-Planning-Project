@@ -145,13 +145,13 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
 TEST_F(PathPlannerTest, should_overtake_vehicle2) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = createEgoCar(posCar);
-  Vehicle vehicle2Overtake = createVehicle(0, posCar + Frenet { 35, 0 },
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
+  Vehicle vehicle2Overtake = createVehicle(0, egoCar.getPos_frenet() + Frenet {
+      35, 0 },
                                            Frenet { mph2meter_per_sec(5), 0 });
-  Vehicle vehicleInLeftLane = createVehicle(1, Frenet { posCar.s + 35,
-                                                getMiddleOfLane(Lane::LEFT) },
-                                            Frenet { mph2meter_per_sec(5), 0 });
+  Vehicle vehicleInLeftLane = createVehicle(
+      1, Frenet { egoCar.getPos_frenet().s + 35, getMiddleOfLane(Lane::LEFT) },
+      Frenet { mph2meter_per_sec(5), 0 });
   vector<Vehicle> vehicles { vehicle2Overtake, vehicleInLeftLane };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
