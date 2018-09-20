@@ -72,19 +72,6 @@ void assert_car_drives_straight_ahead(const Path& path,
       std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
 
-void updatePreviousData(const vector<Point>& points,
-                        int numberOfUnprocessedPathElements, const Path& path,
-                        const CoordsConverter& coordsConverter,
-                        PreviousData& previousData, const EgoCar& egoCar) {
-  previousData.previous_path.points.clear();
-  for (int i = points.size() - numberOfUnprocessedPathElements;
-      i < points.size(); i++) {
-    previousData.previous_path.points.push_back(path.points[i]);
-  }
-  previousData.end_path = coordsConverter.getFrenet(
-      points[points.size() - numberOfUnprocessedPathElements - 1]);
-}
-
 bool oneRoundDriven(const EgoCar& egoCar) {
   return egoCar.getPos_frenet().s > 6900;
 }
@@ -132,6 +119,9 @@ class Simulator {
   void driveVehicles();
   void driveVehicle(Vehicle& vehicle);
   void drive2PointOfEgoCar(const Point& dst);
+  void updatePreviousData(const vector<Point>& points,
+                          int numberOfUnprocessedPathElements,
+                          const Path& path);
 
   ReferencePoint& refPoint;
   Lane& lane;
@@ -174,9 +164,20 @@ double Simulator::driveEgoCarAndVehicles() {
   int numberOfUnprocessedPathElements = 10;
   double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(
       path.points, numberOfUnprocessedPathElements);
-  updatePreviousData(path.points, numberOfUnprocessedPathElements, path,
-                     coordsConverter, previousData, egoCar);
+  updatePreviousData(path.points, numberOfUnprocessedPathElements, path);
   return secsDriven;
+}
+
+void Simulator::updatePreviousData(const vector<Point>& points,
+                                   int numberOfUnprocessedPathElements,
+                                   const Path& path) {
+  previousData.previous_path.points.clear();
+  for (int i = points.size() - numberOfUnprocessedPathElements;
+      i < points.size(); i++) {
+    previousData.previous_path.points.push_back(path.points[i]);
+  }
+  previousData.end_path = coordsConverter.getFrenet(
+      points[points.size() - numberOfUnprocessedPathElements - 1]);
 }
 
 double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
