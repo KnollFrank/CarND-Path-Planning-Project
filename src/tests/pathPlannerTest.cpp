@@ -60,8 +60,7 @@ class PathPlannerTest : public ::testing::Test {
 TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = createEgoCar(pos);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
   PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02);
