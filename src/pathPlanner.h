@@ -86,7 +86,7 @@ class PathPlanner {
                                          const int num);
   vector<Frenet> transform(const CoordinateSystem& coordinateSystem,
                            const vector<Frenet>& points) const;
-  std::vector<double> createSVals(const tk::spline& s, const int num);
+  std::vector<double> createSVals(const tk::spline& spline, const int num);
   void addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
                                  const PreviousData& previousData);
   void addNewPoints(Path& path, const EgoCar& egoCar);
@@ -161,6 +161,9 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   vector<Frenet> points = workWithPathInCarsCoordinateSystem(
       path, [&](const Path& carsPath) {
         return createSplinePoints(
+            // TODO: diesen Spline später in XY-Koordinaten erzeugen, damit es nicht ruckelt im Simulator.
+            // Man muß einen Path sowohl in Frenet als auch in kartesischen Koordinaten erhalten können, und zwar
+            // nicht über den ungenauen CoordsConverter, sondern über ein Runnable.
             carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
       });
 
@@ -274,9 +277,9 @@ vector<Frenet> PathPlanner::transform(const CoordinateSystem& coordinateSystem,
   });
 }
 
-vector<double> PathPlanner::createSVals(const tk::spline& s, const int num) {
+vector<double> PathPlanner::createSVals(const tk::spline& spline, const int num) {
   vector<double> s_vals;
-  Frenet target = createSplinePoint(30.0, s);
+  Frenet target = createSplinePoint(30.0, spline);
   double s_add_on = 0;
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 0; i < num; i++) {
