@@ -18,16 +18,6 @@ vector<Frenet> asFrenets(const vector<Point>& points,
   });
 }
 
-bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
-  return egoCar.getPos_cart().distanceTo(vehicle.getPos_cart()) <= carSize;
-}
-
-bool isCollision(const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
-  return std::any_of(
-      vehicles.cbegin(), vehicles.cend(),
-      [&egoCar](const Vehicle& vehicle) {return isCollision(egoCar, vehicle);});
-}
-
 void assert_car_drives_in_middle_of_lane(
     const Path& path, Lane lane, const CoordsConverter& coordsConverter) {
 
@@ -71,6 +61,9 @@ class Simulator {
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
             int minSecs2Drive);
   void drive(function<void(void)> afterEachMovementOfEgoCar);
+  static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
+  static bool isCollision(const EgoCar& egoCar,
+                          const vector<Vehicle>& vehicles);
 
  private:
   double driveEgoCarAndVehicles(function<void(void)> afterEachMovementOfEgoCar);
@@ -184,6 +177,17 @@ void Simulator::drive2PointOfEgoCar(
   ASSERT_FALSE(isCollision(egoCar, vehicles)) << "COLLISION:" << endl << egoCar
       << vehicles[0];
   afterEachMovementOfEgoCar();
+}
+
+bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
+  return egoCar.getPos_cart().distanceTo(vehicle.getPos_cart()) <= carSize;
+}
+
+bool Simulator::isCollision(const EgoCar& egoCar,
+                            const vector<Vehicle>& vehicles) {
+  return std::any_of(
+      vehicles.cbegin(), vehicles.cend(),
+      [&](const Vehicle& vehicle) {return isCollision(egoCar, vehicle);});
 }
 
 #endif /* TESTS_SIMULATOR_H_ */

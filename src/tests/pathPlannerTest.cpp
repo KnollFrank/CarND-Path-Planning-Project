@@ -99,7 +99,7 @@ TEST_F(PathPlannerTest, should_collide) {
 // WHEN
 
 // THEN
-  ASSERT_TRUE(isCollision(egoCar, vehicle));
+  ASSERT_TRUE(Simulator::isCollision(egoCar, vehicle));
 }
 
 TEST_F(PathPlannerTest, should_not_collide) {
@@ -114,7 +114,7 @@ TEST_F(PathPlannerTest, should_not_collide) {
 
 // WHEN
   simulator.drive([&]() {
-    ASSERT_FALSE(isCollision(egoCar, vehicles));});
+    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));});
 
 // THEN
 }
