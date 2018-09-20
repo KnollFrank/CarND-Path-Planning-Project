@@ -190,9 +190,10 @@ TEST_F(PathPlannerTest, should_overtake_vehicle2) {
   Vehicle vehicle2Overtake = createVehicle(0, egoCar.getPos_frenet() + Frenet {
       35, 0 },
                                            Frenet { mph2meter_per_sec(5), 0 });
-  Vehicle vehicleInLeftLane = createVehicle(
-      1, Frenet { egoCar.getPos_frenet().s + 35, getMiddleOfLane(Lane::LEFT) },
-      Frenet { mph2meter_per_sec(5), 0 });
+  Vehicle vehicleInLeftLane =
+      createVehicle(1, Frenet { vehicle2Overtake.getPos_frenet().s,
+                        getMiddleOfLane(Lane::LEFT) },
+                    vehicle2Overtake.getVel_frenet_m_per_s());
   vector<Vehicle> vehicles { vehicle2Overtake, vehicleInLeftLane };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
