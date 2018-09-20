@@ -98,24 +98,6 @@ void driveVehicles(vector<Vehicle>& vehicles, double dt) {
   }
 }
 
-double drive2PointsOfEgoCarAndDriveVehicles(const vector<Point>& points,
-                                            int numberOfUnprocessedPathElements,
-                                            double dt,
-                                            const function<void(void)>& check,
-                                            EgoCar& egoCar,
-                                            vector<Vehicle>& vehicles) {
-
-  int numberOfProcessedPathElements = points.size()
-      - numberOfUnprocessedPathElements;
-  for (int i = 0; i < numberOfProcessedPathElements; i++) {
-    driveVehicles(vehicles, dt);
-    drive2PointOfEgoCar(points[i], egoCar, dt, vehicles, check);
-  }
-
-  double secsDriven = numberOfProcessedPathElements * dt;
-  return secsDriven;
-}
-
 void updatePreviousData(const vector<Point>& points,
                         int numberOfUnprocessedPathElements, const Path& path,
                         const CoordsConverter& coordsConverter,
@@ -171,6 +153,10 @@ class Simulator {
 
  private:
   double driveEgoCarAndVehicles();
+  double drive2PointsOfEgoCarAndDriveVehicles(
+      const vector<Point>& points, int numberOfUnprocessedPathElements,
+      double dt, const function<void(void)>& check, EgoCar& egoCar,
+      vector<Vehicle>& vehicles);
 
   ReferencePoint& refPoint;
   Lane& lane;
@@ -216,6 +202,22 @@ double Simulator::driveEgoCarAndVehicles() {
       vehicles);
   updatePreviousData(path.points, numberOfUnprocessedPathElements, path,
                      coordsConverter, previousData, egoCar);
+  return secsDriven;
+}
+
+double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
+    const vector<Point>& points, int numberOfUnprocessedPathElements, double dt,
+    const function<void(void)>& check, EgoCar& egoCar,
+    vector<Vehicle>& vehicles) {
+
+  int numberOfProcessedPathElements = points.size()
+      - numberOfUnprocessedPathElements;
+  for (int i = 0; i < numberOfProcessedPathElements; i++) {
+    driveVehicles(vehicles, dt);
+    drive2PointOfEgoCar(points[i], egoCar, dt, vehicles, check);
+  }
+
+  double secsDriven = numberOfProcessedPathElements * dt;
   return secsDriven;
 }
 }
