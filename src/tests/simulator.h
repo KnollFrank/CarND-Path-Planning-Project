@@ -7,37 +7,6 @@ constexpr int NO_VALUE = -1;
 
 #define GTEST_COUT std::cerr
 
-vector<Frenet> asFrenets(const vector<Point>& points,
-                         const CoordsConverter& coordsConverter) {
-
-  return map2<Point, Frenet>(points, [&coordsConverter](const Point& point) {
-    return coordsConverter.getFrenet(point);
-  });
-}
-
-void assert_car_drives_in_middle_of_lane(
-    const Path& path, Lane lane, const CoordsConverter& coordsConverter) {
-
-  for (const Frenet& frenet : asFrenets(path.points, coordsConverter)) {
-    ASSERT_NEAR(2 + 4 * lane, frenet.d, 0.001);
-  }
-}
-
-vector<double> getDistancesAlongRoad(const Path& path,
-                                     const CoordsConverter& coordsConverter) {
-
-  return map2<Frenet, double>(asFrenets(path.points, coordsConverter),
-                              [](const Frenet& frenet) {return frenet.s;});
-}
-
-void assert_car_drives_straight_ahead(const Path& path,
-                                      const CoordsConverter& coordsConverter) {
-  vector<double> distancesAlongRoad = getDistancesAlongRoad(path,
-                                                            coordsConverter);
-  ASSERT_TRUE(
-      std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
-}
-
 std::vector<bool>::iterator getEgoCarJustOvertakesVehicleIterator(
     vector<bool>& overtakens) {
 

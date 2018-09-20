@@ -51,6 +51,32 @@ class PathPlannerTest : public ::testing::Test {
     return vehicle;
   }
 
+  vector<Frenet> asFrenets(const vector<Point>& points) {
+
+    return map2<Point, Frenet>(points, [&](const Point& point) {
+      return coordsConverter->getFrenet(point);
+    });
+  }
+
+  void assert_car_drives_in_middle_of_lane(const Path& path, Lane lane) {
+
+    for (const Frenet& frenet : asFrenets(path.points)) {
+      ASSERT_NEAR(2 + 4 * lane, frenet.d, 0.001);
+    }
+  }
+
+  vector<double> getDistancesAlongRoad(const Path& path) {
+
+    return map2<Frenet, double>(asFrenets(path.points),
+                                [](const Frenet& frenet) {return frenet.s;});
+  }
+
+  void assert_car_drives_straight_ahead(const Path& path) {
+    vector<double> distancesAlongRoad = getDistancesAlongRoad(path);
+    ASSERT_TRUE(
+        std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
+  }
+
   MapWaypoints mapWaypoints;
   CoordsConverter* coordsConverter;
   ReferencePoint refPoint;
@@ -69,8 +95,8 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
 
 // THEN
-  assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE, *coordsConverter);
-  assert_car_drives_straight_ahead(path, *coordsConverter);
+  assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE);
+  assert_car_drives_straight_ahead(path);
 }
 
 TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
