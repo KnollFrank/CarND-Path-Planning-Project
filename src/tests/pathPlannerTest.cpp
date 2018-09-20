@@ -51,13 +51,6 @@ class PathPlannerTest : public ::testing::Test {
     return vehicle;
   }
 
-  vector<Frenet> asFrenets(const vector<Point>& points) {
-
-    return map2<Point, Frenet>(points, [&](const Point& point) {
-      return coordsConverter->getFrenet(point);
-    });
-  }
-
   void assert_car_drives_in_middle_of_lane(const Path& path, Lane lane) {
     for (const Frenet& frenet : path.points) {
       ASSERT_NEAR(2 + 4 * lane, frenet.d, 0.001);
