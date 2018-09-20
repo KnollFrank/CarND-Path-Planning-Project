@@ -192,6 +192,53 @@ bool staysOvertaken(vector<bool>::const_iterator egoCarJustOvertakesVehicle,
                 [](bool overtaken) {return overtaken;});
 }
 
+class Simulator {
+ public:
+  // TODO: make check a parameter of drive()
+  Simulator(ReferencePoint& refPoint, Lane& lane,
+            const CoordsConverter& coordsConverter, EgoCar& egoCar,
+            PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
+            int minSecs2Drive, const function<void(void)>& check);
+  void drive();
+
+ private:
+  ReferencePoint& refPoint;
+  Lane& lane;
+  const CoordsConverter& coordsConverter;
+  EgoCar& egoCar;
+  PreviousData& previousData;
+  vector<Vehicle>& vehicles;
+  double dt;
+  int minSecs2Drive;
+  const function<void(void)>& check;
+};
+
+Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
+                     const CoordsConverter& _coordsConverter, EgoCar& _egoCar,
+                     PreviousData& _previousData, vector<Vehicle>& _vehicles,
+                     double _dt, int _minSecs2Drive,
+                     const function<void(void)>& _check)
+    : refPoint(_refPoint),
+      lane(_lane),
+      coordsConverter(_coordsConverter),
+      egoCar(_egoCar),
+      previousData(_previousData),
+      vehicles(_vehicles),
+      dt(_dt),
+      minSecs2Drive(_minSecs2Drive),
+      check(_check) {
+}
+
+void Simulator::drive() {
+  double secsDriven = 0;
+  while ((secsDriven <= minSecs2Drive || minSecs2Drive == NO_VALUE)
+      && !oneRoundDriven(egoCar)) {
+    secsDriven += driveEgoCarAndVehicles(refPoint, lane, coordsConverter,
+                                         egoCar, previousData, vehicles, dt,
+                                         check);
+  }
+}
+
 }
 
 TEST(PathPlannerTest, should_drive_in_same_lane) {
@@ -235,12 +282,14 @@ TEST(PathPlannerTest, should_drive_with_max_50_mph) {
 
   double dt = 0.02;
 
-// WHEN
-  test::drive(
+  test::Simulator simulator(
       refPoint, lane, coordsConverter, egoCar, previousData, vehicles, dt,
       NO_VALUE, [&egoCar]() {
         ASSERT_LT(egoCar.speed_mph, 50);
         ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos_frenet().d, 0.9);});
+
+// WHEN
+  simulator.drive();
 
 // THEN
 }
@@ -316,7 +365,7 @@ TEST(PathPlannerTest, should_overtake_vehicle) {
         bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
         overtakens.push_back(overtaken);});
 
-  // THEN
+// THEN
   auto egoCarJustOvertakesVehicle = test::getEgoCarJustOvertakesVehicleIterator(
       overtakens);
   ASSERT_NE(egoCarJustOvertakesVehicle, end(overtakens))<< "egoCar should overtake vehicle";
