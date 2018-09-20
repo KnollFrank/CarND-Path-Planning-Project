@@ -198,7 +198,7 @@ class Simulator {
   Simulator(ReferencePoint& refPoint, Lane& lane,
             const CoordsConverter& coordsConverter, EgoCar& egoCar,
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
-            int minSecs2Drive, const function<void(void)>& check);
+            int minSecs2Drive, function<void(void)> check);
   void drive();
 
  private:
@@ -210,14 +210,14 @@ class Simulator {
   vector<Vehicle>& vehicles;
   double dt;
   int minSecs2Drive;
-  const function<void(void)>& check;
+  function<void(void)> check;
 };
 
 Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
                      const CoordsConverter& _coordsConverter, EgoCar& _egoCar,
                      PreviousData& _previousData, vector<Vehicle>& _vehicles,
                      double _dt, int _minSecs2Drive,
-                     const function<void(void)>& _check)
+                     function<void(void)> _check)
     : refPoint(_refPoint),
       lane(_lane),
       coordsConverter(_coordsConverter),
@@ -326,10 +326,13 @@ TEST(PathPlannerTest, should_not_collide) {
                                         Frenet { 5, 0 }, coordsConverter);
   vector<Vehicle> vehicles = { vehicle };
 
+  test::Simulator simulator(
+      refPoint, lane, coordsConverter, egoCar, previousData, vehicles, dt,
+      NO_VALUE, [&egoCar, &vehicles]() {
+        ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
+
 // WHEN
-  test::drive(refPoint, lane, coordsConverter, egoCar, previousData, vehicles,
-              dt, NO_VALUE, [&egoCar, &vehicles]() {
-                ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
+  simulator.drive();
 
 // THEN
 }
@@ -350,9 +353,8 @@ TEST(PathPlannerTest, should_overtake_vehicle) {
                                         coordsConverter);
   vector<Vehicle> vehicles = { vehicle };
 
-// WHEN
   vector<bool> overtakens;
-  test::drive(
+  test::Simulator simulator(
       refPoint,
       lane,
       coordsConverter,
@@ -364,6 +366,9 @@ TEST(PathPlannerTest, should_overtake_vehicle) {
       [&egoCar, &vehicles, &overtakens]() {
         bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
         overtakens.push_back(overtaken);});
+
+// WHEN
+  simulator.drive();
 
 // THEN
   auto egoCarJustOvertakesVehicle = test::getEgoCarJustOvertakesVehicleIterator(
