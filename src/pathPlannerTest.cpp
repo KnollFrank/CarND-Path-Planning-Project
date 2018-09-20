@@ -72,20 +72,6 @@ void assert_car_drives_straight_ahead(const Path& path,
       std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
 
-void drive2PointOfEgoCar(const Point& dst, EgoCar& egoCar, double dt,
-                         const vector<Vehicle>& vehicles,
-                         const function<void(void)>& check) {
-
-  const Point& src = egoCar.getPos_cart();
-  egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
-  egoCar.setPos_cart(dst);
-  egoCar.yaw_deg = rad2deg((dst - src).getHeading());
-  // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
-
-  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar << vehicles[0];
-  check();
-}
-
 void updatePreviousData(const vector<Point>& points,
                         int numberOfUnprocessedPathElements, const Path& path,
                         const CoordsConverter& coordsConverter,
@@ -145,6 +131,7 @@ class Simulator {
       const vector<Point>& points, int numberOfUnprocessedPathElements);
   void driveVehicles();
   void driveVehicle(Vehicle& vehicle);
+  void drive2PointOfEgoCar(const Point& dst);
 
   ReferencePoint& refPoint;
   Lane& lane;
@@ -199,7 +186,7 @@ double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
       - numberOfUnprocessedPathElements;
   for (int i = 0; i < numberOfProcessedPathElements; i++) {
     driveVehicles();
-    drive2PointOfEgoCar(points[i], egoCar, dt, vehicles, check);
+    drive2PointOfEgoCar(points[i]);
   }
 
   double secsDriven = numberOfProcessedPathElements * dt;
@@ -216,6 +203,17 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
   const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s();
   vehicle.setPos_frenet(vehicle.getPos_frenet() + (vel_frenet * dt));
   // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
+}
+
+void Simulator::drive2PointOfEgoCar(const Point& dst) {
+  const Point& src = egoCar.getPos_cart();
+  egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
+  egoCar.setPos_cart(dst);
+  egoCar.yaw_deg = rad2deg((dst - src).getHeading());
+  // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
+
+  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar << vehicles[0];
+  check();
 }
 
 }
