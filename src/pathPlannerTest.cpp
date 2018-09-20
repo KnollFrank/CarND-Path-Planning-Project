@@ -81,11 +81,6 @@ Vehicle createVehicle(int id, const Frenet& pos, const Frenet& vel_m_per_sec,
   return vehicle;
 }
 
-bool hasBeenInLane(const vector<double>& ds, Lane lane) {
-  return std::any_of(ds.cbegin(), ds.cend(),
-                     [lane](double d) {return isInLane(d, lane);});
-}
-
 std::vector<bool>::iterator getEgoCarJustOvertakesVehicleIterator(
     vector<bool>& overtakens) {
 
