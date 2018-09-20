@@ -106,18 +106,17 @@ int main(int argc, char **argv) {
               // j[1] is the data JSON object
 
               EgoCar egoCar = createEgoCar(j, coordsConverter);
-              PreviousData previousData = createPreviousData(j);
+              PreviousData previousData = createPreviousData(j, coordsConverter);
               vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"], coordsConverter);
               PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
               Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles);
 
               json msgJson;
-              vector<double> ss;
-              vector<double> ds;
-              tie(ss, ds) = next_vals.asSValsAndDVals();
-              // FIXME: convert ss to next_x and convert ds to next_y
-              msgJson["next_x"] = ss;
-              msgJson["next_y"] = ds;
+              vector<double> xs;
+              vector<double> ys;
+              tie(xs, ys) = next_vals.asXValsAndYVals(coordsConverter);
+              msgJson["next_x"] = xs;
+              msgJson["next_y"] = ys;
 
               auto msg = "42[\"control\","+ msgJson.dump()+"]";
 

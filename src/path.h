@@ -17,6 +17,7 @@ struct Path {
   vector<Frenet> points;
 
   tuple<vector<double>, vector<double>> asSValsAndDVals() const;
+  tuple<vector<double>, vector<double>> asXValsAndYVals(const CoordsConverter& coordsConverter) const;
   tk::spline asSpline() const;
 };
 
@@ -29,6 +30,23 @@ tuple<vector<double>, vector<double>> Path::asSValsAndDVals() const {
   }
 
   return make_tuple(ss, ds);
+}
+
+vector<Point> asPoints(const vector<Frenet>& points, const CoordsConverter& coordsConverter) {
+  return map2<Frenet, Point>(points, [&](const Frenet& point) {
+    return coordsConverter.getXY(point);
+  });
+}
+
+tuple<vector<double>, vector<double>> Path::asXValsAndYVals(const CoordsConverter& coordsConverter) const {
+  vector<double> xs;
+  vector<double> ys;
+  for (const Point& point : asPoints(points, coordsConverter)) {
+    xs.push_back(point.x);
+    ys.push_back(point.y);
+  }
+
+  return make_tuple(xs, ys);
 }
 
 tk::spline Path::asSpline() const {

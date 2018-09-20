@@ -38,18 +38,19 @@ PreviousData createPreviousData(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &j) {
+        std::allocator, nlohmann::adl_serializer> &j,
+    const CoordsConverter& coordsConverter) {
   PreviousData previousData;
   // Previous path data given to the Planner
   // FIXME: previous_path_x und previous_path_y nach Frenet s und d konvertieren.
   vector<double> previous_path_x = j[1]["previous_path_x"];
   vector<double> previous_path_y = j[1]["previous_path_y"];
   for (int i = 0; i < previous_path_x.size(); i++) {
-    previousData.previous_path.points.push_back(Frenet { previous_path_x[i],
-        previous_path_y[i] });
+    previousData.previous_path.points.push_back(coordsConverter.getFrenet(Point {
+        previous_path_x[i], previous_path_y[i] }));
   }
 
-  // Previous path's end s and d values
+// Previous path's end s and d values
   previousData.end_path = Frenet { j[1]["end_path_s"], j[1]["end_path_d"] };
   return previousData;
 }
