@@ -2,8 +2,9 @@
 #define TESTS_SIMULATOR_H_
 
 #include <vector>
+#include <experimental/optional>
 
-constexpr int NO_VALUE = -1;
+using namespace std;
 
 #define GTEST_COUT std::cerr
 
@@ -12,7 +13,7 @@ class Simulator {
   Simulator(ReferencePoint& refPoint, Lane& lane,
             const CoordsConverter& coordsConverter, EgoCar& egoCar,
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
-            int minSecs2Drive);
+            std::experimental::optional<int> minSecs2Drive);
   void drive(function<void(void)> afterEachMovementOfEgoCar);
   static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
   static bool isCollision(const EgoCar& egoCar,
@@ -39,14 +40,14 @@ class Simulator {
   PreviousData& previousData;
   vector<Vehicle>& vehicles;
   double dt;
-  int minSecs2Drive;
+  std::experimental::optional<int> minSecs2Drive;
   function<void(void)> afterEachMovementOfEgoCar;
 };
 
 Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
                      const CoordsConverter& _coordsConverter, EgoCar& _egoCar,
                      PreviousData& _previousData, vector<Vehicle>& _vehicles,
-                     double _dt, int _minSecs2Drive)
+                     double _dt, std::experimental::optional<int> _minSecs2Drive)
     : refPoint(_refPoint),
       lane(_lane),
       coordsConverter(_coordsConverter),
@@ -59,7 +60,7 @@ Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
 
 void Simulator::drive(function<void(void)> afterEachMovementOfEgoCar) {
   double secsDriven = 0;
-  while ((secsDriven <= minSecs2Drive || minSecs2Drive == NO_VALUE)
+  while ((!minSecs2Drive || secsDriven <= minSecs2Drive.value())
       && !oneRoundDriven()) {
     secsDriven += driveEgoCarAndVehicles(afterEachMovementOfEgoCar);
   }
@@ -116,7 +117,7 @@ void Simulator::driveVehicles() {
 void Simulator::driveVehicle(Vehicle& vehicle) {
   const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s();
   vehicle.setPos_frenet(vehicle.getPos_frenet() + (vel_frenet * dt));
-  // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
+// GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
 void Simulator::drive2PointOfEgoCar(
@@ -125,7 +126,7 @@ void Simulator::drive2PointOfEgoCar(
   egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
   egoCar.setPos_frenet(dst);
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
-  // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
+// GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
   ASSERT_FALSE(isCollision(egoCar, vehicles))
       << "COLLISION between ego car and another vehicle:" << endl << egoCar
