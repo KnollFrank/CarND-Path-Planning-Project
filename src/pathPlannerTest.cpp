@@ -72,10 +72,6 @@ void assert_car_drives_straight_ahead(const Path& path,
       std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
 
-bool oneRoundDriven(const EgoCar& egoCar) {
-  return egoCar.getPos_frenet().s > 6900;
-}
-
 Vehicle createVehicle(int id, const Frenet& pos, const Frenet& vel_m_per_sec,
                       const CoordsConverter& coordsConverter) {
   Vehicle vehicle(coordsConverter);
@@ -122,6 +118,7 @@ class Simulator {
   void updatePreviousData(const vector<Point>& points,
                           int numberOfUnprocessedPathElements,
                           const Path& path);
+  bool oneRoundDriven();
 
   ReferencePoint& refPoint;
   Lane& lane;
@@ -153,9 +150,13 @@ Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
 void Simulator::drive() {
   double secsDriven = 0;
   while ((secsDriven <= minSecs2Drive || minSecs2Drive == NO_VALUE)
-      && !oneRoundDriven(egoCar)) {
+      && !oneRoundDriven()) {
     secsDriven += driveEgoCarAndVehicles();
   }
+}
+
+bool Simulator::oneRoundDriven() {
+  return egoCar.getPos_frenet().s > 6900;
 }
 
 double Simulator::driveEgoCarAndVehicles() {
