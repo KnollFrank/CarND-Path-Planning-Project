@@ -33,6 +33,11 @@ class PathPlannerTest : public ::testing::Test {
   void TearDown() override {
     delete coordsConverter;
   }
+
+  Simulator createSimulator(Lane& lane, EgoCar& egoCar, int minSecs2Drive) {
+    return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
+                     vehicles, 0.02, minSecs2Drive);
+  }
 };
 
 TEST_F(PathPlannerTest, should_drive_in_same_lane) {
@@ -90,8 +95,7 @@ TEST_F(PathPlannerTest, should_not_collide) {
                                   Frenet { 5, 0 }, *coordsConverter);
   vehicles.push_back(vehicle);
 
-  Simulator simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
-                      vehicles, 0.02, NO_VALUE);
+  Simulator simulator = createSimulator(lane, egoCar, NO_VALUE);
 
 // WHEN
   simulator.drive([&]() {
