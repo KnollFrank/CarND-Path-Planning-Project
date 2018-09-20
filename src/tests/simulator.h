@@ -7,19 +7,6 @@ constexpr int NO_VALUE = -1;
 
 #define GTEST_COUT std::cerr
 
-std::vector<bool>::iterator getEgoCarJustOvertakesVehicleIterator(
-    vector<bool>& overtakens) {
-
-  auto it = find(begin(overtakens), end(overtakens), true);
-  return begin(overtakens) + (it - begin(overtakens));
-}
-
-bool staysOvertaken(vector<bool>::const_iterator egoCarJustOvertakesVehicle,
-                    const vector<bool>& overtakens) {
-  return all_of(egoCarJustOvertakesVehicle, end(overtakens),
-                [](bool overtaken) {return overtaken;});
-}
-
 class Simulator {
  public:
   Simulator(ReferencePoint& refPoint, Lane& lane,
