@@ -7,16 +7,16 @@ enum Lane {
   RIGHT = 2
 };
 
-double sizeOfLane() {
+double widthOfLane() {
   return 4;
 }
 
 double startOfLane(int lane) {
-  return sizeOfLane() * lane;
+  return widthOfLane() * lane;
 }
 
 double getMiddleOfLane(Lane lane) {
-  return startOfLane(lane) + sizeOfLane() / 2;
+  return startOfLane(lane) + widthOfLane() / 2;
 }
 
 double endOfLane(Lane lane) {
