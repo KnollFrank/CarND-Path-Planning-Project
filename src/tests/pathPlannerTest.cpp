@@ -36,25 +36,21 @@ class PathPlannerTest : public ::testing::Test {
 
 TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
-  const MapWaypoints mapWaypoints = read_map_waypoints();
-  const CoordsConverter coordsConverter(mapWaypoints);
-  ReferencePoint refPoint;
-  refPoint.vel_mph = 0;
   Lane lane = Lane::MIDDLE;
   Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = createEgoCar(pos, coordsConverter);
+  EgoCar egoCar = createEgoCar(pos, *coordsConverter);
 
   PreviousData previousData;
   vector<Vehicle> vehicles;
 
-  PathPlanner pathPlanner(coordsConverter, refPoint, lane, 0.02);
+  PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02);
 
 // WHEN
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
 
 // THEN
-  assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE, coordsConverter);
-  assert_car_drives_straight_ahead(path, coordsConverter);
+  assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE, *coordsConverter);
+  assert_car_drives_straight_ahead(path, *coordsConverter);
 }
 
 TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
