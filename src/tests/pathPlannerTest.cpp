@@ -77,8 +77,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = createEgoCar(pos);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, NO_VALUE);
