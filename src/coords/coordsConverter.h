@@ -154,6 +154,7 @@ Point CoordsConverter::createCartVectorFromStart2End(
   return getXY(end) - getXY(start);
 }
 
+// TODO: replace " &" with "& " in all files
 Frenet CoordsConverter::createFrenetVectorFromStart2End(
     const Point &start, const Point &end) const {
   return getFrenet(end) - getFrenet(start);

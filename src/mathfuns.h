@@ -46,4 +46,14 @@ template<typename T, typename unop>
 void mapInPlace(vector<T> &v, unop op) {
   transform(v.begin(), v.end(), v.begin(), op);
 }
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
+  if (!v.empty()) {
+    out << '[';
+    std::copy(v.begin(), v.end(), std::ostream_iterator < T > (out, ", "));
+    out << "\b\b]";
+  }
+  return out;
+}
 #endif /* MATHFUNS_H_ */

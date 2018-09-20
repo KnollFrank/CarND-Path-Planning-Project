@@ -13,12 +13,12 @@ class EgoCar {
   double yaw_deg;
   double speed_mph;
 
-  void setPos(const Point &pos_cart, const Frenet &pos_frenet);
+  void setPos(const Point& pos_cart, const Frenet& pos_frenet);
 
-  void setPos_cart(const Point &pos);
+  void setPos_cart(const Point& pos);
   Point getPos_cart() const;
 
-  void setPos_frenet(const Frenet &pos);
+  void setPos_frenet(const Frenet& pos);
   Frenet getPos_frenet() const;
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
@@ -49,7 +49,7 @@ EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
     : coordsConverter(_coordsConverter) {
 }
 
-void EgoCar::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
+void EgoCar::setPos(const Point& pos_cart, const Frenet& pos_frenet) {
   this->pos_cart = pos_cart;
   this->pos_frenet = pos_frenet;
 }
@@ -62,12 +62,12 @@ Frenet EgoCar::getPos_frenet() const {
   return pos_frenet;
 }
 
-void EgoCar::setPos_cart(const Point &pos) {
+void EgoCar::setPos_cart(const Point& pos) {
   pos_cart = pos;
   pos_frenet = coordsConverter.getFrenet(pos);
 }
 
-void EgoCar::setPos_frenet(const Frenet &pos) {
+void EgoCar::setPos_frenet(const Frenet& pos) {
   pos_frenet = pos;
   pos_cart = coordsConverter.getXY(pos);
 }
@@ -76,18 +76,18 @@ class Vehicle {
 
  public:
   Vehicle(const CoordsConverter& coordsConverter);
-  void setPos(const Point &pos_cart, const Frenet &pos_frenet);
+  void setPos(const Point& pos_cart, const Frenet& pos_frenet);
 
-  void setPos_cart(const Point &pos);
+  void setPos_cart(const Point& pos);
   Point getPos_cart() const;
 
-  void setPos_frenet(const Frenet &pos);
+  void setPos_frenet(const Frenet& pos);
   Frenet getPos_frenet() const;
 
-  void setVel_cart_m_per_s(const Point &vel);
+  void setVel_cart_m_per_s(const Point& vel);
   Point getVel_cart_m_per_s() const;
 
-  void setVel_frenet_m_per_s(const Frenet &vel);
+  void setVel_frenet_m_per_s(const Frenet& vel);
   Frenet getVel_frenet_m_per_s() const;
 
   int id;
@@ -96,6 +96,7 @@ class Vehicle {
 
  private:
   Point vel_cart_m_per_s;
+  Frenet vel_frenet_m_per_s;
   Point pos_cart;
   Frenet pos_frenet;
   const CoordsConverter& coordsConverter;
@@ -114,7 +115,7 @@ Vehicle::Vehicle(const CoordsConverter& _coordsConverter)
     : coordsConverter(_coordsConverter) {
 }
 
-void Vehicle::setPos(const Point &pos_cart, const Frenet &pos_frenet) {
+void Vehicle::setPos(const Point& pos_cart, const Frenet& pos_frenet) {
   this->pos_cart = pos_cart;
   this->pos_frenet = pos_frenet;
 }
@@ -127,33 +128,34 @@ Frenet Vehicle::getPos_frenet() const {
   return pos_frenet;
 }
 
-void Vehicle::setVel_cart_m_per_s(const Point &vel) {
-  this->vel_cart_m_per_s = vel;
+void Vehicle::setVel_cart_m_per_s(const Point& vel) {
+  vel_cart_m_per_s = vel;
+  vel_frenet_m_per_s = coordsConverter.createFrenetVectorFromStart2End(
+      getPos_cart(), getPos_cart() + vel);
+}
+
+void Vehicle::setVel_frenet_m_per_s(const Frenet& vel) {
+  vel_frenet_m_per_s = vel;
+  vel_cart_m_per_s = coordsConverter.createCartVectorFromStart2End(
+      getPos_frenet(), getPos_frenet() + vel);
 }
 
 Point Vehicle::getVel_cart_m_per_s() const {
   return vel_cart_m_per_s;
 }
 
-void Vehicle::setPos_cart(const Point &pos) {
+Frenet Vehicle::getVel_frenet_m_per_s() const {
+  return vel_frenet_m_per_s;
+}
+
+void Vehicle::setPos_cart(const Point& pos) {
   pos_cart = pos;
   pos_frenet = coordsConverter.getFrenet(pos);
 }
 
-void Vehicle::setPos_frenet(const Frenet &pos) {
+void Vehicle::setPos_frenet(const Frenet& pos) {
   pos_frenet = pos;
   pos_cart = coordsConverter.getXY(pos);
-}
-
-void Vehicle::setVel_frenet_m_per_s(const Frenet &vel) {
-  vel_cart_m_per_s = coordsConverter.createCartVectorFromStart2End(
-      getPos_frenet(), getPos_frenet() + vel);
-}
-
-Frenet Vehicle::getVel_frenet_m_per_s() const {
-  const Point &src = getPos_cart();
-  const Point &dst = src + getVel_cart_m_per_s();
-  return coordsConverter.createFrenetVectorFromStart2End(src, dst);
 }
 
 #endif /* CAR_H_ */

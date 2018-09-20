@@ -127,13 +127,14 @@ void Simulator::drive2PointOfEgoCar(
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
   // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
-  ASSERT_FALSE(isCollision(egoCar, vehicles)) << "COLLISION:" << endl << egoCar
-      << vehicles[0];
+  ASSERT_FALSE(isCollision(egoCar, vehicles)) << "COLLISION between ego car and any vehicle:" << endl << egoCar
+      << vehicles;
   afterEachMovementOfEgoCar();
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
-  return egoCar.getPos_cart().distanceTo(vehicle.getPos_cart()) <= EgoCar::carSize();
+  return egoCar.getPos_cart().distanceTo(vehicle.getPos_cart())
+      <= EgoCar::carSize();
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar,

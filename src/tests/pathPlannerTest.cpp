@@ -110,7 +110,7 @@ TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
 // WHEN
   simulator.drive([&egoCar]() {
     ASSERT_LT(egoCar.speed_mph, 50);
-    ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos_frenet().d, 0.9);});
+    ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos_frenet().d, 0.001);});
 
 // THEN
 }
@@ -183,7 +183,7 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   ASSERT_TRUE(staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
 }
 
-TEST_F(PathPlannerTest, should_overtake_vehicle2) {
+TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
@@ -202,7 +202,11 @@ TEST_F(PathPlannerTest, should_overtake_vehicle2) {
   vector<bool> overtakens;
   simulator.drive([&]() {
     bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
-    overtakens.push_back(overtaken);});
+    overtakens.push_back(overtaken);
+    // TODO: die folgenden beiden Zeilen wieder entfernen.
+      ASSERT_NEAR(getMiddleOfLane(Lane::MIDDLE), vehicles[0].getPos_frenet().d, 0.001);
+      ASSERT_NEAR(getMiddleOfLane(Lane::LEFT), vehicles[1].getPos_frenet().d, 0.001);
+    });
 
   // THEN
   auto egoCarJustOvertakesVehicle = getEgoCarJustOvertakesVehicleIterator(
