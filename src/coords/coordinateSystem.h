@@ -8,21 +8,22 @@
 #include "lineSegment.h"
 #include "coordSys.h"
 
+// TODO: merge with CoordianteSystemCart using templates
 struct CoordinateSystem {
-  Point origin;
-  Point e1;
-  Point e2;
+  Frenet origin;
+  Frenet e1;
+  Frenet e2;
 
-  Point transform(double e1_coord, double e2_coord) const;
-  Point transform(const Point& point) const;
+  Frenet transform(double e1_coord, double e2_coord) const;
+  Frenet transform(const Frenet& point) const;
 };
 
-Point CoordinateSystem::transform(double e1_coord, double e2_coord) const {
+Frenet CoordinateSystem::transform(double e1_coord, double e2_coord) const {
   return origin + e1 * e1_coord + e2 * e2_coord;
 }
 
-Point CoordinateSystem::transform(const Point& point) const {
-  return transform(point.x, point.y);
+Frenet CoordinateSystem::transform(const Frenet& point) const {
+  return transform(point.s, point.d);
 }
 
 #endif /* COORDS_COORDINATESYSTEM_H_ */

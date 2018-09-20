@@ -59,15 +59,14 @@ class PathPlannerTest : public ::testing::Test {
   }
 
   void assert_car_drives_in_middle_of_lane(const Path& path, Lane lane) {
-
-    for (const Frenet& frenet : asFrenets(path.points)) {
+    for (const Frenet& frenet : path.points) {
       ASSERT_NEAR(2 + 4 * lane, frenet.d, 0.001);
     }
   }
 
   vector<double> getDistancesAlongRoad(const Path& path) {
 
-    return map2<Frenet, double>(asFrenets(path.points),
+    return map2<Frenet, double>(path.points,
                                 [](const Frenet& frenet) {return frenet.s;});
   }
 

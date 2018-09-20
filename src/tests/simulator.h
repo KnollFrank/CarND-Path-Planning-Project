@@ -21,13 +21,13 @@ class Simulator {
  private:
   double driveEgoCarAndVehicles(function<void(void)> afterEachMovementOfEgoCar);
   double drive2PointsOfEgoCarAndDriveVehicles(
-      const vector<Point>& points, int numberOfUnprocessedPathElements,
+      const vector<Frenet>& points, int numberOfUnprocessedPathElements,
       function<void(void)> afterEachMovementOfEgoCar);
   void driveVehicles();
   void driveVehicle(Vehicle& vehicle);
-  void drive2PointOfEgoCar(const Point& dst,
+  void drive2PointOfEgoCar(const Frenet& dst,
                            function<void(void)> afterEachMovementOfEgoCar);
-  void updatePreviousData(const vector<Point>& points,
+  void updatePreviousData(const vector<Frenet>& points,
                           int numberOfUnprocessedPathElements,
                           const Path& path);
   bool oneRoundDriven();
@@ -80,7 +80,7 @@ double Simulator::driveEgoCarAndVehicles(
   return secsDriven;
 }
 
-void Simulator::updatePreviousData(const vector<Point>& points,
+void Simulator::updatePreviousData(const vector<Frenet>& points,
                                    int numberOfUnprocessedPathElements,
                                    const Path& path) {
   previousData.previous_path.points.clear();
@@ -88,12 +88,12 @@ void Simulator::updatePreviousData(const vector<Point>& points,
       i < points.size(); i++) {
     previousData.previous_path.points.push_back(path.points[i]);
   }
-  previousData.end_path = coordsConverter.getFrenet(
-      points[points.size() - numberOfUnprocessedPathElements - 1]);
+  previousData.end_path = points[points.size() - numberOfUnprocessedPathElements
+      - 1];
 }
 
 double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
-    const vector<Point>& points, int numberOfUnprocessedPathElements,
+    const vector<Frenet>& points, int numberOfUnprocessedPathElements,
     function<void(void)> afterEachMovementOfEgoCar) {
 
   int numberOfProcessedPathElements = points.size()
@@ -120,14 +120,15 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
 }
 
 void Simulator::drive2PointOfEgoCar(
-    const Point& dst, function<void(void)> afterEachMovementOfEgoCar) {
-  const Point& src = egoCar.getPos_cart();
+    const Frenet& dst, function<void(void)> afterEachMovementOfEgoCar) {
+  const Frenet& src = egoCar.getPos_frenet();
   egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
-  egoCar.setPos_cart(dst);
+  egoCar.setPos_frenet(dst);
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
   // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
-  ASSERT_FALSE(isCollision(egoCar, vehicles)) << "COLLISION between ego car and any vehicle:" << endl << egoCar
+  ASSERT_FALSE(isCollision(egoCar, vehicles))
+      << "COLLISION between ego car and any vehicle:" << endl << egoCar
       << vehicles;
   afterEachMovementOfEgoCar();
 }

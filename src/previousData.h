@@ -41,10 +41,11 @@ PreviousData createPreviousData(
         std::allocator, nlohmann::adl_serializer> &j) {
   PreviousData previousData;
   // Previous path data given to the Planner
+  // FIXME: previous_path_x und previous_path_y nach Frenet s und d konvertieren.
   vector<double> previous_path_x = j[1]["previous_path_x"];
   vector<double> previous_path_y = j[1]["previous_path_y"];
   for (int i = 0; i < previous_path_x.size(); i++) {
-    previousData.previous_path.points.push_back(Point { previous_path_x[i],
+    previousData.previous_path.points.push_back(Frenet { previous_path_x[i],
         previous_path_y[i] });
   }
 

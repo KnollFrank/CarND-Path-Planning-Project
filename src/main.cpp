@@ -112,11 +112,12 @@ int main(int argc, char **argv) {
               Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles);
 
               json msgJson;
-              vector<double> xs;
-              vector<double> ys;
-              tie(xs, ys) = next_vals.asXValsAndYVals();
-              msgJson["next_x"] = xs;
-              msgJson["next_y"] = ys;
+              vector<double> ss;
+              vector<double> ds;
+              tie(ss, ds) = next_vals.asSValsAndDVals();
+              // FIXME: convert ss to next_x and convert ds to next_y
+              msgJson["next_x"] = ss;
+              msgJson["next_y"] = ds;
 
               auto msg = "42[\"control\","+ msgJson.dump()+"]";
 

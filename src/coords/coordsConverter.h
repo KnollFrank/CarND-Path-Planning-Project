@@ -18,6 +18,7 @@
 #include "lineSegment.h"
 #include "coordSys.h"
 #include "coordinateSystem.h"
+#include "coordinateSystemCart.h"
 
 using namespace std;
 
@@ -42,7 +43,7 @@ class CoordsConverter {
                                 const int endWaypointIndex) const;
   int getStartIndex(const Frenet& point) const;
   Point getClockwisePerpendicular(Point v) const;
-  CoordinateSystem createCoordinateSystem(const LineSegment& lineSegment) const;
+  CoordinateSystemCart createCoordinateSystem(const LineSegment& lineSegment) const;
   LineSegment getLineSegmentContaining(const Frenet& point) const;
 
   const MapWaypoints &map_waypoints;
@@ -127,11 +128,11 @@ Point CoordsConverter::getClockwisePerpendicular(Point v) const {
   return Point { v.y, -v.x };
 }
 
-CoordinateSystem CoordsConverter::createCoordinateSystem(
+CoordinateSystemCart CoordsConverter::createCoordinateSystem(
     const LineSegment& lineSegment) const {
   Point e1 = lineSegment.getBasisVector();
   // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
-  return CoordinateSystem { lineSegment.start, e1, getClockwisePerpendicular(e1) };
+  return CoordinateSystemCart { lineSegment.start, e1, getClockwisePerpendicular(e1) };
 }
 
 LineSegment CoordsConverter::getLineSegmentContaining(
@@ -144,7 +145,7 @@ LineSegment CoordsConverter::getLineSegmentContaining(
 
 Point CoordsConverter::getXY(const Frenet& point) const {
   LineSegment lineSegment = getLineSegmentContaining(point);
-  CoordinateSystem coordinateSystem = createCoordinateSystem(lineSegment);
+  CoordinateSystemCart coordinateSystem = createCoordinateSystem(lineSegment);
   return coordinateSystem.transform(
       point.s - map_waypoints.map_waypoints_s[getStartIndex(point)], point.d);
 }
