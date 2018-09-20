@@ -28,9 +28,7 @@ TEST(PathPlannerTest, should_drive_in_same_lane) {
   PreviousData previousData;
   vector<Vehicle> vehicles;
 
-  double dt = 0.02;
-
-  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
+  PathPlanner pathPlanner(coordsConverter, refPoint, lane, 0.02);
 
 // WHEN
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
@@ -53,10 +51,8 @@ TEST(PathPlannerTest, should_drive_with_max_50_mph) {
   PreviousData previousData;
   vector<Vehicle> vehicles;
 
-  double dt = 0.02;
-
   Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
-                      vehicles, dt, NO_VALUE);
+                      vehicles, 0.02, NO_VALUE);
 
 // WHEN
   simulator.drive([&egoCar]() {
@@ -87,7 +83,6 @@ TEST(PathPlannerTest, should_not_collide) {
   const CoordsConverter coordsConverter(mapWaypoints);
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
-  double dt = 0.02;
   PreviousData previousData;
   Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
@@ -97,7 +92,7 @@ TEST(PathPlannerTest, should_not_collide) {
   vector<Vehicle> vehicles = { vehicle };
 
   Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
-                      vehicles, dt, NO_VALUE);
+                      vehicles, 0.02, NO_VALUE);
 
 // WHEN
   simulator.drive([&egoCar, &vehicles]() {
@@ -112,7 +107,6 @@ TEST(PathPlannerTest, should_overtake_vehicle) {
   const CoordsConverter coordsConverter(mapWaypoints);
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
-  double dt = 0.02;
   PreviousData previousData;
   Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
@@ -123,7 +117,7 @@ TEST(PathPlannerTest, should_overtake_vehicle) {
   vector<Vehicle> vehicles = { vehicle };
 
   Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
-                      vehicles, dt, 60);
+                      vehicles, 0.02, 60);
 
 // WHEN
   vector<bool> overtakens;
@@ -144,7 +138,6 @@ TEST(PathPlannerTest, should_overtake_vehicle2) {
   const CoordsConverter coordsConverter(mapWaypoints);
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
-  double dt = 0.02;
   PreviousData previousData;
   Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
@@ -159,7 +152,7 @@ TEST(PathPlannerTest, should_overtake_vehicle2) {
   vector<Vehicle> vehicles = { vehicle2Overtake, vehicleInLeftLane };
 
   Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
-                      vehicles, dt, 60);
+                      vehicles, 0.02, 60);
 
 // WHEN
   vector<bool> overtakens;
