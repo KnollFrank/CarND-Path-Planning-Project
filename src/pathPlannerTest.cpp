@@ -398,9 +398,8 @@ TEST(PathPlannerTest, should_overtake_vehicle2) {
       coordsConverter);
   vector<Vehicle> vehicles = { vehicle2Overtake, vehicleInLeftLane };
 
-// WHEN
   vector<bool> overtakens;
-  test::drive(
+  test::Simulator simulator(
       refPoint,
       lane,
       coordsConverter,
@@ -412,6 +411,9 @@ TEST(PathPlannerTest, should_overtake_vehicle2) {
       [&egoCar, &vehicles, &overtakens]() {
         bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
         overtakens.push_back(overtaken);});
+
+// WHEN
+  simulator.drive();
 
   // THEN
   auto egoCarJustOvertakesVehicle = test::getEgoCarJustOvertakesVehicleIterator(
