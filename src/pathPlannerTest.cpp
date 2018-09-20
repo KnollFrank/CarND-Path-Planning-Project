@@ -154,9 +154,7 @@ class Simulator {
  private:
   double driveEgoCarAndVehicles();
   double drive2PointsOfEgoCarAndDriveVehicles(
-      const vector<Point>& points, int numberOfUnprocessedPathElements,
-      double dt, const function<void(void)>& check, EgoCar& egoCar,
-      vector<Vehicle>& vehicles);
+      const vector<Point>& points, int numberOfUnprocessedPathElements);
 
   ReferencePoint& refPoint;
   Lane& lane;
@@ -198,17 +196,14 @@ double Simulator::driveEgoCarAndVehicles() {
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
   int numberOfUnprocessedPathElements = 10;
   double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(
-      path.points, numberOfUnprocessedPathElements, dt, check, egoCar,
-      vehicles);
+      path.points, numberOfUnprocessedPathElements);
   updatePreviousData(path.points, numberOfUnprocessedPathElements, path,
                      coordsConverter, previousData, egoCar);
   return secsDriven;
 }
 
 double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
-    const vector<Point>& points, int numberOfUnprocessedPathElements, double dt,
-    const function<void(void)>& check, EgoCar& egoCar,
-    vector<Vehicle>& vehicles) {
+    const vector<Point>& points, int numberOfUnprocessedPathElements) {
 
   int numberOfProcessedPathElements = points.size()
       - numberOfUnprocessedPathElements;
