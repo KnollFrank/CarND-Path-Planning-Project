@@ -133,23 +133,6 @@ bool oneRoundDriven(const EgoCar& egoCar) {
   return egoCar.getPos_frenet().s > 6900;
 }
 
-double driveEgoCarAndVehicles(ReferencePoint& refPoint, Lane& lane,
-                              const CoordsConverter& coordsConverter,
-                              EgoCar& egoCar, PreviousData& previousData,
-                              vector<Vehicle>& vehicles, double dt,
-                              const function<void(void)>& check) {
-
-  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
-  Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
-  int numberOfUnprocessedPathElements = 10;
-  double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(
-      path.points, numberOfUnprocessedPathElements, dt, check, egoCar,
-      vehicles);
-  updatePreviousData(path.points, numberOfUnprocessedPathElements, path,
-                     coordsConverter, previousData, egoCar);
-  return secsDriven;
-}
-
 Vehicle createVehicle(int id, const Frenet& pos, const Frenet& vel_m_per_sec,
                       const CoordsConverter& coordsConverter) {
   Vehicle vehicle(coordsConverter);
@@ -187,6 +170,8 @@ class Simulator {
   void drive();
 
  private:
+  double driveEgoCarAndVehicles();
+
   ReferencePoint& refPoint;
   Lane& lane;
   const CoordsConverter& coordsConverter;
@@ -218,12 +203,21 @@ void Simulator::drive() {
   double secsDriven = 0;
   while ((secsDriven <= minSecs2Drive || minSecs2Drive == NO_VALUE)
       && !oneRoundDriven(egoCar)) {
-    secsDriven += driveEgoCarAndVehicles(refPoint, lane, coordsConverter,
-                                         egoCar, previousData, vehicles, dt,
-                                         check);
+    secsDriven += driveEgoCarAndVehicles();
   }
 }
 
+double Simulator::driveEgoCarAndVehicles() {
+  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
+  Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
+  int numberOfUnprocessedPathElements = 10;
+  double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(
+      path.points, numberOfUnprocessedPathElements, dt, check, egoCar,
+      vehicles);
+  updatePreviousData(path.points, numberOfUnprocessedPathElements, path,
+                     coordsConverter, previousData, egoCar);
+  return secsDriven;
+}
 }
 
 TEST(PathPlannerTest, should_drive_in_same_lane) {
