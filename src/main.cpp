@@ -2,7 +2,7 @@
 #include "lane.h"
 #include "gtest/gtest.h"
 
-#include "coordsConverterTest.cpp"
+#include "tests/coordsConverterTest.cpp"
 #include "tests/pathPlannerTest.cpp"
 
 // for convenience

@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "coords/coordsConverter.h"
+#include "../coords/coordsConverter.h"
 
 void expect_near(const Frenet& expected, const Frenet& actual) {
   const double abs_error = 0.00001;
