@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "pathPlanner.h"
+#include "../pathPlanner.h"
 #include <fstream>
 #include <math.h>
 #include <uWS/uWS.h>
@@ -7,12 +7,12 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
-#include "Eigen-3.3/Eigen/QR"
-#include "json.hpp"
+#include "../Eigen-3.3/Eigen/Core"
+#include "../Eigen-3.3/Eigen/QR"
+#include "../json.hpp"
 #include <tuple>
-#include "spline.h"
-#include "path.h"
+#include "../spline.h"
+#include "../path.h"
 
 constexpr int NO_VALUE = -1;
 

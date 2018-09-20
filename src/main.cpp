@@ -3,7 +3,7 @@
 #include "gtest/gtest.h"
 
 #include "coordsConverterTest.cpp"
-#include "pathPlannerTest.cpp"
+#include "tests/pathPlannerTest.cpp"
 
 // for convenience
 using json = nlohmann::json;
