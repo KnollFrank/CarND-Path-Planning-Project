@@ -17,6 +17,7 @@
 #include <experimental/optional>
 
 using namespace std;
+using namespace std::experimental;
 
 class PathPlannerTest : public ::testing::Test {
 
@@ -33,7 +34,7 @@ class PathPlannerTest : public ::testing::Test {
 
   Simulator createSimulator(Lane& lane, EgoCar& egoCar,
                             vector<Vehicle>& vehicles,
-                            std::experimental::optional<int> minSecs2Drive) {
+                            optional<int> minSecs2Drive) {
     return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                      vehicles, 0.02, minSecs2Drive);
   }
@@ -101,7 +102,7 @@ TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
-  Simulator simulator = createSimulator(lane, egoCar, vehicles, std::experimental::nullopt);
+  Simulator simulator = createSimulator(lane, egoCar, vehicles, nullopt);
 
 // WHEN
   simulator.drive([&egoCar]() {
@@ -134,7 +135,7 @@ TEST_F(PathPlannerTest, should_not_collide) {
           5, 0 });
   vector<Vehicle> vehicles = { vehicle };
 
-  Simulator simulator = createSimulator(lane, egoCar, vehicles, std::experimental::nullopt);
+  Simulator simulator = createSimulator(lane, egoCar, vehicles, nullopt);
 
 // WHEN
   simulator.drive([&]() {

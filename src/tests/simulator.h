@@ -5,6 +5,7 @@
 #include <experimental/optional>
 
 using namespace std;
+using namespace std::experimental;
 
 #define GTEST_COUT std::cerr
 
@@ -13,7 +14,7 @@ class Simulator {
   Simulator(ReferencePoint& refPoint, Lane& lane,
             const CoordsConverter& coordsConverter, EgoCar& egoCar,
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
-            std::experimental::optional<int> minSecs2Drive);
+            optional<int> minSecs2Drive);
   void drive(function<void(void)> afterEachMovementOfEgoCar);
   static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
   static bool isCollision(const EgoCar& egoCar,
@@ -40,14 +41,14 @@ class Simulator {
   PreviousData& previousData;
   vector<Vehicle>& vehicles;
   double dt;
-  std::experimental::optional<int> minSecs2Drive;
+  optional<int> minSecs2Drive;
   function<void(void)> afterEachMovementOfEgoCar;
 };
 
 Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
                      const CoordsConverter& _coordsConverter, EgoCar& _egoCar,
                      PreviousData& _previousData, vector<Vehicle>& _vehicles,
-                     double _dt, std::experimental::optional<int> _minSecs2Drive)
+                     double _dt, optional<int> _minSecs2Drive)
     : refPoint(_refPoint),
       lane(_lane),
       coordsConverter(_coordsConverter),
