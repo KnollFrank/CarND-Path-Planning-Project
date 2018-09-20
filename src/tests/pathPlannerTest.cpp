@@ -33,7 +33,6 @@ class PathPlannerTest : public ::testing::Test {
   }
 };
 
-
 TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
@@ -75,12 +74,10 @@ TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
 
 TEST_F(PathPlannerTest, should_collide) {
 // GIVEN
-  const MapWaypoints mapWaypoints = read_map_waypoints();
-  const CoordsConverter coordsConverter(mapWaypoints);
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) };
-  EgoCar egoCar = createEgoCar(posCar, coordsConverter);
+  EgoCar egoCar = createEgoCar(posCar, *coordsConverter);
   Vehicle vehicle = createVehicle(0, posCar + Frenet { carRadius / 2, 0 },
-                                  Frenet { 0, 0 }, coordsConverter);
+                                  Frenet { 0, 0 }, *coordsConverter);
 
 // WHEN
 
@@ -90,19 +87,15 @@ TEST_F(PathPlannerTest, should_collide) {
 
 TEST_F(PathPlannerTest, should_not_collide) {
 // GIVEN
-  const MapWaypoints mapWaypoints = read_map_waypoints();
-  const CoordsConverter coordsConverter(mapWaypoints);
-  ReferencePoint refPoint;
-  refPoint.vel_mph = 0;
   PreviousData previousData;
   Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = createEgoCar(posCar, coordsConverter);
+  EgoCar egoCar = createEgoCar(posCar, *coordsConverter);
   Vehicle vehicle = createVehicle(0, posCar + Frenet { 10 * carSize, 0 },
-                                  Frenet { 5, 0 }, coordsConverter);
+                                  Frenet { 5, 0 }, *coordsConverter);
   vector<Vehicle> vehicles = { vehicle };
 
-  Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
+  Simulator simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                       vehicles, 0.02, NO_VALUE);
 
 // WHEN
@@ -114,20 +107,16 @@ TEST_F(PathPlannerTest, should_not_collide) {
 
 TEST_F(PathPlannerTest, should_overtake_vehicle) {
 // GIVEN
-  const MapWaypoints mapWaypoints = read_map_waypoints();
-  const CoordsConverter coordsConverter(mapWaypoints);
-  ReferencePoint refPoint;
-  refPoint.vel_mph = 0;
   PreviousData previousData;
   Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = createEgoCar(posCar, coordsConverter);
+  EgoCar egoCar = createEgoCar(posCar, *coordsConverter);
   Vehicle vehicle = createVehicle(0, posCar + Frenet { 35, 0 }, Frenet {
                                       mph2meter_per_sec(5), 0 },
-                                  coordsConverter);
+                                  *coordsConverter);
   vector<Vehicle> vehicles = { vehicle };
 
-  Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
+  Simulator simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                       vehicles, 0.02, 60);
 
 // WHEN
@@ -145,24 +134,20 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
 
 TEST_F(PathPlannerTest, should_overtake_vehicle2) {
 // GIVEN
-  const MapWaypoints mapWaypoints = read_map_waypoints();
-  const CoordsConverter coordsConverter(mapWaypoints);
-  ReferencePoint refPoint;
-  refPoint.vel_mph = 0;
   PreviousData previousData;
   Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = createEgoCar(posCar, coordsConverter);
+  EgoCar egoCar = createEgoCar(posCar, *coordsConverter);
   Vehicle vehicle2Overtake = createVehicle(0, posCar + Frenet { 35, 0 },
                                            Frenet { mph2meter_per_sec(5), 0 },
-                                           coordsConverter);
+                                           *coordsConverter);
   Vehicle vehicleInLeftLane = createVehicle(1, Frenet { posCar.s + 35,
                                                 getMiddleOfLane(Lane::LEFT) },
                                             Frenet { mph2meter_per_sec(5), 0 },
-                                            coordsConverter);
+                                            *coordsConverter);
   vector<Vehicle> vehicles = { vehicle2Overtake, vehicleInLeftLane };
 
-  Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
+  Simulator simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                       vehicles, 0.02, 60);
 
 // WHEN
