@@ -42,6 +42,15 @@ class PathPlannerTest : public ::testing::Test {
     return egoCar;
   }
 
+  Vehicle createVehicle(int id, const Frenet& pos,
+                        const Frenet& vel_m_per_sec) {
+    Vehicle vehicle(*coordsConverter);
+    vehicle.id = id;
+    vehicle.setPos_frenet(pos);
+    vehicle.setVel_frenet_m_per_s(vel_m_per_sec);
+    return vehicle;
+  }
+
   MapWaypoints mapWaypoints;
   CoordsConverter* coordsConverter;
   ReferencePoint refPoint;
@@ -87,7 +96,7 @@ TEST_F(PathPlannerTest, should_collide) {
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) };
   EgoCar egoCar = createEgoCar(posCar);
   Vehicle vehicle = createVehicle(0, posCar + Frenet { carRadius / 2, 0 },
-                                  Frenet { 0, 0 }, *coordsConverter);
+                                  Frenet { 0, 0 });
 
 // WHEN
 
@@ -101,7 +110,7 @@ TEST_F(PathPlannerTest, should_not_collide) {
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = createEgoCar(posCar);
   Vehicle vehicle = createVehicle(0, posCar + Frenet { 10 * carSize, 0 },
-                                  Frenet { 5, 0 }, *coordsConverter);
+                                  Frenet { 5, 0 });
   vector<Vehicle> vehicles = { vehicle };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, NO_VALUE);
@@ -119,8 +128,7 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = createEgoCar(posCar);
   Vehicle vehicle = createVehicle(0, posCar + Frenet { 35, 0 }, Frenet {
-                                      mph2meter_per_sec(5), 0 },
-                                  *coordsConverter);
+                                      mph2meter_per_sec(5), 0 });
   vector<Vehicle> vehicles = { vehicle };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
@@ -144,12 +152,10 @@ TEST_F(PathPlannerTest, should_overtake_vehicle2) {
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
   EgoCar egoCar = createEgoCar(posCar);
   Vehicle vehicle2Overtake = createVehicle(0, posCar + Frenet { 35, 0 },
-                                           Frenet { mph2meter_per_sec(5), 0 },
-                                           *coordsConverter);
+                                           Frenet { mph2meter_per_sec(5), 0 });
   Vehicle vehicleInLeftLane = createVehicle(1, Frenet { posCar.s + 35,
                                                 getMiddleOfLane(Lane::LEFT) },
-                                            Frenet { mph2meter_per_sec(5), 0 },
-                                            *coordsConverter);
+                                            Frenet { mph2meter_per_sec(5), 0 });
   vector<Vehicle> vehicles { vehicle2Overtake, vehicleInLeftLane };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);

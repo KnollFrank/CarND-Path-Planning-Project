@@ -51,15 +51,6 @@ void assert_car_drives_straight_ahead(const Path& path,
       std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
 }
 
-Vehicle createVehicle(int id, const Frenet& pos, const Frenet& vel_m_per_sec,
-                      const CoordsConverter& coordsConverter) {
-  Vehicle vehicle(coordsConverter);
-  vehicle.id = id;
-  vehicle.setPos_frenet(pos);
-  vehicle.setVel_frenet_m_per_s(vel_m_per_sec);
-  return vehicle;
-}
-
 std::vector<bool>::iterator getEgoCarJustOvertakesVehicleIterator(
     vector<bool>& overtakens) {
 
