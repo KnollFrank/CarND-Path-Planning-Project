@@ -23,7 +23,7 @@ TEST(PathPlannerTest, should_drive_in_same_lane) {
   refPoint.vel_mph = 0;
   Lane lane = Lane::MIDDLE;
   Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = test::createEgoCar(pos, coordsConverter);
+  EgoCar egoCar = createEgoCar(pos, coordsConverter);
 
   PreviousData previousData;
   vector<Vehicle> vehicles;
@@ -36,9 +36,8 @@ TEST(PathPlannerTest, should_drive_in_same_lane) {
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
 
 // THEN
-  test::assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE,
-                                            coordsConverter);
-  test::assert_car_drives_straight_ahead(path, coordsConverter);
+  assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE, coordsConverter);
+  assert_car_drives_straight_ahead(path, coordsConverter);
 }
 
 TEST(PathPlannerTest, should_drive_with_max_50_mph) {
@@ -49,15 +48,15 @@ TEST(PathPlannerTest, should_drive_with_max_50_mph) {
   refPoint.vel_mph = 0;
   Lane lane = Lane::MIDDLE;
   Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = test::createEgoCar(pos, coordsConverter);
+  EgoCar egoCar = createEgoCar(pos, coordsConverter);
 
   PreviousData previousData;
   vector<Vehicle> vehicles;
 
   double dt = 0.02;
 
-  test::Simulator simulator(refPoint, lane, coordsConverter, egoCar,
-                            previousData, vehicles, dt, NO_VALUE);
+  Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
+                      vehicles, dt, NO_VALUE);
 
 // WHEN
   simulator.drive([&egoCar]() {
@@ -72,15 +71,14 @@ TEST(PathPlannerTest, should_collide) {
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) };
-  EgoCar egoCar = test::createEgoCar(posCar, coordsConverter);
-  Vehicle vehicle = test::createVehicle(
-      0, posCar + Frenet { test::carRadius / 2, 0 }, Frenet { 0, 0 },
-      coordsConverter);
+  EgoCar egoCar = createEgoCar(posCar, coordsConverter);
+  Vehicle vehicle = createVehicle(0, posCar + Frenet { carRadius / 2, 0 },
+                                  Frenet { 0, 0 }, coordsConverter);
 
 // WHEN
 
 // THEN
-  ASSERT_TRUE(test::isCollision(egoCar, vehicle));
+  ASSERT_TRUE(isCollision(egoCar, vehicle));
 }
 
 TEST(PathPlannerTest, should_not_collide) {
@@ -93,18 +91,17 @@ TEST(PathPlannerTest, should_not_collide) {
   PreviousData previousData;
   Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = test::createEgoCar(posCar, coordsConverter);
-  Vehicle vehicle = test::createVehicle(0, posCar + Frenet { 10 * test::carSize,
-      0 },
-                                        Frenet { 5, 0 }, coordsConverter);
+  EgoCar egoCar = createEgoCar(posCar, coordsConverter);
+  Vehicle vehicle = createVehicle(0, posCar + Frenet { 10 * carSize, 0 },
+                                  Frenet { 5, 0 }, coordsConverter);
   vector<Vehicle> vehicles = { vehicle };
 
-  test::Simulator simulator(refPoint, lane, coordsConverter, egoCar,
-                            previousData, vehicles, dt, NO_VALUE);
+  Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
+                      vehicles, dt, NO_VALUE);
 
 // WHEN
   simulator.drive([&egoCar, &vehicles]() {
-    ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
+    ASSERT_FALSE(isCollision(egoCar, vehicles));});
 
 // THEN
 }
@@ -119,14 +116,14 @@ TEST(PathPlannerTest, should_overtake_vehicle) {
   PreviousData previousData;
   Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = test::createEgoCar(posCar, coordsConverter);
-  Vehicle vehicle = test::createVehicle(0, posCar + Frenet { 35, 0 }, Frenet {
-                                            mph2meter_per_sec(5), 0 },
-                                        coordsConverter);
+  EgoCar egoCar = createEgoCar(posCar, coordsConverter);
+  Vehicle vehicle = createVehicle(0, posCar + Frenet { 35, 0 }, Frenet {
+                                      mph2meter_per_sec(5), 0 },
+                                  coordsConverter);
   vector<Vehicle> vehicles = { vehicle };
 
-  test::Simulator simulator(refPoint, lane, coordsConverter, egoCar,
-                            previousData, vehicles, dt, 60);
+  Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
+                      vehicles, dt, 60);
 
 // WHEN
   vector<bool> overtakens;
@@ -135,10 +132,10 @@ TEST(PathPlannerTest, should_overtake_vehicle) {
     overtakens.push_back(overtaken);});
 
 // THEN
-  auto egoCarJustOvertakesVehicle = test::getEgoCarJustOvertakesVehicleIterator(
+  auto egoCarJustOvertakesVehicle = getEgoCarJustOvertakesVehicleIterator(
       overtakens);
   ASSERT_NE(egoCarJustOvertakesVehicle, end(overtakens))<< "egoCar should overtake vehicle";
-  ASSERT_TRUE(test::staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
+  ASSERT_TRUE(staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
 }
 
 TEST(PathPlannerTest, should_overtake_vehicle2) {
@@ -151,19 +148,18 @@ TEST(PathPlannerTest, should_overtake_vehicle2) {
   PreviousData previousData;
   Lane lane = Lane::MIDDLE;
   Frenet posCar = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = test::createEgoCar(posCar, coordsConverter);
-  Vehicle vehicle2Overtake = test::createVehicle(0, posCar + Frenet { 35, 0 },
-                                                 Frenet { mph2meter_per_sec(5),
-                                                     0 },
-                                                 coordsConverter);
-  Vehicle vehicleInLeftLane = test::createVehicle(
-      1, Frenet { posCar.s + 35, getMiddleOfLane(Lane::LEFT) }, Frenet {
-          mph2meter_per_sec(5), 0 },
-      coordsConverter);
+  EgoCar egoCar = createEgoCar(posCar, coordsConverter);
+  Vehicle vehicle2Overtake = createVehicle(0, posCar + Frenet { 35, 0 },
+                                           Frenet { mph2meter_per_sec(5), 0 },
+                                           coordsConverter);
+  Vehicle vehicleInLeftLane = createVehicle(1, Frenet { posCar.s + 35,
+                                                getMiddleOfLane(Lane::LEFT) },
+                                            Frenet { mph2meter_per_sec(5), 0 },
+                                            coordsConverter);
   vector<Vehicle> vehicles = { vehicle2Overtake, vehicleInLeftLane };
 
-  test::Simulator simulator(refPoint, lane, coordsConverter, egoCar,
-                            previousData, vehicles, dt, 60);
+  Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
+                      vehicles, dt, 60);
 
 // WHEN
   vector<bool> overtakens;
@@ -172,8 +168,8 @@ TEST(PathPlannerTest, should_overtake_vehicle2) {
     overtakens.push_back(overtaken);});
 
   // THEN
-  auto egoCarJustOvertakesVehicle = test::getEgoCarJustOvertakesVehicleIterator(
+  auto egoCarJustOvertakesVehicle = getEgoCarJustOvertakesVehicleIterator(
       overtakens);
   ASSERT_NE(egoCarJustOvertakesVehicle, end(overtakens))<< "egoCar should overtake vehicle";
-  ASSERT_TRUE(test::staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
+  ASSERT_TRUE(staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
 }

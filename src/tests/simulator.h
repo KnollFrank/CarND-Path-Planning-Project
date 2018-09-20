@@ -5,8 +5,6 @@
 
 constexpr int NO_VALUE = -1;
 
-namespace test {
-
 #define GTEST_COUT std::cerr
 
 const double carRadius = 1.25;
@@ -202,8 +200,6 @@ void Simulator::drive2PointOfEgoCar(const Point& dst,
   ASSERT_FALSE(isCollision(egoCar, vehicles)) << "COLLISION:" << endl << egoCar
       << vehicles[0];
   check();
-}
-
 }
 
 #endif /* TESTS_SIMULATOR_H_ */
