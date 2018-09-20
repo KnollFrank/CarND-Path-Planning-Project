@@ -198,6 +198,14 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
   return vel_mph;
 }
 
+Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
+  if (too_close && lane > Lane::LEFT) {
+    lane = Lane::LEFT;
+  }
+
+  return lane;
+}
+
 vector<Point> PathPlanner::createPointsFromPreviousData(
     const EgoCar& egoCar, const PreviousData& previousData) {
 
@@ -280,14 +288,6 @@ vector<Point> PathPlanner::createSplinePoints(const tk::spline& s,
   vector<Point> points = map2<double, Point>(
       x_vals, [&](const double x_val) {return createSplinePoint(x_val, s);});
   return points;
-}
-
-Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
-  if (too_close && lane > Lane::LEFT) {
-    lane = Lane::LEFT;
-  }
-
-  return lane;
 }
 
 CoordinateSystem PathPlanner::createRotatedCoordinateSystem(const Point& origin,
