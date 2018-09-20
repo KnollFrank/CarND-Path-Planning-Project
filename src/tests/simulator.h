@@ -66,21 +66,21 @@ bool staysOvertaken(vector<bool>::const_iterator egoCarJustOvertakesVehicle,
 
 class Simulator {
  public:
-  // TODO: make check a parameter of drive()
   Simulator(ReferencePoint& refPoint, Lane& lane,
             const CoordsConverter& coordsConverter, EgoCar& egoCar,
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
             int minSecs2Drive);
-  void drive(function<void(void)> check);
+  void drive(function<void(void)> afterEachMovementOfEgoCar);
 
  private:
-  double driveEgoCarAndVehicles(function<void(void)> check);
+  double driveEgoCarAndVehicles(function<void(void)> afterEachMovementOfEgoCar);
   double drive2PointsOfEgoCarAndDriveVehicles(
       const vector<Point>& points, int numberOfUnprocessedPathElements,
-      function<void(void)> check);
+      function<void(void)> afterEachMovementOfEgoCar);
   void driveVehicles();
   void driveVehicle(Vehicle& vehicle);
-  void drive2PointOfEgoCar(const Point& dst, function<void(void)> check);
+  void drive2PointOfEgoCar(const Point& dst,
+                           function<void(void)> afterEachMovementOfEgoCar);
   void updatePreviousData(const vector<Point>& points,
                           int numberOfUnprocessedPathElements,
                           const Path& path);
@@ -94,7 +94,7 @@ class Simulator {
   vector<Vehicle>& vehicles;
   double dt;
   int minSecs2Drive;
-  function<void(void)> check;
+  function<void(void)> afterEachMovementOfEgoCar;
 };
 
 Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
@@ -111,11 +111,11 @@ Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
       minSecs2Drive(_minSecs2Drive) {
 }
 
-void Simulator::drive(function<void(void)> check) {
+void Simulator::drive(function<void(void)> afterEachMovementOfEgoCar) {
   double secsDriven = 0;
   while ((secsDriven <= minSecs2Drive || minSecs2Drive == NO_VALUE)
       && !oneRoundDriven()) {
-    secsDriven += driveEgoCarAndVehicles(check);
+    secsDriven += driveEgoCarAndVehicles(afterEachMovementOfEgoCar);
   }
 }
 
@@ -123,12 +123,13 @@ bool Simulator::oneRoundDriven() {
   return egoCar.getPos_frenet().s > 6900;
 }
 
-double Simulator::driveEgoCarAndVehicles(function<void(void)> check) {
+double Simulator::driveEgoCarAndVehicles(
+    function<void(void)> afterEachMovementOfEgoCar) {
   PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
   int numberOfUnprocessedPathElements = 10;
   double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(
-      path.points, numberOfUnprocessedPathElements, check);
+      path.points, numberOfUnprocessedPathElements, afterEachMovementOfEgoCar);
   updatePreviousData(path.points, numberOfUnprocessedPathElements, path);
   return secsDriven;
 }
@@ -147,13 +148,13 @@ void Simulator::updatePreviousData(const vector<Point>& points,
 
 double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
     const vector<Point>& points, int numberOfUnprocessedPathElements,
-    function<void(void)> check) {
+    function<void(void)> afterEachMovementOfEgoCar) {
 
   int numberOfProcessedPathElements = points.size()
       - numberOfUnprocessedPathElements;
   for (int i = 0; i < numberOfProcessedPathElements; i++) {
     driveVehicles();
-    drive2PointOfEgoCar(points[i], check);
+    drive2PointOfEgoCar(points[i], afterEachMovementOfEgoCar);
   }
 
   double secsDriven = numberOfProcessedPathElements * dt;
@@ -172,8 +173,8 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
   // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
-void Simulator::drive2PointOfEgoCar(const Point& dst,
-                                    function<void(void)> check) {
+void Simulator::drive2PointOfEgoCar(
+    const Point& dst, function<void(void)> afterEachMovementOfEgoCar) {
   const Point& src = egoCar.getPos_cart();
   egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
   egoCar.setPos_cart(dst);
@@ -182,7 +183,7 @@ void Simulator::drive2PointOfEgoCar(const Point& dst,
 
   ASSERT_FALSE(isCollision(egoCar, vehicles)) << "COLLISION:" << endl << egoCar
       << vehicles[0];
-  check();
+  afterEachMovementOfEgoCar();
 }
 
 #endif /* TESTS_SIMULATOR_H_ */
