@@ -15,7 +15,6 @@
 #include "../path.h"
 #include "simulator.h"
 
-
 TEST(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
@@ -57,14 +56,13 @@ TEST(PathPlannerTest, should_drive_with_max_50_mph) {
 
   double dt = 0.02;
 
-  test::Simulator simulator(
-      refPoint, lane, coordsConverter, egoCar, previousData, vehicles, dt,
-      NO_VALUE, [&egoCar]() {
-        ASSERT_LT(egoCar.speed_mph, 50);
-        ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos_frenet().d, 0.9);});
+  test::Simulator simulator(refPoint, lane, coordsConverter, egoCar,
+                            previousData, vehicles, dt, NO_VALUE);
 
 // WHEN
-  simulator.drive();
+  simulator.drive([&egoCar]() {
+    ASSERT_LT(egoCar.speed_mph, 50);
+    ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos_frenet().d, 0.9);});
 
 // THEN
 }
@@ -101,13 +99,12 @@ TEST(PathPlannerTest, should_not_collide) {
                                         Frenet { 5, 0 }, coordsConverter);
   vector<Vehicle> vehicles = { vehicle };
 
-  test::Simulator simulator(
-      refPoint, lane, coordsConverter, egoCar, previousData, vehicles, dt,
-      NO_VALUE, [&egoCar, &vehicles]() {
-        ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
+  test::Simulator simulator(refPoint, lane, coordsConverter, egoCar,
+                            previousData, vehicles, dt, NO_VALUE);
 
 // WHEN
-  simulator.drive();
+  simulator.drive([&egoCar, &vehicles]() {
+    ASSERT_FALSE(test::isCollision(egoCar, vehicles));});
 
 // THEN
 }
@@ -128,22 +125,14 @@ TEST(PathPlannerTest, should_overtake_vehicle) {
                                         coordsConverter);
   vector<Vehicle> vehicles = { vehicle };
 
-  vector<bool> overtakens;
-  test::Simulator simulator(
-      refPoint,
-      lane,
-      coordsConverter,
-      egoCar,
-      previousData,
-      vehicles,
-      dt,
-      60,
-      [&egoCar, &vehicles, &overtakens]() {
-        bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
-        overtakens.push_back(overtaken);});
+  test::Simulator simulator(refPoint, lane, coordsConverter, egoCar,
+                            previousData, vehicles, dt, 60);
 
 // WHEN
-  simulator.drive();
+  vector<bool> overtakens;
+  simulator.drive([&egoCar, &vehicles, &overtakens]() {
+    bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
+    overtakens.push_back(overtaken);});
 
 // THEN
   auto egoCarJustOvertakesVehicle = test::getEgoCarJustOvertakesVehicleIterator(
@@ -173,22 +162,14 @@ TEST(PathPlannerTest, should_overtake_vehicle2) {
       coordsConverter);
   vector<Vehicle> vehicles = { vehicle2Overtake, vehicleInLeftLane };
 
-  vector<bool> overtakens;
-  test::Simulator simulator(
-      refPoint,
-      lane,
-      coordsConverter,
-      egoCar,
-      previousData,
-      vehicles,
-      dt,
-      60,
-      [&egoCar, &vehicles, &overtakens]() {
-        bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
-        overtakens.push_back(overtaken);});
+  test::Simulator simulator(refPoint, lane, coordsConverter, egoCar,
+                            previousData, vehicles, dt, 60);
 
 // WHEN
-  simulator.drive();
+  vector<bool> overtakens;
+  simulator.drive([&egoCar, &vehicles, &overtakens]() {
+    bool overtaken = egoCar.getPos_frenet().s > vehicles[0].getPos_frenet().s;
+    overtakens.push_back(overtaken);});
 
   // THEN
   auto egoCarJustOvertakesVehicle = test::getEgoCarJustOvertakesVehicleIterator(

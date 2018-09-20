@@ -89,16 +89,17 @@ class Simulator {
   Simulator(ReferencePoint& refPoint, Lane& lane,
             const CoordsConverter& coordsConverter, EgoCar& egoCar,
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
-            int minSecs2Drive, function<void(void)> check);
-  void drive();
+            int minSecs2Drive);
+  void drive(function<void(void)> check);
 
  private:
-  double driveEgoCarAndVehicles();
+  double driveEgoCarAndVehicles(function<void(void)> check);
   double drive2PointsOfEgoCarAndDriveVehicles(
-      const vector<Point>& points, int numberOfUnprocessedPathElements);
+      const vector<Point>& points, int numberOfUnprocessedPathElements,
+      function<void(void)> check);
   void driveVehicles();
   void driveVehicle(Vehicle& vehicle);
-  void drive2PointOfEgoCar(const Point& dst);
+  void drive2PointOfEgoCar(const Point& dst, function<void(void)> check);
   void updatePreviousData(const vector<Point>& points,
                           int numberOfUnprocessedPathElements,
                           const Path& path);
@@ -118,8 +119,7 @@ class Simulator {
 Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
                      const CoordsConverter& _coordsConverter, EgoCar& _egoCar,
                      PreviousData& _previousData, vector<Vehicle>& _vehicles,
-                     double _dt, int _minSecs2Drive,
-                     function<void(void)> _check)
+                     double _dt, int _minSecs2Drive)
     : refPoint(_refPoint),
       lane(_lane),
       coordsConverter(_coordsConverter),
@@ -127,15 +127,14 @@ Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
       previousData(_previousData),
       vehicles(_vehicles),
       dt(_dt),
-      minSecs2Drive(_minSecs2Drive),
-      check(_check) {
+      minSecs2Drive(_minSecs2Drive) {
 }
 
-void Simulator::drive() {
+void Simulator::drive(function<void(void)> check) {
   double secsDriven = 0;
   while ((secsDriven <= minSecs2Drive || minSecs2Drive == NO_VALUE)
       && !oneRoundDriven()) {
-    secsDriven += driveEgoCarAndVehicles();
+    secsDriven += driveEgoCarAndVehicles(check);
   }
 }
 
@@ -143,12 +142,12 @@ bool Simulator::oneRoundDriven() {
   return egoCar.getPos_frenet().s > 6900;
 }
 
-double Simulator::driveEgoCarAndVehicles() {
+double Simulator::driveEgoCarAndVehicles(function<void(void)> check) {
   PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
   int numberOfUnprocessedPathElements = 10;
   double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(
-      path.points, numberOfUnprocessedPathElements);
+      path.points, numberOfUnprocessedPathElements, check);
   updatePreviousData(path.points, numberOfUnprocessedPathElements, path);
   return secsDriven;
 }
@@ -166,13 +165,14 @@ void Simulator::updatePreviousData(const vector<Point>& points,
 }
 
 double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
-    const vector<Point>& points, int numberOfUnprocessedPathElements) {
+    const vector<Point>& points, int numberOfUnprocessedPathElements,
+    function<void(void)> check) {
 
   int numberOfProcessedPathElements = points.size()
       - numberOfUnprocessedPathElements;
   for (int i = 0; i < numberOfProcessedPathElements; i++) {
     driveVehicles();
-    drive2PointOfEgoCar(points[i]);
+    drive2PointOfEgoCar(points[i], check);
   }
 
   double secsDriven = numberOfProcessedPathElements * dt;
@@ -191,14 +191,16 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
   // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
-void Simulator::drive2PointOfEgoCar(const Point& dst) {
+void Simulator::drive2PointOfEgoCar(const Point& dst,
+                                    function<void(void)> check) {
   const Point& src = egoCar.getPos_cart();
   egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
   egoCar.setPos_cart(dst);
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
   // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
-  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION:" << endl << egoCar << vehicles[0];
+  ASSERT_FALSE(isCollision(egoCar, vehicles)) << "COLLISION:" << endl << egoCar
+      << vehicles[0];
   check();
 }
 
