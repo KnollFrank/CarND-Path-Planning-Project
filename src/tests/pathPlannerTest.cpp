@@ -15,7 +15,26 @@
 #include "../path.h"
 #include "simulator.h"
 
-TEST(PathPlannerTest, should_drive_in_same_lane) {
+class PathPlannerTest : public ::testing::Test {
+
+ protected:
+  void SetUp() override {
+    mapWaypoints = read_map_waypoints();
+    coordsConverter = new CoordsConverter(mapWaypoints);
+    refPoint.vel_mph = 0;
+  }
+
+  MapWaypoints mapWaypoints;
+  CoordsConverter* coordsConverter;
+  ReferencePoint refPoint;
+
+  void TearDown() override {
+    delete coordsConverter;
+  }
+};
+
+
+TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
@@ -38,20 +57,16 @@ TEST(PathPlannerTest, should_drive_in_same_lane) {
   assert_car_drives_straight_ahead(path, coordsConverter);
 }
 
-TEST(PathPlannerTest, should_drive_with_max_50_mph) {
+TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
 // GIVEN
-  const MapWaypoints mapWaypoints = read_map_waypoints();
-  const CoordsConverter coordsConverter(mapWaypoints);
-  ReferencePoint refPoint;
-  refPoint.vel_mph = 0;
   Lane lane = Lane::MIDDLE;
   Frenet pos = Frenet { 124.8336, getMiddleOfLane(lane) };
-  EgoCar egoCar = createEgoCar(pos, coordsConverter);
+  EgoCar egoCar = createEgoCar(pos, *coordsConverter);
 
   PreviousData previousData;
   vector<Vehicle> vehicles;
 
-  Simulator simulator(refPoint, lane, coordsConverter, egoCar, previousData,
+  Simulator simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                       vehicles, 0.02, NO_VALUE);
 
 // WHEN
@@ -62,7 +77,7 @@ TEST(PathPlannerTest, should_drive_with_max_50_mph) {
 // THEN
 }
 
-TEST(PathPlannerTest, should_collide) {
+TEST_F(PathPlannerTest, should_collide) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
@@ -77,7 +92,7 @@ TEST(PathPlannerTest, should_collide) {
   ASSERT_TRUE(isCollision(egoCar, vehicle));
 }
 
-TEST(PathPlannerTest, should_not_collide) {
+TEST_F(PathPlannerTest, should_not_collide) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
@@ -101,7 +116,7 @@ TEST(PathPlannerTest, should_not_collide) {
 // THEN
 }
 
-TEST(PathPlannerTest, should_overtake_vehicle) {
+TEST_F(PathPlannerTest, should_overtake_vehicle) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
@@ -132,7 +147,7 @@ TEST(PathPlannerTest, should_overtake_vehicle) {
   ASSERT_TRUE(staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
 }
 
-TEST(PathPlannerTest, should_overtake_vehicle2) {
+TEST_F(PathPlannerTest, should_overtake_vehicle2) {
 // GIVEN
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
