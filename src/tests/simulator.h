@@ -128,7 +128,7 @@ void Simulator::drive2PointOfEgoCar(
   // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
   ASSERT_FALSE(isCollision(egoCar, vehicles))
-      << "COLLISION between ego car and any vehicle:" << endl << egoCar
+      << "COLLISION between ego car and another vehicle:" << endl << egoCar
       << vehicles;
   afterEachMovementOfEgoCar();
 }
