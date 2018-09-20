@@ -91,10 +91,10 @@ TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
 
 TEST_F(PathPlannerTest, should_collide) {
 // GIVEN
-  Frenet posCar = Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) };
-  EgoCar egoCar = createEgoCar(posCar);
-  Vehicle vehicle = createVehicle(0, posCar + Frenet { carRadius / 2, 0 },
-                                  Frenet { 0, 0 });
+  EgoCar egoCar = createEgoCar(
+      Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) });
+  Vehicle vehicle = createVehicle(
+      0, egoCar.getPos_frenet() + Frenet { carRadius / 2, 0 }, Frenet { 0, 0 });
 
 // WHEN
 
