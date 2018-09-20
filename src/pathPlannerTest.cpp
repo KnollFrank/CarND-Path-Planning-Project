@@ -150,21 +150,6 @@ double driveEgoCarAndVehicles(ReferencePoint& refPoint, Lane& lane,
   return secsDriven;
 }
 
-// TODO: make drive method a class
-void drive(ReferencePoint& refPoint, Lane& lane,
-           const CoordsConverter& coordsConverter, EgoCar& egoCar,
-           PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
-           int minSecs2Drive, const function<void(void)>& check) {
-
-  double secsDriven = 0;
-  while ((secsDriven <= minSecs2Drive || minSecs2Drive == NO_VALUE)
-      && !oneRoundDriven(egoCar)) {
-    secsDriven += driveEgoCarAndVehicles(refPoint, lane, coordsConverter,
-                                         egoCar, previousData, vehicles, dt,
-                                         check);
-  }
-}
-
 Vehicle createVehicle(int id, const Frenet& pos, const Frenet& vel_m_per_sec,
                       const CoordsConverter& coordsConverter) {
   Vehicle vehicle(coordsConverter);
