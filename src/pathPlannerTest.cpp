@@ -92,12 +92,6 @@ void driveVehicle(Vehicle& vehicle, double dt) {
   // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
-void driveVehicles(vector<Vehicle>& vehicles, double dt) {
-  for (Vehicle& vehicle : vehicles) {
-    driveVehicle(vehicle, dt);
-  }
-}
-
 void updatePreviousData(const vector<Point>& points,
                         int numberOfUnprocessedPathElements, const Path& path,
                         const CoordsConverter& coordsConverter,
@@ -155,6 +149,7 @@ class Simulator {
   double driveEgoCarAndVehicles();
   double drive2PointsOfEgoCarAndDriveVehicles(
       const vector<Point>& points, int numberOfUnprocessedPathElements);
+  void driveVehicles();
 
   ReferencePoint& refPoint;
   Lane& lane;
@@ -208,13 +203,20 @@ double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
   int numberOfProcessedPathElements = points.size()
       - numberOfUnprocessedPathElements;
   for (int i = 0; i < numberOfProcessedPathElements; i++) {
-    driveVehicles(vehicles, dt);
+    driveVehicles();
     drive2PointOfEgoCar(points[i], egoCar, dt, vehicles, check);
   }
 
   double secsDriven = numberOfProcessedPathElements * dt;
   return secsDriven;
 }
+
+void Simulator::driveVehicles() {
+  for (Vehicle& vehicle : vehicles) {
+    driveVehicle(vehicle, dt);
+  }
+}
+
 }
 
 TEST(PathPlannerTest, should_drive_in_same_lane) {
