@@ -13,7 +13,8 @@
 using namespace std;
 using namespace std::experimental;
 
-struct Path {
+class Path {
+ public:
   vector<FrenetCart> points;
 
   tuple<vector<double>, vector<double>> asSValsAndDVals(
