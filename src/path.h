@@ -14,6 +14,7 @@ using namespace std;
 using json = nlohmann::json;
 
 struct Path {
+  // TODO: "vector<tuple<optional<Frenet>, optional<Point>>> points". Falls einer der beiden Werte im Tupel nicht vorhanden ist, soll er aus dem anderen Wert berechnet werden.
   vector<Frenet> points;
 
   tuple<vector<double>, vector<double>> asSValsAndDVals() const;
