@@ -122,7 +122,7 @@ TEST_F(PathPlannerTest, should_collide) {
       Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) });
   Vehicle vehicle = createVehicle(
       0, egoCar.getPos_frenet() + Frenet { EgoCar::carRadius() / 2, 0 },
-      Frenet { 0, 0 });
+      Frenet::zero());
 
 // WHEN
 

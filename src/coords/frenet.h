@@ -18,6 +18,7 @@ struct Frenet {
   double d;
 
   static Frenet fromAngle(double angle_rad);
+  static Frenet zero();
   Frenet operator+(const Frenet& other) const;
   Frenet operator-(const Frenet& other) const;
   Frenet operator*(double scalar) const;
@@ -60,12 +61,16 @@ Frenet Frenet::fromAngle(double angle_rad) {
   return Frenet { cos(angle_rad), sin(angle_rad) };
 }
 
+Frenet Frenet::zero() {
+  return Frenet {0, 0};
+}
+
 double Frenet::getHeading() const {
   return atan2(d, s);
 }
 
 double Frenet::len() const {
-  return distanceTo(Frenet { 0, 0 });
+  return distanceTo(zero());
 }
 
 double Frenet::distanceTo(const Frenet &point) const {

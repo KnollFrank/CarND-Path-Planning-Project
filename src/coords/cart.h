@@ -19,6 +19,7 @@ struct Point {
   double y;
 
   static Point fromAngle(double angle_rad);
+  static Point zero();
   double len() const;
   double scalarProd(const Point &point) const;
   double distanceTo(const Point &point) const;
@@ -32,12 +33,16 @@ struct Point {
   friend ostream& operator<<(ostream& os, const Point& point);
 };
 
+Point Point::zero() {
+  return Point {0, 0};
+}
+
 Point Point::fromAngle(double angle_rad) {
   return Point { cos(angle_rad), sin(angle_rad) };
 }
 
 double Point::len() const {
-  return distanceTo(Point { 0, 0 });
+  return distanceTo(zero());
 }
 
 double Point::scalarProd(const Point &point) const {

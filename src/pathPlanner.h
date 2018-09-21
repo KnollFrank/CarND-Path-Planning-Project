@@ -108,9 +108,8 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
     const Frenet& origin, const double angle_rad,
     const vector<FrenetCart>& points) {
-  CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(Frenet { 0,
-                                                                        0 },
-                                                                    angle_rad);
+  CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
+      Frenet::zero(), angle_rad);
   vector<FrenetCart> origin2points = map2<FrenetCart, FrenetCart>(
       points, [&](const FrenetCart& point) {
         return FrenetCart(point.getFrenet(coordsConverter) - origin);
