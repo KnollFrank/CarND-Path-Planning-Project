@@ -114,12 +114,10 @@ vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(Frenet { 0,
                                                                         0 },
                                                                     angle_rad);
-  vector<FrenetCart> origin2points =
-      map2<FrenetCart, FrenetCart>(
-          points,
-          [&](const FrenetCart& point) {
-            return FrenetCart {point.getFrenet(coordsConverter) - origin, std::experimental::nullopt};
-          });
+  vector<FrenetCart> origin2points = map2<FrenetCart, FrenetCart>(
+      points, [&](const FrenetCart& point) {
+        return FrenetCart(point.getFrenet(coordsConverter) - origin);
+      });
   return transform(coordinateSystem, origin2points);
 }
 
@@ -222,17 +220,16 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
   if (previousData.sizeOfPreviousPath() < 2) {
     Frenet prev = egoCar.getPos_frenet()
         - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
-    points.push_back(FrenetCart { prev, std::experimental::nullopt });
-    points.push_back(FrenetCart { egoCar.getPos_frenet(),
-        std::experimental::nullopt });
+    points.push_back(FrenetCart(prev));
+    points.push_back(FrenetCart(egoCar.getPos_frenet()));
   } else {
     refPoint.point = previousData.previous_path.points[previousData
         .sizeOfPreviousPath() - 1].getFrenet(coordsConverter);
     Frenet prev = previousData.previous_path.points[previousData
         .sizeOfPreviousPath() - 2].getFrenet(coordsConverter);
     refPoint.yaw_rad = (refPoint.point - prev).getHeading();
-    points.push_back(FrenetCart { prev, std::experimental::nullopt });
-    points.push_back(FrenetCart { refPoint.point, std::experimental::nullopt });
+    points.push_back(FrenetCart(prev));
+    points.push_back(FrenetCart(refPoint.point));
   }
   return points;
 }
@@ -244,12 +241,12 @@ void PathPlanner::appendSnd2Fst(vector<T>& fst, const vector<T>& snd) {
 
 vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
   vector<FrenetCart> points;
-  points.push_back(FrenetCart { Frenet { egoCar.getPos_frenet().s + 30,
-      getMiddleOfLane(lane) }, std::experimental::nullopt });
-  points.push_back(FrenetCart { Frenet { egoCar.getPos_frenet().s + 60,
-      getMiddleOfLane(lane) }, std::experimental::nullopt });
-  points.push_back(FrenetCart { Frenet { egoCar.getPos_frenet().s + 90,
-      getMiddleOfLane(lane) }, std::experimental::nullopt });
+  points.push_back(FrenetCart(Frenet { egoCar.getPos_frenet().s + 30,
+      getMiddleOfLane(lane) }));
+  points.push_back(FrenetCart(Frenet { egoCar.getPos_frenet().s + 60,
+      getMiddleOfLane(lane) }));
+  points.push_back(FrenetCart(Frenet { egoCar.getPos_frenet().s + 90,
+      getMiddleOfLane(lane) }));
   return points;
 }
 
@@ -282,8 +279,7 @@ vector<FrenetCart> PathPlanner::transform(
   return map2<FrenetCart, FrenetCart>(
       points,
       [&](const FrenetCart& point) {
-        return FrenetCart {coordinateSystem.transform(point.getFrenet(coordsConverter)), std::experimental::nullopt};
-      });
+        return FrenetCart(coordinateSystem.transform(point.getFrenet(coordsConverter)));});
 }
 
 vector<double> PathPlanner::createSVals(const tk::spline& spline,
@@ -317,7 +313,7 @@ CoordinateSystem PathPlanner::createRotatedCoordinateSystem(
 }
 
 FrenetCart PathPlanner::createSplinePoint(double x, const tk::spline& spline) {
-  return FrenetCart { Frenet { x, spline(x) }, std::experimental::nullopt };
+  return FrenetCart(Frenet { x, spline(x) });
 }
 
 #endif /* PATHPLANNER_H_ */

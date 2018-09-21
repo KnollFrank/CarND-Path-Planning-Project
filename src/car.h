@@ -31,6 +31,7 @@ class EgoCar {
   }
 
  private:
+  // TODO: use class FrenetCart
   Point pos_cart;
   Frenet pos_frenet;
   const CoordsConverter& coordsConverter;
@@ -96,6 +97,7 @@ class Vehicle {
  private:
   Point vel_cart_m_per_s;
   Frenet vel_frenet_m_per_s;
+  // TODO: use class FrenetCart
   Point pos_cart;
   Frenet pos_frenet;
   const CoordsConverter& coordsConverter;
@@ -104,7 +106,8 @@ class Vehicle {
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   os << "Vehicle(" << vehicle.id << "):" << endl;
   os << "  pos_frenet = " << vehicle.pos_frenet << endl;
-  os << "  vel_frenet_m_per_s = " << vehicle.vel_frenet_m_per_s << " m/s" << endl;
+  os << "  vel_frenet_m_per_s = " << vehicle.vel_frenet_m_per_s << " m/s"
+     << endl;
   return os;
 }
 

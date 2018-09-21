@@ -47,8 +47,8 @@ PreviousData createPreviousData(
   vector<double> previous_path_x = j[1]["previous_path_x"];
   vector<double> previous_path_y = j[1]["previous_path_y"];
   for (int i = 0; i < previous_path_x.size(); i++) {
-    FrenetCart frenetCart = FrenetCart { std::experimental::nullopt, Point {
-        previous_path_x[i], previous_path_y[i] } };
+    FrenetCart frenetCart = FrenetCart(Point { previous_path_x[i],
+        previous_path_y[i] });
     previousData.previous_path.points.push_back(frenetCart);
   }
 
