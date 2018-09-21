@@ -2,6 +2,7 @@
 #define CAR_H_
 
 #include "coords/coordsConverter.h"
+#include "coords/frenetCart.h"
 
 using namespace std;
 
@@ -31,15 +32,13 @@ class EgoCar {
   }
 
  private:
-  // TODO: use class FrenetCart
-  Point pos_cart;
-  Frenet pos_frenet;
+  FrenetCart pos;
   const CoordsConverter& coordsConverter;
 };
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   os << "EgoCar:" << endl;
-  os << "  pos_frenet = " << egoCar.pos_frenet << endl;
+  os << "  pos_frenet = " << egoCar.pos << endl;
   os << "  yaw = " << egoCar.yaw_deg << "°" << endl;
   os << "  speed = " << egoCar.speed_mph << " mph" << endl;
   return os;
@@ -50,26 +49,23 @@ EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
 }
 
 void EgoCar::setPos(const Point& pos_cart, const Frenet& pos_frenet) {
-  this->pos_cart = pos_cart;
-  this->pos_frenet = pos_frenet;
+  pos = FrenetCart(pos_frenet, pos_cart);
 }
 
 Point EgoCar::getPos_cart() const {
-  return pos_cart;
+  return pos.getXY(coordsConverter);
 }
 
 Frenet EgoCar::getPos_frenet() const {
-  return pos_frenet;
+  return pos.getFrenet(coordsConverter);
 }
 
 void EgoCar::setPos_cart(const Point& pos) {
-  pos_cart = pos;
-  pos_frenet = coordsConverter.getFrenet(pos);
+  this->pos = FrenetCart(pos);
 }
 
 void EgoCar::setPos_frenet(const Frenet& pos) {
-  pos_frenet = pos;
-  pos_cart = coordsConverter.getXY(pos);
+  this->pos = FrenetCart(pos);
 }
 
 class Vehicle {

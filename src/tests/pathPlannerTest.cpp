@@ -19,6 +19,8 @@
 using namespace std;
 using namespace std::experimental;
 
+#define GTEST_COUT std::cerr
+
 class PathPlannerTest : public ::testing::Test {
 
  protected:

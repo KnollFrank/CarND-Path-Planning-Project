@@ -9,16 +9,31 @@
 class FrenetCart {
  public:
   FrenetCart();
+  FrenetCart(Frenet frenet, Point cart);
   FrenetCart(Frenet frenet);
   FrenetCart(Point cart);
 
   Frenet getFrenet(const CoordsConverter& coordsConverter) const;
   Point getXY(const CoordsConverter& coordsConverter) const;
 
+  friend ostream& operator<<(ostream& os, const FrenetCart& frenetCart);
+
  private:
   std::experimental::optional<Frenet> frenet;
   std::experimental::optional<Point> cart;
 };
+
+ostream& operator<<(ostream& os, const FrenetCart& frenetCart) {
+  os << "FrenetCart:" << endl;
+  os << "  frenet = " << *frenetCart.frenet << endl;
+  os << "  cart = " << *frenetCart.cart << endl;
+  return os;
+}
+
+FrenetCart::FrenetCart(Frenet _frenet, Point _cart)
+    : frenet(_frenet),
+      cart(_cart) {
+}
 
 FrenetCart::FrenetCart()
     : frenet(std::experimental::nullopt),
