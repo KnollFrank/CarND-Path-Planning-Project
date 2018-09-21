@@ -56,4 +56,10 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
   }
   return out;
 }
+
+template<typename T>
+void appendSnd2Fst(vector<T>& fst, const vector<T>& snd) {
+  fst.insert(std::end(fst), std::begin(snd), std::end(snd));
+}
+
 #endif /* FUNS_H_ */

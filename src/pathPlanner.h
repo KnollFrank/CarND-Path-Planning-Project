@@ -71,9 +71,6 @@ class PathPlanner {
   void sort_and_remove_duplicates(vector<FrenetCart>& points);
   std::vector<FrenetCart> createPointsFromPreviousData(
       const EgoCar& egoCar, const PreviousData& previousData);
-  // TODO: move to mathfuns.h and rename mathfuns.h to funs.h
-  template<typename T>
-  void appendSnd2Fst(vector<T>& fst, const vector<T>& snd);
   std::vector<FrenetCart> createNewPoints(const EgoCar& egoCar);
   vector<FrenetCart> workWithPathInCarsCoordinateSystem(
       const Path& path,
@@ -232,11 +229,6 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
     points.push_back(FrenetCart(refPoint.point));
   }
   return points;
-}
-
-template<typename T>
-void PathPlanner::appendSnd2Fst(vector<T>& fst, const vector<T>& snd) {
-  fst.insert(std::end(fst), std::begin(snd), std::end(snd));
 }
 
 vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
