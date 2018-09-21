@@ -91,8 +91,7 @@ class Vehicle {
   friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
 
  private:
-  Point vel_cart_m_per_s;
-  Frenet vel_frenet_m_per_s;
+  FrenetCart vel_m_per_s;
   FrenetCart pos;
   const CoordsConverter& coordsConverter;
 };
@@ -100,8 +99,7 @@ class Vehicle {
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   os << "Vehicle(" << vehicle.id << "):" << endl;
   os << "  pos_frenet = " << vehicle.pos << endl;
-  os << "  vel_frenet_m_per_s = " << vehicle.vel_frenet_m_per_s << " m/s"
-     << endl;
+  os << "  vel_m_per_s = " << vehicle.vel_m_per_s << " m/s" << endl;
   return os;
 }
 
@@ -122,23 +120,25 @@ Frenet Vehicle::getPos_frenet() const {
 }
 
 void Vehicle::setVel_cart_m_per_s(const Point& vel) {
-  vel_cart_m_per_s = vel;
-  vel_frenet_m_per_s = coordsConverter.createFrenetVectorFromStart2End(
-      getPos_cart(), getPos_cart() + vel);
+  vel_m_per_s = FrenetCart(
+      coordsConverter.createFrenetVectorFromStart2End(getPos_cart(),
+                                                      getPos_cart() + vel),
+      vel);
 }
 
 void Vehicle::setVel_frenet_m_per_s(const Frenet& vel) {
-  vel_frenet_m_per_s = vel;
-  vel_cart_m_per_s = coordsConverter.createCartVectorFromStart2End(
-      getPos_frenet(), getPos_frenet() + vel);
+  vel_m_per_s = FrenetCart(
+      vel,
+      coordsConverter.createCartVectorFromStart2End(getPos_frenet(),
+                                                    getPos_frenet() + vel));
 }
 
 Point Vehicle::getVel_cart_m_per_s() const {
-  return vel_cart_m_per_s;
+  return vel_m_per_s.getXY(coordsConverter);
 }
 
 Frenet Vehicle::getVel_frenet_m_per_s() const {
-  return vel_frenet_m_per_s;
+  return vel_m_per_s.getFrenet(coordsConverter);
 }
 
 void Vehicle::setPos_cart(const Point& pos) {
