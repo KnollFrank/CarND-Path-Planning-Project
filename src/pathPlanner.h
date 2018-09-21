@@ -108,6 +108,7 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
     const Frenet& origin, const double angle_rad,
     const vector<FrenetCart>& points) {
+
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Frenet::zero(), angle_rad);
   vector<FrenetCart> origin2points = map2<FrenetCart, FrenetCart>(
@@ -119,6 +120,7 @@ vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
 
 vector<FrenetCart> PathPlanner::leaveCarsCoordinateSystem(
     const Frenet& origin, double angle_rad, const vector<FrenetCart>& points) {
+
   return transform(createRotatedCoordinateSystem(origin, angle_rad), points);
 }
 
@@ -267,6 +269,7 @@ void PathPlanner::sort_and_remove_duplicates(vector<FrenetCart>& points) {
 vector<FrenetCart> PathPlanner::transform(
     const CoordinateSystem& coordinateSystem,
     const vector<FrenetCart>& points) const {
+
   return map2<FrenetCart, FrenetCart>(
       points,
       [&](const FrenetCart& point) {
