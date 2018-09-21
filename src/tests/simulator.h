@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <experimental/optional>
+#include "../pathPlanner.h"
 
 using namespace std;
 using namespace std::experimental;
@@ -14,7 +15,7 @@ class Simulator {
   Simulator(ReferencePoint& refPoint, Lane& lane,
             const CoordsConverter& coordsConverter, EgoCar& egoCar,
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
-            optional<int> minSecs2Drive);
+            std::experimental::optional<int> minSecs2Drive);
   void drive(function<void(void)> afterEachMovementOfEgoCar);
   static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
   static bool isCollision(const EgoCar& egoCar,
@@ -23,13 +24,13 @@ class Simulator {
  private:
   double driveEgoCarAndVehicles(function<void(void)> afterEachMovementOfEgoCar);
   double drive2PointsOfEgoCarAndDriveVehicles(
-      const vector<Frenet>& points, int numberOfUnprocessedPathElements,
+      const vector<FrenetCart>& points, int numberOfUnprocessedPathElements,
       function<void(void)> afterEachMovementOfEgoCar);
   void driveVehicles();
   void driveVehicle(Vehicle& vehicle);
   void drive2PointOfEgoCar(const Frenet& dst,
                            function<void(void)> afterEachMovementOfEgoCar);
-  void updatePreviousData(const vector<Frenet>& points,
+  void updatePreviousData(const vector<FrenetCart>& points,
                           int numberOfUnprocessedPathElements,
                           const Path& path);
   bool oneRoundDriven();
@@ -41,14 +42,15 @@ class Simulator {
   PreviousData& previousData;
   vector<Vehicle>& vehicles;
   double dt;
-  optional<int> minSecs2Drive;
+  std::experimental::optional<int> minSecs2Drive;
   function<void(void)> afterEachMovementOfEgoCar;
 };
 
 Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
                      const CoordsConverter& _coordsConverter, EgoCar& _egoCar,
                      PreviousData& _previousData, vector<Vehicle>& _vehicles,
-                     double _dt, optional<int> _minSecs2Drive)
+                     double _dt,
+                     std::experimental::optional<int> _minSecs2Drive)
     : refPoint(_refPoint),
       lane(_lane),
       coordsConverter(_coordsConverter),
@@ -82,7 +84,7 @@ double Simulator::driveEgoCarAndVehicles(
   return secsDriven;
 }
 
-void Simulator::updatePreviousData(const vector<Frenet>& points,
+void Simulator::updatePreviousData(const vector<FrenetCart>& points,
                                    int numberOfUnprocessedPathElements,
                                    const Path& path) {
   previousData.previous_path.points.clear();
@@ -91,18 +93,19 @@ void Simulator::updatePreviousData(const vector<Frenet>& points,
     previousData.previous_path.points.push_back(path.points[i]);
   }
   previousData.end_path = points[points.size() - numberOfUnprocessedPathElements
-      - 1];
+      - 1].getFrenet(coordsConverter);
 }
 
 double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
-    const vector<Frenet>& points, int numberOfUnprocessedPathElements,
+    const vector<FrenetCart>& points, int numberOfUnprocessedPathElements,
     function<void(void)> afterEachMovementOfEgoCar) {
 
   int numberOfProcessedPathElements = points.size()
       - numberOfUnprocessedPathElements;
   for (int i = 0; i < numberOfProcessedPathElements; i++) {
     driveVehicles();
-    drive2PointOfEgoCar(points[i], afterEachMovementOfEgoCar);
+    drive2PointOfEgoCar(points[i].getFrenet(coordsConverter),
+                        afterEachMovementOfEgoCar);
   }
 
   double secsDriven = numberOfProcessedPathElements * dt;

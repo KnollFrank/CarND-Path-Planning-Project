@@ -67,25 +67,26 @@ class PathPlanner {
   Lane getNewLane(bool too_close, Lane lane);
   CoordinateSystem createRotatedCoordinateSystem(const Frenet& origin,
                                                  double angle_rad);
-  Frenet createSplinePoint(double x, const tk::spline& spline);
-  void sort_and_remove_duplicates(vector<Frenet>& points);
-  std::vector<Frenet> createPointsFromPreviousData(
+  FrenetCart createSplinePoint(double x, const tk::spline& spline);
+  void sort_and_remove_duplicates(vector<FrenetCart>& points);
+  std::vector<FrenetCart> createPointsFromPreviousData(
       const EgoCar& egoCar, const PreviousData& previousData);
-  void appendSnd2Fst(vector<Frenet>& fst, const vector<Frenet>& snd);
-  std::vector<Frenet> createNewPoints(const EgoCar& egoCar);
-  vector<Frenet> workWithPathInCarsCoordinateSystem(
+  // TODO: move to mathfuns.h and rename mathfuns.h to funs.h
+  template<typename T>
+  void appendSnd2Fst(vector<T>& fst, const vector<T>& snd);
+  std::vector<FrenetCart> createNewPoints(const EgoCar& egoCar);
+  vector<FrenetCart> workWithPathInCarsCoordinateSystem(
       const Path& path,
-      const function<vector<Frenet>(const Path& carsPath)>& transformCarsPath2Points);
-  vector<Frenet> enterCarsCoordinateSystem(const Frenet& origin,
-                                           const double angle_rad,
-                                           const vector<Frenet>& points);
-  vector<Frenet> leaveCarsCoordinateSystem(const Frenet& origin,
-                                           double angle_rad,
-                                           const vector<Frenet>& points);
-  std::vector<Frenet> createSplinePoints(const tk::spline& spline,
-                                         const int num);
-  vector<Frenet> transform(const CoordinateSystem& coordinateSystem,
-                           const vector<Frenet>& points) const;
+      const function<vector<FrenetCart>(const Path& carsPath)>& transformCarsPath2Points);
+  vector<FrenetCart> enterCarsCoordinateSystem(
+      const Frenet& origin, const double angle_rad,
+      const vector<FrenetCart>& points);
+  vector<FrenetCart> leaveCarsCoordinateSystem(
+      const Frenet& origin, double angle_rad, const vector<FrenetCart>& points);
+  std::vector<FrenetCart> createSplinePoints(const tk::spline& spline,
+                                             const int num);
+  vector<FrenetCart> transform(const CoordinateSystem& coordinateSystem,
+                               const vector<FrenetCart>& points) const;
   std::vector<double> createSVals(const tk::spline& spline, const int num);
   void addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
                                  const PreviousData& previousData);
@@ -107,33 +108,35 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
       dt(_dt) {
 }
 
-vector<Frenet> PathPlanner::enterCarsCoordinateSystem(
+vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
     const Frenet& origin, const double angle_rad,
-    const vector<Frenet>& points) {
+    const vector<FrenetCart>& points) {
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(Frenet { 0,
                                                                         0 },
                                                                     angle_rad);
-  vector<Frenet> origin2points = map2<Frenet, Frenet>(points,
-                                                      [&](const Frenet& point) {
-                                                        return point - origin;
-                                                      });
+  vector<FrenetCart> origin2points =
+      map2<FrenetCart, FrenetCart>(
+          points,
+          [&](const FrenetCart& point) {
+            return FrenetCart {point.getFrenet(coordsConverter) - origin, std::experimental::nullopt};
+          });
   return transform(coordinateSystem, origin2points);
 }
 
-vector<Frenet> PathPlanner::leaveCarsCoordinateSystem(
-    const Frenet& origin, double angle_rad, const vector<Frenet>& points) {
+vector<FrenetCart> PathPlanner::leaveCarsCoordinateSystem(
+    const Frenet& origin, double angle_rad, const vector<FrenetCart>& points) {
   return transform(createRotatedCoordinateSystem(origin, angle_rad), points);
 }
 
-vector<Frenet> PathPlanner::workWithPathInCarsCoordinateSystem(
+vector<FrenetCart> PathPlanner::workWithPathInCarsCoordinateSystem(
     const Path& path,
-    const function<vector<Frenet>(const Path& carsPath)>& transformCarsPath2Points) {
+    const function<vector<FrenetCart>(const Path& carsPath)>& transformCarsPath2Points) {
 
   Path carsPath;
   carsPath.points = enterCarsCoordinateSystem(refPoint.point, -refPoint.yaw_rad,
                                               path.points);
   sort_and_remove_duplicates(carsPath.points);
-  vector<Frenet> points = transformCarsPath2Points(carsPath);
+  vector<FrenetCart> points = transformCarsPath2Points(carsPath);
   return leaveCarsCoordinateSystem(refPoint.point, refPoint.yaw_rad, points);
 }
 
@@ -158,14 +161,12 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   addPointsFromPreviousData(path, egoCar, previousData);
   addNewPoints(path, egoCar);
 
-  vector<Frenet> points = workWithPathInCarsCoordinateSystem(
-      path, [&](const Path& carsPath) {
-        return createSplinePoints(
-            // TODO: diesen Spline später in XY-Koordinaten erzeugen, damit es nicht ruckelt im Simulator.
-            // Man muß einen Path sowohl in Frenet als auch in kartesischen Koordinaten erhalten können, und zwar
-            // nicht über den ungenauen CoordsConverter, sondern über ein Runnable.
-            carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
-      });
+  vector<FrenetCart> points =
+      workWithPathInCarsCoordinateSystem(
+          path,
+          [&](const Path& carsPath) {
+            return createSplinePoints(carsPath.asSpline(coordsConverter), path_size - previousData.sizeOfPreviousPath());
+          });
 
   Path next_vals;
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
@@ -214,40 +215,41 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
   return lane;
 }
 
-vector<Frenet> PathPlanner::createPointsFromPreviousData(
+vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
     const EgoCar& egoCar, const PreviousData& previousData) {
 
-  vector<Frenet> points;
+  vector<FrenetCart> points;
   if (previousData.sizeOfPreviousPath() < 2) {
     Frenet prev = egoCar.getPos_frenet()
         - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
-    points.push_back(prev);
-    points.push_back(egoCar.getPos_frenet());
+    points.push_back(FrenetCart { prev, std::experimental::nullopt });
+    points.push_back(FrenetCart { egoCar.getPos_frenet(),
+        std::experimental::nullopt });
   } else {
     refPoint.point = previousData.previous_path.points[previousData
-        .sizeOfPreviousPath() - 1];
+        .sizeOfPreviousPath() - 1].getFrenet(coordsConverter);
     Frenet prev = previousData.previous_path.points[previousData
-        .sizeOfPreviousPath() - 2];
+        .sizeOfPreviousPath() - 2].getFrenet(coordsConverter);
     refPoint.yaw_rad = (refPoint.point - prev).getHeading();
-    points.push_back(prev);
-    points.push_back(refPoint.point);
+    points.push_back(FrenetCart { prev, std::experimental::nullopt });
+    points.push_back(FrenetCart { refPoint.point, std::experimental::nullopt });
   }
   return points;
 }
 
-void PathPlanner::appendSnd2Fst(vector<Frenet>& fst,
-                                const vector<Frenet>& snd) {
+template<typename T>
+void PathPlanner::appendSnd2Fst(vector<T>& fst, const vector<T>& snd) {
   fst.insert(std::end(fst), std::begin(snd), std::end(snd));
 }
 
-vector<Frenet> PathPlanner::createNewPoints(const EgoCar& egoCar) {
-  vector<Frenet> points;
-  points.push_back(
-      Frenet { egoCar.getPos_frenet().s + 30, getMiddleOfLane(lane) });
-  points.push_back(
-      Frenet { egoCar.getPos_frenet().s + 60, getMiddleOfLane(lane) });
-  points.push_back(
-      Frenet { egoCar.getPos_frenet().s + 90, getMiddleOfLane(lane) });
+vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
+  vector<FrenetCart> points;
+  points.push_back(FrenetCart { Frenet { egoCar.getPos_frenet().s + 30,
+      getMiddleOfLane(lane) }, std::experimental::nullopt });
+  points.push_back(FrenetCart { Frenet { egoCar.getPos_frenet().s + 60,
+      getMiddleOfLane(lane) }, std::experimental::nullopt });
+  points.push_back(FrenetCart { Frenet { egoCar.getPos_frenet().s + 90,
+      getMiddleOfLane(lane) }, std::experimental::nullopt });
   return points;
 }
 
@@ -261,25 +263,33 @@ void PathPlanner::addNewPoints(Path& path, const EgoCar& egoCar) {
   appendSnd2Fst(path.points, createNewPoints(egoCar));
 }
 
-void PathPlanner::sort_and_remove_duplicates(vector<Frenet>& points) {
-  std::sort(points.begin(), points.end(),
-            [](const Frenet& p1, const Frenet& p2) {return p1.s < p2.s;});
+void PathPlanner::sort_and_remove_duplicates(vector<FrenetCart>& points) {
+  std::sort(
+      points.begin(),
+      points.end(),
+      [&](const FrenetCart& p1, const FrenetCart& p2) {return p1.getFrenet(coordsConverter).s < p2.getFrenet(coordsConverter).s;});
   points.erase(
-      unique(points.begin(), points.end(),
-             [](const Frenet& p1, const Frenet& p2) {return p1.s == p2.s;}),
+      unique(
+          points.begin(),
+          points.end(),
+          [&](const FrenetCart& p1, const FrenetCart& p2) {return p1.getFrenet(coordsConverter).s == p2.getFrenet(coordsConverter).s;}),
       points.end());
 }
 
-vector<Frenet> PathPlanner::transform(const CoordinateSystem& coordinateSystem,
-                                      const vector<Frenet>& points) const {
-  return map2<Frenet, Frenet>(points, [&](const Frenet& point) {
-    return coordinateSystem.transform(point);
-  });
+vector<FrenetCart> PathPlanner::transform(
+    const CoordinateSystem& coordinateSystem,
+    const vector<FrenetCart>& points) const {
+  return map2<FrenetCart, FrenetCart>(
+      points,
+      [&](const FrenetCart& point) {
+        return FrenetCart {coordinateSystem.transform(point.getFrenet(coordsConverter)), std::experimental::nullopt};
+      });
 }
 
-vector<double> PathPlanner::createSVals(const tk::spline& spline, const int num) {
+vector<double> PathPlanner::createSVals(const tk::spline& spline,
+                                        const int num) {
   vector<double> s_vals;
-  Frenet target = createSplinePoint(30.0, spline);
+  Frenet target = createSplinePoint(30.0, spline).getFrenet(coordsConverter);
   double s_add_on = 0;
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 0; i < num; i++) {
@@ -289,11 +299,11 @@ vector<double> PathPlanner::createSVals(const tk::spline& spline, const int num)
   return s_vals;
 }
 
-vector<Frenet> PathPlanner::createSplinePoints(const tk::spline& spline,
-                                               const int num) {
+vector<FrenetCart> PathPlanner::createSplinePoints(const tk::spline& spline,
+                                                   const int num) {
 
   vector<double> s_vals = createSVals(spline, num);
-  vector<Frenet> points = map2<double, Frenet>(
+  vector<FrenetCart> points = map2<double, FrenetCart>(
       s_vals,
       [&](const double s_val) {return createSplinePoint(s_val, spline);});
   return points;
@@ -306,8 +316,8 @@ CoordinateSystem PathPlanner::createRotatedCoordinateSystem(
   return CoordinateSystem { origin, e1, e2 };
 }
 
-Frenet PathPlanner::createSplinePoint(double x, const tk::spline& spline) {
-  return Frenet { x, spline(x) };
+FrenetCart PathPlanner::createSplinePoint(double x, const tk::spline& spline) {
+  return FrenetCart { Frenet { x, spline(x) }, std::experimental::nullopt };
 }
 
 #endif /* PATHPLANNER_H_ */

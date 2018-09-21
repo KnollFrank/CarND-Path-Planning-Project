@@ -5,41 +5,62 @@
 #include <tuple>
 #include "coords/cart.h"
 #include "coords/frenet.h"
-#include "json.hpp"
+#include "coords/coordsConverter.h"
 #include "spline.h"
+#include <experimental/optional>
 
 using namespace std;
+using namespace std::experimental;
 
-// for convenience
-using json = nlohmann::json;
+struct FrenetCart {
 
-struct Path {
-  // TODO: "vector<tuple<optional<Frenet>, optional<Point>>> points". Falls einer der beiden Werte im Tupel nicht vorhanden ist, soll er aus dem anderen Wert berechnet werden.
-  vector<Frenet> points;
+  // TODO: add constructors for either Frenet or Point
+  std::experimental::optional<Frenet> frenet;
+  std::experimental::optional<Point> cart;
 
-  tuple<vector<double>, vector<double>> asSValsAndDVals() const;
-  tuple<vector<double>, vector<double>> asXValsAndYVals(const CoordsConverter& coordsConverter) const;
-  tk::spline asSpline() const;
+  Frenet getFrenet(const CoordsConverter& coordsConverter) const;
+  Point getXY(const CoordsConverter& coordsConverter) const;
 };
 
-tuple<vector<double>, vector<double>> Path::asSValsAndDVals() const {
+Frenet FrenetCart::getFrenet(const CoordsConverter& coordsConverter) const {
+  return frenet ? frenet.value() : coordsConverter.getFrenet(cart.value());
+}
+
+Point FrenetCart::getXY(const CoordsConverter& coordsConverter) const {
+  return cart ? cart.value() : coordsConverter.getXY(frenet.value());
+}
+
+struct Path {
+  vector<FrenetCart> points;
+
+  tuple<vector<double>, vector<double>> asSValsAndDVals(
+      const CoordsConverter& coordsConverter) const;
+  tuple<vector<double>, vector<double>> asXValsAndYVals(
+      const CoordsConverter& coordsConverter) const;
+  tk::spline asSpline(const CoordsConverter& coordsConverter) const;
+};
+
+tuple<vector<double>, vector<double>> Path::asSValsAndDVals(
+    const CoordsConverter& coordsConverter) const {
   vector<double> ss;
   vector<double> ds;
-  for (const Frenet& point : points) {
-    ss.push_back(point.s);
-    ds.push_back(point.d);
+  for (const FrenetCart& point : points) {
+    ss.push_back(point.getFrenet(coordsConverter).s);
+    ds.push_back(point.getFrenet(coordsConverter).d);
   }
 
   return make_tuple(ss, ds);
 }
 
-vector<Point> asPoints(const vector<Frenet>& points, const CoordsConverter& coordsConverter) {
-  return map2<Frenet, Point>(points, [&](const Frenet& point) {
-    return coordsConverter.getXY(point);
+vector<Point> asPoints(const vector<FrenetCart>& points,
+                       const CoordsConverter& coordsConverter) {
+  return map2<FrenetCart, Point>(points, [&](const FrenetCart& point) {
+    return point.getXY(coordsConverter);
   });
 }
 
-tuple<vector<double>, vector<double>> Path::asXValsAndYVals(const CoordsConverter& coordsConverter) const {
+tuple<vector<double>, vector<double>> Path::asXValsAndYVals(
+    const CoordsConverter& coordsConverter) const {
   vector<double> xs;
   vector<double> ys;
   for (const Point& point : asPoints(points, coordsConverter)) {
@@ -50,10 +71,10 @@ tuple<vector<double>, vector<double>> Path::asXValsAndYVals(const CoordsConverte
   return make_tuple(xs, ys);
 }
 
-tk::spline Path::asSpline() const {
+tk::spline Path::asSpline(const CoordsConverter& coordsConverter) const {
   vector<double> ss;
   vector<double> ds;
-  tie(ss, ds) = asSValsAndDVals();
+  tie(ss, ds) = asSValsAndDVals(coordsConverter);
   tk::spline s;
   s.set_points(ss, ds);
   return s;

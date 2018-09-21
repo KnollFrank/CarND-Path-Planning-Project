@@ -17,6 +17,7 @@
 #include "mathfuns.h"
 #include "lane.h"
 #include "path.h"
+#include <experimental/optional>
 
 using namespace std;
 
@@ -46,8 +47,9 @@ PreviousData createPreviousData(
   vector<double> previous_path_x = j[1]["previous_path_x"];
   vector<double> previous_path_y = j[1]["previous_path_y"];
   for (int i = 0; i < previous_path_x.size(); i++) {
-    previousData.previous_path.points.push_back(coordsConverter.getFrenet(Point {
-        previous_path_x[i], previous_path_y[i] }));
+    FrenetCart frenetCart = FrenetCart { std::experimental::nullopt, Point {
+        previous_path_x[i], previous_path_y[i] } };
+    previousData.previous_path.points.push_back(frenetCart);
   }
 
 // Previous path's end s and d values

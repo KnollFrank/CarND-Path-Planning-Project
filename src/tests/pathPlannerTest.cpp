@@ -34,7 +34,7 @@ class PathPlannerTest : public ::testing::Test {
 
   Simulator createSimulator(Lane& lane, EgoCar& egoCar,
                             vector<Vehicle>& vehicles,
-                            optional<int> minSecs2Drive) {
+                            std::experimental::optional<int> minSecs2Drive) {
     return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                      vehicles, 0.02, minSecs2Drive);
   }
@@ -57,15 +57,16 @@ class PathPlannerTest : public ::testing::Test {
   }
 
   void assert_car_drives_in_middle_of_lane(const Path& path, Lane lane) {
-    for (const Frenet& frenet : path.points) {
-      ASSERT_NEAR(2 + 4 * lane, frenet.d, 0.001);
+    for (const FrenetCart& frenet : path.points) {
+      ASSERT_NEAR(2 + 4 * lane, frenet.getFrenet(*coordsConverter).d, 0.001);
     }
   }
 
   vector<double> getDistancesAlongRoad(const Path& path) {
 
-    return map2<Frenet, double>(path.points,
-                                [](const Frenet& frenet) {return frenet.s;});
+    return map2<FrenetCart, double>(
+        path.points,
+        [&](const FrenetCart& frenet) {return frenet.getFrenet(*coordsConverter).s;});
   }
 
   void assert_car_drives_straight_ahead(const Path& path) {
@@ -102,7 +103,8 @@ TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
-  Simulator simulator = createSimulator(lane, egoCar, vehicles, nullopt);
+  Simulator simulator = createSimulator(lane, egoCar, vehicles,
+                                        std::experimental::nullopt);
 
 // WHEN
   simulator.drive([&egoCar]() {
@@ -135,7 +137,8 @@ TEST_F(PathPlannerTest, should_not_collide) {
           5, 0 });
   vector<Vehicle> vehicles = { vehicle };
 
-  Simulator simulator = createSimulator(lane, egoCar, vehicles, nullopt);
+  Simulator simulator = createSimulator(lane, egoCar, vehicles,
+                                        std::experimental::nullopt);
 
 // WHEN
   simulator.drive([&]() {
