@@ -112,11 +112,8 @@ int main(int argc, char **argv) {
               Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles);
 
               json msgJson;
-              vector<double> xs;
-              vector<double> ys;
-              tie(xs, ys) = next_vals.asXValsAndYVals(coordsConverter);
-              msgJson["next_x"] = xs;
-              msgJson["next_y"] = ys;
+              msgJson["next_x"] = next_vals.asXVals(coordsConverter);
+              msgJson["next_y"] = next_vals.asYVals(coordsConverter);
 
               auto msg = "42[\"control\","+ msgJson.dump()+"]";
 

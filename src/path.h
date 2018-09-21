@@ -17,15 +17,13 @@ class Path {
  public:
   vector<FrenetCart> points;
 
-  tuple<vector<double>, vector<double>> asXValsAndYVals(
-      const CoordsConverter& coordsConverter) const;
+  vector<double> asXVals(const CoordsConverter& coordsConverter) const;
+  vector<double> asYVals(const CoordsConverter& coordsConverter) const;
   tk::spline asSpline(const CoordsConverter& coordsConverter) const;
 
  private:
   vector<Point> asPoints(const CoordsConverter& coordsConverter) const;
   vector<Frenet> asFrenets(const CoordsConverter& coordsConverter) const;
-  vector<double> asXVals(const CoordsConverter& coordsConverter) const;
-  vector<double> asYVals(const CoordsConverter& coordsConverter) const;
   vector<double> asSVals(const CoordsConverter& coordsConverter) const;
   vector<double> asDVals(const CoordsConverter& coordsConverter) const;
 };
@@ -60,11 +58,6 @@ vector<double> Path::asSVals(const CoordsConverter& coordsConverter) const {
 vector<double> Path::asDVals(const CoordsConverter& coordsConverter) const {
   return map2<Frenet, double>(asFrenets(coordsConverter),
                               [](const Frenet& point) {return point.d;});
-}
-
-tuple<vector<double>, vector<double>> Path::asXValsAndYVals(
-    const CoordsConverter& coordsConverter) const {
-  return make_tuple(asXVals(coordsConverter), asYVals(coordsConverter));
 }
 
 tk::spline Path::asSpline(const CoordsConverter& coordsConverter) const {
