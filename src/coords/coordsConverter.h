@@ -13,7 +13,7 @@
 
 #include "cart.h"
 #include "frenet.h"
-#include "../mathfuns.h"
+#include "../funs.h"
 #include "waypoints.h"
 #include "lineSegment.h"
 #include "coordSys.h"

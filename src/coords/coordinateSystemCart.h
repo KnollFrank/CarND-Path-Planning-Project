@@ -2,7 +2,7 @@
 #define COORDS_COORDINATESYSTEMCART_H_
 
 #include "cart.h"
-#include "../mathfuns.h"
+#include "../funs.h"
 #include "waypoints.h"
 #include "lineSegment.h"
 #include "coordSys.h"

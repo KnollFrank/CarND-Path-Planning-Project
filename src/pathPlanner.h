@@ -14,12 +14,12 @@
 #include <tuple>
 #include "spline.h"
 #include "car.h"
-#include "mathfuns.h"
 #include "lane.h"
 #include "path.h"
 #include "previousData.h"
 #include "coords/coordinateSystem.h"
 #include "coords/frenet.h"
+#include "funs.h"
 
 using namespace std;
 

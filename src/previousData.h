@@ -14,10 +14,10 @@
 #include <tuple>
 #include "spline.h"
 #include "car.h"
-#include "mathfuns.h"
 #include "lane.h"
 #include "path.h"
 #include <experimental/optional>
+#include "funs.h"
 
 using namespace std;
 

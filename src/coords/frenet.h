@@ -9,7 +9,7 @@
 #include <thread>
 #include <vector>
 #include <tuple>
-#include "../mathfuns.h"
+#include "../funs.h"
 
 using namespace std;
 

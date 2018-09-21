@@ -3,7 +3,7 @@
 
 #include "cart.h"
 #include "frenet.h"
-#include "../mathfuns.h"
+#include "../funs.h"
 
 class LineSegment {
  public:

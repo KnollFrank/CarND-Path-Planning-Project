@@ -1,5 +1,5 @@
-#ifndef MATHFUNS_H_
-#define MATHFUNS_H_
+#ifndef FUNS_H_
+#define FUNS_H_
 
 #include <vector>
 #include <math.h>
@@ -56,4 +56,4 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
   }
   return out;
 }
-#endif /* MATHFUNS_H_ */
+#endif /* FUNS_H_ */
