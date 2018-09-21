@@ -51,11 +51,11 @@ FrenetCart::FrenetCart(Point _cart)
 }
 
 Frenet FrenetCart::getFrenet(const CoordsConverter& coordsConverter) const {
-  return frenet ? frenet.value() : coordsConverter.getFrenet(cart.value());
+  return frenet ? *frenet : coordsConverter.getFrenet(*cart);
 }
 
 Point FrenetCart::getXY(const CoordsConverter& coordsConverter) const {
-  return cart ? cart.value() : coordsConverter.getXY(frenet.value());
+  return cart ? *cart : coordsConverter.getXY(*frenet);
 }
 
 #endif /* COORDS_FRENETCART_H_ */
