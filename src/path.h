@@ -12,15 +12,30 @@
 using namespace std;
 using namespace std::experimental;
 
-struct FrenetCart {
+class FrenetCart {
+ public:
+  FrenetCart();
+  FrenetCart(std::experimental::optional<Frenet> frenet,
+             std::experimental::optional<Point> cart);
 
   // TODO: add constructors for either Frenet or Point
-  std::experimental::optional<Frenet> frenet;
-  std::experimental::optional<Point> cart;
-
   Frenet getFrenet(const CoordsConverter& coordsConverter) const;
   Point getXY(const CoordsConverter& coordsConverter) const;
+
+ private:
+  std::experimental::optional<Frenet> frenet;
+  std::experimental::optional<Point> cart;
 };
+
+FrenetCart::FrenetCart()
+    : FrenetCart(std::experimental::nullopt, std::experimental::nullopt) {
+}
+
+FrenetCart::FrenetCart(std::experimental::optional<Frenet> _frenet,
+                       std::experimental::optional<Point> _cart)
+    : frenet(_frenet),
+      cart(_cart) {
+}
 
 Frenet FrenetCart::getFrenet(const CoordsConverter& coordsConverter) const {
   return frenet ? frenet.value() : coordsConverter.getFrenet(cart.value());
