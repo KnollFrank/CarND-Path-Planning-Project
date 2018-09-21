@@ -28,10 +28,10 @@ class CoordsConverter {
   CoordsConverter(const MapWaypoints& map_waypoints);
   Frenet getFrenet(const Point& point) const;
   Point getXY(const Frenet& point) const;
-  Point createCartVectorFromStart2End(const Frenet &start,
-                                              const Frenet &end) const;
-  Frenet createFrenetVectorFromStart2End(const Point &start,
-                                                 const Point &end) const;
+  Point createCartVectorFromStart2End(const Frenet& start,
+                                      const Frenet& end) const;
+  Frenet createFrenetVectorFromStart2End(const Point& start,
+                                         const Point& end) const;
 
  private:
   int getIndexOfClosestWaypoint(const Point& point) const;
@@ -43,10 +43,11 @@ class CoordsConverter {
                                 const int endWaypointIndex) const;
   int getStartIndex(const Frenet& point) const;
   Point getClockwisePerpendicular(Point v) const;
-  CoordinateSystemCart createCoordinateSystem(const LineSegment& lineSegment) const;
+  CoordinateSystemCart createCoordinateSystem(
+      const LineSegment& lineSegment) const;
   LineSegment getLineSegmentContaining(const Frenet& point) const;
 
-  const MapWaypoints &map_waypoints;
+  const MapWaypoints& map_waypoints;
 };
 
 CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
@@ -132,7 +133,8 @@ CoordinateSystemCart CoordsConverter::createCoordinateSystem(
     const LineSegment& lineSegment) const {
   Point e1 = lineSegment.getBasisVector();
   // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
-  return CoordinateSystemCart { lineSegment.start, e1, getClockwisePerpendicular(e1) };
+  return CoordinateSystemCart { lineSegment.start, e1,
+      getClockwisePerpendicular(e1) };
 }
 
 LineSegment CoordsConverter::getLineSegmentContaining(
@@ -150,14 +152,13 @@ Point CoordsConverter::getXY(const Frenet& point) const {
       point.s - map_waypoints.map_waypoints_s[getStartIndex(point)], point.d);
 }
 
-Point CoordsConverter::createCartVectorFromStart2End(
-    const Frenet &start, const Frenet &end) const {
+Point CoordsConverter::createCartVectorFromStart2End(const Frenet& start,
+                                                     const Frenet& end) const {
   return getXY(end) - getXY(start);
 }
 
-// TODO: replace " &" with "& " in all files
 Frenet CoordsConverter::createFrenetVectorFromStart2End(
-    const Point &start, const Point &end) const {
+    const Point& start, const Point& end) const {
   return getFrenet(end) - getFrenet(start);
 }
 
