@@ -1,16 +1,9 @@
 #include "gtest/gtest.h"
 
 #include "../coords/coordsConverter.h"
-
-#include "../alglib/stdafx.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "../alglib/interpolation.h"
+#include "../parametricSpline.h"
 
 #define GTEST_COUT std::cerr
-
-using namespace alglib;
 
 void expect_near(const Frenet& expected, const Frenet& actual) {
   const double abs_error = 0.00001;
@@ -70,24 +63,6 @@ void print_array(string name, vector<double> xs) {
     GTEST_COUT<< xs[i] << ", " << endl;
   }
   GTEST_COUT<< "]";
-}
-
-enum SplineType {
-  CatmullRom = 1,
-  Cubic = 2
-};
-
-enum ParameterizationType {
-  uniform = 0,
-  chordLength = 1,
-  centripetal = 2
-};
-
-void buildPeriodicParametricSpline(const real_2d_array &xy, const SplineType st,
-                           const ParameterizationType pt,
-                           pspline2interpolant &p) {
-  alglib::ae_int_t n = xy.rows();
-  pspline2buildperiodic(xy, n, st, pt, p);
 }
 
 TEST(CoordsConverterTest, should_convert2) {
