@@ -66,9 +66,18 @@ void print_array(string name, vector<double> xs) {
 }
 
 TEST(CoordsConverterTest, should_convert2) {
+  MapWaypoints mapWaypoints = read_map_waypoints();
   pspline2interpolant p;
-  real_2d_array xy("[[0, 0], [10, 0], [10, 10], [0, 10]]");
-  buildPeriodicParametricSpline(xy, SplineType::CatmullRom, ParameterizationType::uniform, p);
+
+  real_2d_array xy;
+  xy.setlength(mapWaypoints.map_waypoints.size(), 2);
+  for (int row = 0; row < mapWaypoints.map_waypoints.size(); row++) {
+    xy(row, 0) = mapWaypoints.map_waypoints[row].x;
+    xy(row, 1) = mapWaypoints.map_waypoints[row].y;
+  }
+
+  buildPeriodicParametricSpline(xy, SplineType::CatmullRom,
+                                ParameterizationType::uniform, p);
   double x;
   double y;
   vector<double> xs;
@@ -76,8 +85,6 @@ TEST(CoordsConverterTest, should_convert2) {
 
   for (double t = 0.0; t < 1.0; t += 0.01) {
     pspline2calc(p, t, x, y);
-    // GTEST_COUT << "p(" << t << ") = (" << x << ", " << y << ")" << endl;
-    // GTEST_COUT << x << " " << y << endl;
     xs.push_back(x);
     ys.push_back(y);
   }
@@ -87,5 +94,5 @@ TEST(CoordsConverterTest, should_convert2) {
   print_array("y", ys);
 
   double arclength = pspline2arclength(p, 0, 1);
-  EXPECT_NEAR(40, arclength, 0.00001);
+  EXPECT_EQ(6947, int(arclength));
 }

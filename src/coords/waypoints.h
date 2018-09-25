@@ -39,6 +39,7 @@ LineSegment MapWaypoints::getLineSegment(int start, int end) const {
   return LineSegment { map_waypoints[start], map_waypoints[end] };
 }
 
+// TODO: make read_map_waypoints() a static method of MapWaypoints
 // Load up map values for waypoint's x,y,s and d normalized normal vectors
 MapWaypoints read_map_waypoints() {
   // Load up map values for waypoint's x,y,s and d normalized normal vectors
