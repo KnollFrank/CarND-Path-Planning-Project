@@ -64,10 +64,18 @@ TEST(CoordsConverterTest, should_convert) {
   test_convert(Point { 9, 0.5 }, Frenet { s1 + s2 + 4, -0.5 });
 }
 
+void print_array(string name, vector<double> xs) {
+  GTEST_COUT<< name << " = [";
+  for (int i = 0; i < xs.size(); i++) {
+    GTEST_COUT<< xs[i] << ", " << endl;
+  }
+  GTEST_COUT<< "]";
+}
+
 TEST(CoordsConverterTest, should_convert2) {
   pspline2interpolant p;
   real_2d_array xy("[[0, 0], [10, 0], [10, 10], [0, 10]]");
-  pspline2buildperiodic(xy, 4, 2, 1, p);
+  pspline2buildperiodic(xy, 4, 1, 1, p);
   double x;
   double y;
   vector<double> xs;
@@ -81,25 +89,10 @@ TEST(CoordsConverterTest, should_convert2) {
     ys.push_back(y);
   }
 
-  GTEST_COUT << "x = [";
-  for (int i = 0; i < xs.size(); i++) {
-    GTEST_COUT<< xs[i] << ", " << endl;
-  }
-  GTEST_COUT << "]";
+  print_array("x", xs);
+  GTEST_COUT<< endl;
+  print_array("y", ys);
 
-  GTEST_COUT << endl;
-
-  GTEST_COUT << "y = [";
-  for (int i = 0; i < ys.size(); i++) {
-    GTEST_COUT<< ys[i] << ", " << endl;
-  }
-  GTEST_COUT << "]";
-
-  pspline2calc(p, 0, x, y);
-  EXPECT_NEAR(0, x, 0.00001);
-  EXPECT_NEAR(0, y, 0.00001);
-
-  pspline2calc(p, 0.5, x, y);
-  EXPECT_NEAR(10, x, 0.00001);
-  EXPECT_NEAR(0, y, 0.00001);
+  double arclength = pspline2arclength(p, 0, 1);
+  EXPECT_NEAR(40, arclength, 0.00001);
 }
