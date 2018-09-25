@@ -3,13 +3,14 @@ project(Path_Planning_eclipse)
 cmake_minimum_required (VERSION 3.5)
 find_package(GTest REQUIRED)
 
-add_definitions(-std=c++17)
-
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
-set(sources main.cpp)
-
+add_definitions(-std=c++17)
+file(GLOB alglib_SRC
+    "alglib/*.cpp"
+)
+set(sources main.cpp ${alglib_SRC})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 

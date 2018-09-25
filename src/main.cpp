@@ -5,6 +5,14 @@
 #include "tests/coordsConverterTest.cpp"
 #include "tests/pathPlannerTest.cpp"
 
+#include "alglib/stdafx.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include "alglib/interpolation.h"
+
+using namespace alglib;
+
 // for convenience
 using json = nlohmann::json;
 
@@ -77,6 +85,7 @@ int main(int argc, char **argv) {
   }
 
   uWS::Hub h;
+  real_1d_array x = "[-1.0,-0.5,0.0,+0.5,+1.0]";
 
   const MapWaypoints mapWaypoints = read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
