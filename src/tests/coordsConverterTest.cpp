@@ -72,10 +72,28 @@ void print_array(string name, vector<double> xs) {
   GTEST_COUT<< "]";
 }
 
+enum SplineType {
+  CatmullRom = 1,
+  Cubic = 2
+};
+
+enum ParameterizationType {
+  uniform = 0,
+  chordLength = 1,
+  centripetal = 2
+};
+
+void buildPeriodicParametricSpline(const real_2d_array &xy, const SplineType st,
+                           const ParameterizationType pt,
+                           pspline2interpolant &p) {
+  alglib::ae_int_t n = xy.rows();
+  pspline2buildperiodic(xy, n, st, pt, p);
+}
+
 TEST(CoordsConverterTest, should_convert2) {
   pspline2interpolant p;
   real_2d_array xy("[[0, 0], [10, 0], [10, 10], [0, 10]]");
-  pspline2buildperiodic(xy, 4, 1, 1, p);
+  buildPeriodicParametricSpline(xy, SplineType::CatmullRom, ParameterizationType::uniform, p);
   double x;
   double y;
   vector<double> xs;
