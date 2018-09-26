@@ -28,7 +28,7 @@ class ParametricSpline {
   Point getTangent(double t) const;
   double length() const;
 
-  // private:
+ private:
   pspline2interpolant spline;
 };
 
