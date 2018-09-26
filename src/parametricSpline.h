@@ -24,12 +24,17 @@ class ParametricSpline {
   ParametricSpline(const real_2d_array &xy, const SplineType st,
                    const ParameterizationType pt);
 
-  Point operator() (double t) const;
+  Point operator()(double t) const;
   Point getTangent(double t) const;
+  double length() const;
 
- // private:
+  // private:
   pspline2interpolant spline;
 };
+
+double ParametricSpline::length() const {
+  return pspline2arclength(spline, 0, 1);
+}
 
 Point ParametricSpline::getTangent(double t) const {
   double x;
@@ -38,7 +43,7 @@ Point ParametricSpline::getTangent(double t) const {
   return Point { x, y };
 }
 
-Point ParametricSpline::operator() (double t) const {
+Point ParametricSpline::operator()(double t) const {
   double x;
   double y;
   pspline2calc(spline, t, x, y);
