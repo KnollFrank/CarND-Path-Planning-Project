@@ -24,6 +24,8 @@ class CoordsConverter {
 
  public:
   CoordsConverter(const MapWaypoints& map_waypoints);
+  ~CoordsConverter();
+
   Frenet getFrenet(const Point& point) const;
   Point getXY(const Frenet& point) const;
   Point createCartVectorFromStart2End(const Frenet& start,
@@ -47,7 +49,7 @@ class CoordsConverter {
   void fillXYFromWaypoints(real_2d_array& xy);
 
   const MapWaypoints& map_waypoints;
-  pspline2interpolant spline;
+  ParametricSpline* spline;
   double arclength;
 };
 
@@ -63,10 +65,14 @@ CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
   real_2d_array xy;
   fillXYFromWaypoints(xy);
-  buildPeriodicParametricSpline(xy, SplineType::CatmullRom,
-                                ParameterizationType::uniform, spline);
+  spline = new ParametricSpline(xy, SplineType::CatmullRom,
+                                ParameterizationType::uniform);
 
-  arclength = pspline2arclength(spline, 0, 1);
+  arclength = pspline2arclength(spline->spline, 0, 1);
+}
+
+CoordsConverter::~CoordsConverter() {
+  delete spline;
 }
 
 int CoordsConverter::getIndexOfClosestWaypoint(const Point& point) const {
@@ -160,19 +166,18 @@ LineSegment CoordsConverter::getLineSegmentContaining(
   return lineSegment;
 }
 
-// TODO: use class CoordinateSystem
 Point CoordsConverter::getXY(const Frenet& point) const {
   double x;
   double y;
   double t = (point.s + 34.128) / arclength;
 
   // TODO: extract method
-  pspline2tangent(spline, t, x, y);
+  pspline2tangent(spline->spline, t, x, y);
   Point e1 = Point { x, y };
   Point e2 = getClockwisePerpendicular(e1);
 
   // TODO: extract method
-  pspline2calc(spline, t, x, y);
+  pspline2calc(spline->spline, t, x, y);
   Point origin = Point { x, y };
 
   return origin + e2 * point.d;

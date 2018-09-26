@@ -78,7 +78,6 @@ void print_array(string name, vector<double> xs) {
 
 TEST(CoordsConverterTest, should_convert2) {
   MapWaypoints mapWaypoints = MapWaypoints::load();
-  pspline2interpolant spline;
 
   real_2d_array xy;
   xy.setlength(mapWaypoints.map_waypoints.size(), 2);
@@ -87,15 +86,15 @@ TEST(CoordsConverterTest, should_convert2) {
     xy(row, 1) = mapWaypoints.map_waypoints[row].y;
   }
 
-  buildPeriodicParametricSpline(xy, SplineType::CatmullRom,
-                                ParameterizationType::uniform, spline);
+  ParametricSpline spline(xy, SplineType::CatmullRom,
+                          ParameterizationType::uniform);
   double x;
   double y;
   vector<double> xs;
   vector<double> ys;
 
   for (double t = 0.0; t < 1.0; t += 0.01) {
-    pspline2calc(spline, t, x, y);
+    pspline2calc(spline.spline, t, x, y);
     xs.push_back(x);
     ys.push_back(y);
   }
@@ -104,7 +103,7 @@ TEST(CoordsConverterTest, should_convert2) {
   GTEST_COUT<< endl;
   print_array("y", ys);
 
-  double arclength = pspline2arclength(spline, 0, 1);
+  double arclength = pspline2arclength(spline.spline, 0, 1);
   EXPECT_EQ(6947, int(arclength));
 }
 

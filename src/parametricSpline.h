@@ -17,11 +17,19 @@ enum ParameterizationType {
   centripetal = 2
 };
 
-void buildPeriodicParametricSpline(const real_2d_array &xy, const SplineType st,
-                                   const ParameterizationType pt,
-                                   pspline2interpolant &spline) {
-  alglib::ae_int_t n = xy.rows();
-  pspline2buildperiodic(xy, n, st, pt, spline);
+class ParametricSpline {
+
+ public:
+  ParametricSpline(const real_2d_array &xy, const SplineType st,
+                   const ParameterizationType pt);
+
+ // private:
+  pspline2interpolant spline;
+};
+
+ParametricSpline::ParametricSpline(const real_2d_array &xy, const SplineType st,
+                                   const ParameterizationType pt) {
+  pspline2buildperiodic(xy, xy.rows(), st, pt, spline);
 }
 
 #endif /* PARAMETRICSPLINE_H_ */
