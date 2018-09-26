@@ -22,14 +22,19 @@ struct PreviousData {
   Frenet end_path;
 
   int sizeOfPreviousPath() const;
+  static PreviousData fromJson(
+      const nlohmann::basic_json<std::map, std::vector,
+          std::__cxx11::basic_string<char, std::char_traits<char>,
+              std::allocator<char> >, bool, long, unsigned long, double,
+          std::allocator, nlohmann::adl_serializer> &j,
+      const CoordsConverter& coordsConverter);
 };
 
 int PreviousData::sizeOfPreviousPath() const {
   return previous_path.points.size();
 }
 
-// TODO: make createPreviousData() a static method of PreviousData
-PreviousData createPreviousData(
+PreviousData PreviousData::fromJson(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
