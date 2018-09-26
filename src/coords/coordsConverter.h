@@ -44,26 +44,16 @@ class CoordsConverter {
   CoordinateSystemCart createCoordinateSystem(
       const LineSegment& lineSegment) const;
   LineSegment getLineSegmentContaining(const Frenet& point) const;
-  void fillXYFromWaypoints(real_2d_array& xy);
 
   const MapWaypoints& map_waypoints;
   ParametricSpline* spline;
   double splineLength;
 };
 
-void CoordsConverter::fillXYFromWaypoints(real_2d_array& xy) {
-  xy.setlength(map_waypoints.map_waypoints.size(), 2);
-  for (int row = 0; row < map_waypoints.map_waypoints.size(); row++) {
-    xy(row, 0) = map_waypoints.map_waypoints[row].x;
-    xy(row, 1) = map_waypoints.map_waypoints[row].y;
-  }
-}
-
 CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
-  real_2d_array xy;
-  fillXYFromWaypoints(xy);
-  spline = new ParametricSpline(xy, SplineType::CatmullRom,
+  spline = new ParametricSpline(map_waypoints.map_waypoints,
+                                SplineType::CatmullRom,
                                 ParameterizationType::uniform);
 
   splineLength = spline->length();

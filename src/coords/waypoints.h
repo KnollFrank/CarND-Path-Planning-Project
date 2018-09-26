@@ -1,18 +1,20 @@
 #ifndef COORDS_WAYPOINTS_H_
 #define COORDS_WAYPOINTS_H_
 
-#include <fstream>
 #include <math.h>
 #include <uWS/uWS.h>
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <thread>
-#include <vector>
 #include <tuple>
+#include <vector>
 
+#include "/usr/include/c++/5/iosfwd"
+#include "/usr/include/c++/5/istream"
+#include "/usr/include/c++/5/string"
+#include "/usr/include/c++/5/vector"
 #include "cart.h"
-#include "frenet.h"
-#include "../funs.h"
 #include "lineSegment.h"
 
 using namespace std;
