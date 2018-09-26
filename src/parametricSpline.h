@@ -1,10 +1,7 @@
 #ifndef PARAMETRICSPLINE_H_
 #define PARAMETRICSPLINE_H_
 
-#include "alglib/stdafx.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+#include "alglib/ap.h"
 #include "alglib/interpolation.h"
 
 using namespace alglib;

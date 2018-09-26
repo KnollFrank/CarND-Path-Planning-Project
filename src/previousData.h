@@ -1,23 +1,16 @@
 #ifndef PREVIOUSDATA_H_
 #define PREVIOUSDATA_H_
 
-#include <fstream>
-#include <math.h>
-#include <uWS/uWS.h>
-#include <chrono>
-#include <iostream>
-#include <thread>
+#include <map>
+#include <string>
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
-#include "Eigen-3.3/Eigen/QR"
+
+#include "coords/cart.h"
+#include "coords/coordsConverter.h"
+#include "coords/frenet.h"
+#include "coords/frenetCart.h"
 #include "json.hpp"
-#include <tuple>
-#include "spline.h"
-#include "car.h"
-#include "lane.h"
 #include "path.h"
-#include <experimental/optional>
-#include "funs.h"
 
 using namespace std;
 

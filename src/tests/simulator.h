@@ -1,9 +1,21 @@
 #ifndef TESTS_SIMULATOR_H_
 #define TESTS_SIMULATOR_H_
 
+#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>
+#include <iostream>
 #include <vector>
-#include <experimental/optional>
+
+#include "../car.h"
+#include "../coords/cart.h"
+#include "../coords/coordsConverter.h"
+#include "../coords/frenet.h"
+#include "../coords/frenetCart.h"
+#include "../funs.h"
+#include "../lane.h"
+#include "../path.h"
 #include "../pathPlanner.h"
+#include "../previousData.h"
 
 using namespace std;
 using namespace std::experimental;

@@ -1,6 +1,16 @@
-#include "gtest/gtest.h"
-
 #include "../coords/coordsConverter.h"
+
+#include <gtest/gtest.h>
+#include <cmath>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "../alglib/ap.h"
+#include "../alglib/interpolation.h"
+#include "../coords/cart.h"
+#include "../coords/frenet.h"
+#include "../coords/waypoints.h"
 #include "../parametricSpline.h"
 
 #define GTEST_COUT std::cerr

@@ -1,20 +1,23 @@
-#include "gtest/gtest.h"
 #include "../pathPlanner.h"
-#include <fstream>
-#include <math.h>
-#include <uWS/uWS.h>
-#include <chrono>
-#include <iostream>
-#include <thread>
+
+#include <ext/type_traits.h>
+#include <gtest/gtest.h>
+#include <gtest/gtest-message.h>
+#include <gtest/internal/gtest-internal.h>
+#include <algorithm>
+#include <iterator>
 #include <vector>
-#include "../Eigen-3.3/Eigen/Core"
-#include "../Eigen-3.3/Eigen/QR"
-#include "../json.hpp"
-#include <tuple>
-#include "../spline.h"
+
+#include "../car.h"
+#include "../coords/coordsConverter.h"
+#include "../coords/frenet.h"
+#include "../coords/frenetCart.h"
+#include "../coords/waypoints.h"
+#include "../funs.h"
+#include "../lane.h"
 #include "../path.h"
+#include "../previousData.h"
 #include "simulator.h"
-#include <experimental/optional>
 
 using namespace std;
 using namespace std::experimental;

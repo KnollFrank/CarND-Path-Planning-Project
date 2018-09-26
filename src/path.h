@@ -2,13 +2,13 @@
 #define PATH_H_
 
 #include <vector>
-#include <tuple>
+
 #include "coords/cart.h"
-#include "coords/frenet.h"
 #include "coords/coordsConverter.h"
-#include "spline.h"
-#include <experimental/optional>
+#include "coords/frenet.h"
 #include "coords/frenetCart.h"
+#include "funs.h"
+#include "spline.h"
 
 using namespace std;
 using namespace std::experimental;

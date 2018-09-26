@@ -1,6 +1,9 @@
 #ifndef LANE_H_
 #define LANE_H_
 
+#include "car.h"
+#include "coords/frenet.h"
+
 enum Lane {
   LEFT = 0,
   MIDDLE = 1,

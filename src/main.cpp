@@ -1,9 +1,23 @@
-#include "pathPlanner.h"
-#include "lane.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+#include <stddef.h>
+#include <uWS/HTTPSocket.h>
+#include <uWS/Hub.h>
+#include <uWS/WebSocket.h>
+#include <uWS/WebSocketProtocol.h>
+#include <cstring>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
-#include "tests/coordsConverterTest.cpp"
-#include "tests/pathPlannerTest.cpp"
+#include "car.h"
+#include "coords/coordsConverter.h"
+#include "coords/waypoints.h"
+#include "json.hpp"
+#include "lane.h"
+#include "path.h"
+#include "pathPlanner.h"
+#include "previousData.h"
 
 // for convenience
 using json = nlohmann::json;

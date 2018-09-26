@@ -1,7 +1,11 @@
 #ifndef CAR_H_
 #define CAR_H_
 
+#include <iostream>
+
+#include "coords/cart.h"
 #include "coords/coordsConverter.h"
+#include "coords/frenet.h"
 #include "coords/frenetCart.h"
 
 using namespace std;

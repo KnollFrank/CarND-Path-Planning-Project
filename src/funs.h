@@ -1,8 +1,10 @@
 #ifndef FUNS_H_
 #define FUNS_H_
 
+#include <cmath>
+#include <iostream>
+#include <iterator>
 #include <vector>
-#include <math.h>
 
 using namespace std;
 

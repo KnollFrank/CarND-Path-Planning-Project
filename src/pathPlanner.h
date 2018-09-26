@@ -1,25 +1,24 @@
 #ifndef PATHPLANNER_H_
 #define PATHPLANNER_H_
 
-#include <fstream>
 #include <math.h>
-#include <uWS/uWS.h>
-#include <chrono>
+#include <algorithm>
 #include <iostream>
-#include <thread>
+#include <iterator>
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
-#include "Eigen-3.3/Eigen/QR"
-#include "json.hpp"
-#include <tuple>
-#include "spline.h"
+
 #include "car.h"
+#include "coords/cart.h"
+#include "coords/coordinateSystem.h"
+#include "coords/coordsConverter.h"
+#include "coords/frenet.h"
+#include "coords/frenetCart.h"
+#include "funs.h"
+#include "json.hpp"
 #include "lane.h"
 #include "path.h"
 #include "previousData.h"
-#include "coords/coordinateSystem.h"
-#include "coords/frenet.h"
-#include "funs.h"
+#include "spline.h"
 
 using namespace std;
 
