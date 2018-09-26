@@ -25,15 +25,23 @@ class ParametricSpline {
                    const ParameterizationType pt);
 
   Point operator() (double t) const;
+  Point getTangent(double t) const;
 
  // private:
   pspline2interpolant spline;
 };
 
-Point ParametricSpline::operator() (double t) const {
+Point ParametricSpline::getTangent(double t) const {
   double x;
   double y;
   pspline2tangent(spline, t, x, y);
+  return Point { x, y };
+}
+
+Point ParametricSpline::operator() (double t) const {
+  double x;
+  double y;
+  pspline2calc(spline, t, x, y);
   return Point { x, y };
 }
 
