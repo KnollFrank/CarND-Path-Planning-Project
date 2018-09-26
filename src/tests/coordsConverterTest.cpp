@@ -15,14 +15,12 @@
 
 #define GTEST_COUT std::cerr
 
-void expect_near(const Frenet& expected, const Frenet& actual) {
-  const double abs_error = 0.00001;
+void expect_near(const Frenet& expected, const Frenet& actual, const double abs_error) {
   EXPECT_NEAR(expected.s, actual.s, abs_error);
   EXPECT_NEAR(expected.d, actual.d, abs_error);
 }
 
-void expect_near(const Point& expected, const Point& actual) {
-  const double abs_error = 0.00001;
+void expect_near(const Point& expected, const Point& actual, const double abs_error) {
   EXPECT_NEAR(expected.x, actual.x, abs_error);
   EXPECT_NEAR(expected.y, actual.y, abs_error);
 }
@@ -54,8 +52,9 @@ TEST(CoordsConverterTest, should_convert) {
   CoordsConverter coordsConverter(map_waypoints);
 
   auto test_convert = [&](const Point& point, const Frenet& frenet) {
-    expect_near(frenet, coordsConverter.getFrenet(point));
-    expect_near(point, coordsConverter.getXY(frenet));
+    const double abs_error = 0.00001;
+    expect_near(frenet, coordsConverter.getFrenet(point), abs_error);
+    expect_near(point, coordsConverter.getXY(frenet), abs_error);
   };
 
   // WHEN & THEN
@@ -76,7 +75,7 @@ void print_array(string name, vector<double> xs) {
 }
 
 TEST(CoordsConverterTest, should_convert2) {
-  MapWaypoints mapWaypoints = MapWaypoints::read_map_waypoints();
+  MapWaypoints mapWaypoints = MapWaypoints::load();
   pspline2interpolant spline;
 
   real_2d_array xy;
@@ -107,4 +106,18 @@ TEST(CoordsConverterTest, should_convert2) {
   EXPECT_EQ(6947, int(arclength));
 }
 
-// TODO: test that conversion results in frenet = Frenet(s = 124.834, d = 6.16483) cart = Point(x = 909.48, y = 1128.67)
+TEST(CoordsConverterTest, should_convert3) {
+  // GIVEN
+  MapWaypoints mapWaypoints = MapWaypoints::load();
+  CoordsConverter coordsConverter(mapWaypoints);
+
+  // TODO: DRY with should_convert
+  auto test_convert = [&](const Point& point, const Frenet& frenet) {
+    const double abs_error = 0.001;
+    expect_near(frenet, coordsConverter.getFrenet(point), abs_error);
+    expect_near(point, coordsConverter.getXY(frenet), abs_error);
+  };
+
+  // WHEN & THEN
+  test_convert(Point { 909.48, 1128.67}, Frenet {124.834, 6.16483});
+}
