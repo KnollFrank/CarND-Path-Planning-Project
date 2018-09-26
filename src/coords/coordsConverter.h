@@ -1,24 +1,18 @@
 #ifndef COORDS_COORDSCONVERTER_H_
 #define COORDS_COORDSCONVERTER_H_
 
-#include <fstream>
 #include <math.h>
-#include <uWS/uWS.h>
-#include <chrono>
-#include <iostream>
-#include <thread>
+#include <algorithm>
+#include <iterator>
 #include <vector>
-#include <functional>
-#include <tuple>
 
-#include "cart.h"
-#include "frenet.h"
 #include "../funs.h"
-#include "waypoints.h"
-#include "lineSegment.h"
-#include "coordSys.h"
-#include "coordinateSystem.h"
+#include "cart.h"
 #include "coordinateSystemCart.h"
+#include "coordSys.h"
+#include "frenet.h"
+#include "lineSegment.h"
+#include "waypoints.h"
 
 using namespace std;
 
