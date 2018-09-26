@@ -65,7 +65,7 @@ real_2d_array ParametricSpline::as_real_2d_array(const vector<Point> &points) co
 ParametricSpline::ParametricSpline(const vector<Point> &points, const SplineType st,
                                    const ParameterizationType pt) {
   real_2d_array xy = as_real_2d_array(points);
-  pspline2buildperiodic(xy, xy.rows(), st, pt, spline);
+  pspline2buildperiodic(xy, points.size(), st, pt, spline);
 }
 
 #endif /* PARAMETRICSPLINE_H_ */
