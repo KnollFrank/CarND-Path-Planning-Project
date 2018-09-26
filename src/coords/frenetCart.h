@@ -25,8 +25,12 @@ class FrenetCart {
 
 ostream& operator<<(ostream& os, const FrenetCart& frenetCart) {
   os << "FrenetCart:" << endl;
-  os << "  frenet = " << *frenetCart.frenet << endl;
-  os << "  cart = " << *frenetCart.cart << endl;
+  if (frenetCart.frenet) {
+    os << "  frenet = " << *frenetCart.frenet << endl;
+  }
+  if (frenetCart.cart) {
+    os << "  cart = " << *frenetCart.cart << endl;
+  }
   return os;
 }
 

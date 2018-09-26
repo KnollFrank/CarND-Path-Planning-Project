@@ -1,2 +1,4 @@
 build/
 papers/
+.ipynb_checkpoints/*
+

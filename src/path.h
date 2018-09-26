@@ -20,6 +20,7 @@ class Path {
   vector<double> asXVals(const CoordsConverter& coordsConverter) const;
   vector<double> asYVals(const CoordsConverter& coordsConverter) const;
   tk::spline asSpline(const CoordsConverter& coordsConverter) const;
+  friend ostream& operator<<(ostream& os, const Path& path);
 
  private:
   vector<Point> asPoints(const CoordsConverter& coordsConverter) const;
@@ -27,6 +28,12 @@ class Path {
   vector<double> asSVals(const CoordsConverter& coordsConverter) const;
   vector<double> asDVals(const CoordsConverter& coordsConverter) const;
 };
+
+ostream& operator<<(ostream& os, const Path& path) {
+  os << "Path:" << endl;
+  os << "  points = " << path.points << endl;
+  return os;
+}
 
 vector<Point> Path::asPoints(const CoordsConverter& coordsConverter) const {
   return map2<FrenetCart, Point>(points, [&](const FrenetCart& point) {

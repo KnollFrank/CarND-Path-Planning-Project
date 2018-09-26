@@ -106,3 +106,5 @@ TEST(CoordsConverterTest, should_convert2) {
   double arclength = pspline2arclength(spline, 0, 1);
   EXPECT_EQ(6947, int(arclength));
 }
+
+// TODO: test that conversion results in frenet = Frenet(s = 124.834, d = 6.16483) cart = Point(x = 909.48, y = 1128.67)

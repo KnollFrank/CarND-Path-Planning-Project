@@ -28,6 +28,7 @@ int PreviousData::sizeOfPreviousPath() const {
   return previous_path.points.size();
 }
 
+// TODO: make createPreviousData() a static method of PreviousData
 PreviousData createPreviousData(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
@@ -48,6 +49,13 @@ PreviousData createPreviousData(
 // Previous path's end s and d values
   previousData.end_path = Frenet { j[1]["end_path_s"], j[1]["end_path_d"] };
   return previousData;
+}
+
+ostream& operator<<(ostream& os, const PreviousData& previousData) {
+  os << "PreviousData:" << endl;
+  os << "  previous_path = " << previousData.previous_path << endl;
+  os << "  end_path = " << previousData.end_path << endl;
+  return os;
 }
 
 #endif /* PREVIOUSDATA_H_ */
