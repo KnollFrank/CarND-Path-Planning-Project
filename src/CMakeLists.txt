@@ -7,9 +7,8 @@ set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
 add_definitions(-std=c++17)
-file(GLOB alglib_SRC
-    "alglib/*.cpp"
-)
+
+file(GLOB alglib_SRC "alglib/*.cpp")
 set(sources main.cpp ${alglib_SRC})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
