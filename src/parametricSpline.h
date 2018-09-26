@@ -19,9 +19,9 @@ enum ParameterizationType {
 
 void buildPeriodicParametricSpline(const real_2d_array &xy, const SplineType st,
                                    const ParameterizationType pt,
-                                   pspline2interpolant &p) {
+                                   pspline2interpolant &spline) {
   alglib::ae_int_t n = xy.rows();
-  pspline2buildperiodic(xy, n, st, pt, p);
+  pspline2buildperiodic(xy, n, st, pt, spline);
 }
 
 #endif /* PARAMETRICSPLINE_H_ */
