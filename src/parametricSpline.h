@@ -3,6 +3,7 @@
 
 #include "alglib/ap.h"
 #include "alglib/interpolation.h"
+#include "coords/cart.h"
 
 using namespace alglib;
 
@@ -23,9 +24,18 @@ class ParametricSpline {
   ParametricSpline(const real_2d_array &xy, const SplineType st,
                    const ParameterizationType pt);
 
+  Point operator() (double t) const;
+
  // private:
   pspline2interpolant spline;
 };
+
+Point ParametricSpline::operator() (double t) const {
+  double x;
+  double y;
+  pspline2tangent(spline, t, x, y);
+  return Point { x, y };
+}
 
 ParametricSpline::ParametricSpline(const real_2d_array &xy, const SplineType st,
                                    const ParameterizationType pt) {

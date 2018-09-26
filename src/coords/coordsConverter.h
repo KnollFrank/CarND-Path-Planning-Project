@@ -171,9 +171,7 @@ Point CoordsConverter::getXY(const Frenet& point) const {
   double y;
   double t = (point.s + 34.128) / arclength;
 
-  // TODO: extract method
-  pspline2tangent(spline->spline, t, x, y);
-  Point e1 = Point { x, y };
+  Point e1 = (*spline)(t);
   Point e2 = getClockwisePerpendicular(e1);
 
   // TODO: extract method
