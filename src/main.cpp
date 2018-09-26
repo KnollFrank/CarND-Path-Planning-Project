@@ -19,6 +19,9 @@
 #include "pathPlanner.h"
 #include "previousData.h"
 
+#include "tests/coordsConverterTest.cpp"
+#include "tests/pathPlannerTest.cpp"
+
 // for convenience
 using json = nlohmann::json;
 
