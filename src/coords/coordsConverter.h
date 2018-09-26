@@ -1,14 +1,12 @@
 #ifndef COORDS_COORDSCONVERTER_H_
 #define COORDS_COORDSCONVERTER_H_
 
-#include <math.h>
-#include <algorithm>
-#include <iterator>
-#include <vector>
-
-#include "../funs.h"
+#include "/usr/include/c++/5/algorithm"
+#include "/usr/include/c++/5/cmath"
+#include "/usr/include/c++/5/iterator"
+#include "/usr/include/c++/5/tr1/unordered_map"
+#include "/usr/include/c++/5/vector"
 #include "../alglib/ap.h"
-#include "../alglib/interpolation.h"
 #include "../funs.h"
 #include "../parametricSpline.h"
 #include "cart.h"
