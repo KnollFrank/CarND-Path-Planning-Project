@@ -15,12 +15,14 @@
 
 #define GTEST_COUT std::cerr
 
-void expect_near(const Frenet& expected, const Frenet& actual, const double abs_error) {
+void expect_near(const Frenet& expected, const Frenet& actual,
+                 const double abs_error) {
   EXPECT_NEAR(expected.s, actual.s, abs_error);
   EXPECT_NEAR(expected.d, actual.d, abs_error);
 }
 
-void expect_near(const Point& expected, const Point& actual, const double abs_error) {
+void expect_near(const Point& expected, const Point& actual,
+                 const double abs_error) {
   EXPECT_NEAR(expected.x, actual.x, abs_error);
   EXPECT_NEAR(expected.y, actual.y, abs_error);
 }
@@ -113,11 +115,11 @@ TEST(CoordsConverterTest, should_convert3) {
 
   // TODO: DRY with should_convert
   auto test_convert = [&](const Point& point, const Frenet& frenet) {
-    const double abs_error = 0.001;
+    const double abs_error = 0.1;
     expect_near(frenet, coordsConverter.getFrenet(point), abs_error);
     expect_near(point, coordsConverter.getXY(frenet), abs_error);
   };
 
   // WHEN & THEN
-  test_convert(Point { 909.48, 1128.67}, Frenet {124.834, 6.16483});
+  test_convert(Point { 909.48, 1128.67 }, Frenet { 124.834, 6.16483 });
 }

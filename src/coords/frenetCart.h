@@ -1,9 +1,11 @@
 #ifndef COORDS_FRENETCART_H_
 #define COORDS_FRENETCART_H_
 
+#include <iostream>
+
 #include "cart.h"
-#include "frenet.h"
 #include "coordsConverter.h"
+#include "frenet.h"
 #include <experimental/optional>
 
 class FrenetCart {

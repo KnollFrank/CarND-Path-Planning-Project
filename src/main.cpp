@@ -123,9 +123,7 @@ int main(int argc, char **argv) {
               // j[1] is the data JSON object
 
               EgoCar egoCar = createEgoCar(j, coordsConverter);
-              cout << egoCar << endl;
               PreviousData previousData = PreviousData::fromJson(j, coordsConverter);
-              cout << previousData << endl;
               vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"], coordsConverter);
               PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
               Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles);

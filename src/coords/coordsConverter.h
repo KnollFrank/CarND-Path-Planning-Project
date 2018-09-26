@@ -7,6 +7,10 @@
 #include <vector>
 
 #include "../funs.h"
+#include "../alglib/ap.h"
+#include "../alglib/interpolation.h"
+#include "../funs.h"
+#include "../parametricSpline.h"
 #include "cart.h"
 #include "coordinateSystemCart.h"
 #include "coordSys.h"
@@ -42,10 +46,24 @@ class CoordsConverter {
   LineSegment getLineSegmentContaining(const Frenet& point) const;
 
   const MapWaypoints& map_waypoints;
+  pspline2interpolant spline;
+  double arclength;
 };
 
 CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
+  real_2d_array xy;
+  // TODO: extract method
+  xy.setlength(map_waypoints.map_waypoints.size(), 2);
+  for (int row = 0; row < map_waypoints.map_waypoints.size(); row++) {
+    xy(row, 0) = map_waypoints.map_waypoints[row].x;
+    xy(row, 1) = map_waypoints.map_waypoints[row].y;
+  }
+
+  buildPeriodicParametricSpline(xy, SplineType::CatmullRom,
+                                ParameterizationType::uniform, spline);
+
+  arclength = pspline2arclength(spline, 0, 1);
 }
 
 int CoordsConverter::getIndexOfClosestWaypoint(const Point& point) const {
@@ -139,11 +157,22 @@ LineSegment CoordsConverter::getLineSegmentContaining(
   return lineSegment;
 }
 
+// TODO: use class CoordinateSystem
 Point CoordsConverter::getXY(const Frenet& point) const {
-  LineSegment lineSegment = getLineSegmentContaining(point);
-  CoordinateSystemCart coordinateSystem = createCoordinateSystem(lineSegment);
-  return coordinateSystem.transform(
-      point.s - map_waypoints.map_waypoints_s[getStartIndex(point)], point.d);
+  double x;
+  double y;
+  double t = (point.s + 34.128) / arclength;
+
+  // TODO: extract method
+  pspline2tangent(spline, t, x, y);
+  Point e1 = Point { x, y };
+  Point e2 = getClockwisePerpendicular(e1);
+
+  // TODO: extract method
+  pspline2calc(spline, t, x, y);
+  Point origin = Point { x, y };
+
+  return origin + e2 * point.d;
 }
 
 Point CoordsConverter::createCartVectorFromStart2End(const Frenet& start,

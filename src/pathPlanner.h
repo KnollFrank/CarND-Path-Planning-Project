@@ -166,6 +166,14 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
   appendSnd2Fst(next_vals.points, points);
 
+//  Path next_vals;
+//  double dist_inc = 0.5;
+//  for (int i = 0; i < 50; i++) {
+//    double next_s = egoCar.getPos_frenet().s + dist_inc * (i + 1);
+//    double next_d = 6;
+//    next_vals.points.push_back(FrenetCart(Frenet { next_s, next_d }));
+//  }
+
   return next_vals;
 }
 
