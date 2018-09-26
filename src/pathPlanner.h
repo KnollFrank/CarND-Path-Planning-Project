@@ -141,8 +141,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   // printInfo(egoCar, vehicles);
 
   if (previousData.sizeOfPreviousPath() > 0) {
-    egoCar.setPos_frenet(Frenet { previousData.end_path.s,
-        egoCar.getPos_frenet().d });
+    egoCar.setPos_frenet(previousData.end_path);
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(
