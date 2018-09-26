@@ -167,16 +167,9 @@ LineSegment CoordsConverter::getLineSegmentContaining(
 }
 
 Point CoordsConverter::getXY(const Frenet& point) const {
-  double x;
-  double y;
   double t = (point.s + 34.128) / arclength;
-
-  Point e1 = spline->getTangent(t);
-  Point e2 = getClockwisePerpendicular(e1);
-
-  Point origin = (*spline)(t);
-
-  return origin + e2 * point.d;
+  Point n = getClockwisePerpendicular(spline->getTangent(t));
+  return (*spline)(t) + n * point.d;
 }
 
 Point CoordsConverter::createCartVectorFromStart2End(const Frenet& start,
