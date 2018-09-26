@@ -28,7 +28,7 @@ class PathPlannerTest : public ::testing::Test {
 
  protected:
   void SetUp() override {
-    mapWaypoints = read_map_waypoints();
+    mapWaypoints = MapWaypoints::read_map_waypoints();
     coordsConverter = new CoordsConverter(mapWaypoints);
     refPoint.vel_mph = 0;
   }

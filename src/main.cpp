@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 
   uWS::Hub h;
 
-  const MapWaypoints mapWaypoints = read_map_waypoints();
+  const MapWaypoints mapWaypoints = MapWaypoints::read_map_waypoints();
   const CoordsConverter coordsConverter(mapWaypoints);
 
   Lane lane = Lane::MIDDLE;

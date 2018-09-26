@@ -76,7 +76,7 @@ void print_array(string name, vector<double> xs) {
 }
 
 TEST(CoordsConverterTest, should_convert2) {
-  MapWaypoints mapWaypoints = read_map_waypoints();
+  MapWaypoints mapWaypoints = MapWaypoints::read_map_waypoints();
   pspline2interpolant p;
 
   real_2d_array xy;

@@ -22,6 +22,7 @@ struct MapWaypoints {
   vector<Point> map_outwards;
   vector<double> map_waypoints_s;
 
+  static MapWaypoints read_map_waypoints();
   double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
   LineSegment getLineSegment(int start, int end) const;
 };
@@ -39,9 +40,8 @@ LineSegment MapWaypoints::getLineSegment(int start, int end) const {
   return LineSegment { map_waypoints[start], map_waypoints[end] };
 }
 
-// TODO: make read_map_waypoints() a static method of MapWaypoints
 // Load up map values for waypoint's x,y,s and d normalized normal vectors
-MapWaypoints read_map_waypoints() {
+MapWaypoints MapWaypoints::read_map_waypoints() {
   // Load up map values for waypoint's x,y,s and d normalized normal vectors
   MapWaypoints map_waypoints;
   vector<double> map_waypoints_dx;
