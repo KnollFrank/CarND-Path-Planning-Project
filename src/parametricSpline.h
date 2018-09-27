@@ -52,7 +52,8 @@ Point ParametricSpline::operator()(double t) const {
   return Point { x, y };
 }
 
-real_2d_array ParametricSpline::as_real_2d_array(const vector<Point> &points) const {
+real_2d_array ParametricSpline::as_real_2d_array(
+    const vector<Point> &points) const {
   real_2d_array xy;
   xy.setlength(points.size(), 2);
   for (int row = 0; row < points.size(); row++) {
@@ -62,10 +63,15 @@ real_2d_array ParametricSpline::as_real_2d_array(const vector<Point> &points) co
   return xy;
 }
 
-ParametricSpline::ParametricSpline(const vector<Point>& points, const SplineType st,
+ParametricSpline::ParametricSpline(const vector<Point>& points,
+                                   const SplineType st,
                                    const ParameterizationType pt) {
   real_2d_array xy = as_real_2d_array(points);
   pspline2buildperiodic(xy, points.size(), st, pt, spline);
+}
+
+double distance(const Point& point, const ParametricSpline& spline) {
+  return 4711;
 }
 
 #endif /* PARAMETRICSPLINE_H_ */

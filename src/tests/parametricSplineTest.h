@@ -21,10 +21,29 @@ void print_array(string name, vector<double> xs) {
 }
 
 TEST(ParametricSplineTest, should_get_length) {
+  // Given
   MapWaypoints mapWaypoints = MapWaypoints::load();
   ParametricSpline spline(mapWaypoints.map_waypoints, SplineType::CatmullRom,
                           ParameterizationType::chordLength);
-  EXPECT_EQ(6947, int(spline.length()));
+
+  // When
+  double length = spline.length();
+
+  // Then
+  EXPECT_EQ(6947, int(length));
+}
+
+TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
+  // Given
+  MapWaypoints mapWaypoints = MapWaypoints::load();
+  ParametricSpline spline(mapWaypoints.map_waypoints, SplineType::CatmullRom,
+                          ParameterizationType::chordLength);
+
+  // When
+  double d = distance(Point {10, 20}, spline);
+
+  // Then
+  EXPECT_EQ(3, d);
 }
 
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */
