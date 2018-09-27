@@ -93,7 +93,7 @@ vector<Vehicle> createVehicles(
   return vehicles;
 }
 
-void print(const vector<tuple<Frenet, Point>>& frenetPointTuples) {
+void printAsCppCode(const vector<tuple<Frenet, Point>>& frenetPointTuples) {
   cout << "vector<tuple<Frenet, Point>> frenetPointTuples = {" << endl;
   for (const tuple<Frenet, Point>& frenetPointTuple : frenetPointTuples) {
     const Frenet& frenet = get<0>(frenetPointTuple);
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 #if COLLECT_DATA_FOR_UNIT_TESTS
       frenetPointTuples.push_back(make_tuple(Frenet {j[1]["s"], j[1]["d"]}, Point {j[1]["x"], j[1]["y"]}));
       if(Simulator::oneRoundDriven(egoCar)) {
-        print(frenetPointTuples);
+        printAsCppCode(frenetPointTuples);
         exit(0);
       }
 #endif
