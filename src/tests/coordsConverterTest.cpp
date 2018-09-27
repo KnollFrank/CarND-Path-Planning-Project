@@ -75,14 +75,14 @@ TEST(CoordsConverterTest, should_convert) {
   test_convert(Point { 9, 0.5 }, Frenet { s1 + s2 + 4, -0.5 });
 }
 
-TEST(CoordsConverterTest, should_convert3) {
+TEST(CoordsConverterTest, should_convert2) {
   // GIVEN
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
 
   // TODO: DRY with should_convert
   auto test_convert = [&](const Point& point, const Frenet& frenet) {
-    const double abs_error = 2.5;
+    const double abs_error = 2.26;
     // TODO: die folgende Zeile wierder aktivieren, um getFrenet() zu entwickeln.
     // expect_near(frenet, coordsConverter.getFrenet(point), abs_error);
       expect_near(point, coordsConverter.getXY(frenet), abs_error, asString([&](stringstream& stream) {stream << point << " == coordsConverter.getXY(" << frenet <<")";}));
