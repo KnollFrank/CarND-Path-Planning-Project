@@ -54,7 +54,7 @@ CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
   spline = new ParametricSpline(map_waypoints.map_waypoints,
                                 SplineType::CatmullRom,
-                                ParameterizationType::uniform);
+                                ParameterizationType::chordLength);
 
   splineLength = spline->length();
 }
@@ -155,7 +155,7 @@ LineSegment CoordsConverter::getLineSegmentContaining(
 }
 
 Point CoordsConverter::getXY(const Frenet& point) const {
-  double t = (point.s + 34.128) / splineLength;
+  double t = point.s / splineLength;
   Point n = getClockwisePerpendicular(spline->getTangent(t));
   return (*spline)(t) + n * point.d;
 }
