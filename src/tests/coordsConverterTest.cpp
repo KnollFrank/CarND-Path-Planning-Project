@@ -22,9 +22,9 @@ void expect_near(const Frenet& expected, const Frenet& actual,
 }
 
 void expect_near(const Point& expected, const Point& actual,
-                 const double abs_error) {
-  EXPECT_NEAR(expected.x, actual.x, abs_error);
-  EXPECT_NEAR(expected.y, actual.y, abs_error);
+                 const double abs_error, const string error_msg = "") {
+  EXPECT_NEAR(expected.x, actual.x, abs_error) << error_msg;
+  EXPECT_NEAR(expected.y, actual.y, abs_error) << error_msg;
 }
 
 TEST(CoordsConverterTest, should_convert) {
@@ -108,11 +108,15 @@ TEST(CoordsConverterTest, should_convert3) {
     const double abs_error = 0.2;
     // TODO: die folgende Zeile wierder aktivieren, um getFrenet() zu entwickeln.
     // expect_near(frenet, coordsConverter.getFrenet(point), abs_error);
-      expect_near(point, coordsConverter.getXY(frenet), abs_error);
+      stringstream buffer;
+      buffer << point << " == coordsConverter.getXY(" << frenet <<")";
+      expect_near(point, coordsConverter.getXY(frenet), abs_error, buffer.str());
     };
 
   // WHEN & THEN
   test_convert(Point { 909.48, 1128.67 }, Frenet { 124.834, 6.16483 });
-  test_convert(Point { 784.6001, 1135.571 }, Frenet { 0, 0 });
-  test_convert(Point { 815.2679, 1134.93 }, Frenet { 30.6744785308838, 0 });
+  for (int i = 0; i < mapWaypoints.map_waypoints.size(); i++) {
+    test_convert(mapWaypoints.map_waypoints[i],
+                 Frenet { mapWaypoints.map_waypoints_s[i], 0 });
+  }
 }
