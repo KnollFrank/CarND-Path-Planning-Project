@@ -15,10 +15,10 @@
 
 #define GTEST_COUT std::cerr
 
-string asString(function<void(stringstream&)> print2BufferFn) {
-  stringstream buffer;
-  print2BufferFn(buffer);
-  return buffer.str();
+string asString(function<void(stringstream&)> print2Stream) {
+  stringstream stream;
+  print2Stream(stream);
+  return stream.str();
 }
 
 void expect_near(const Frenet& expected, const Frenet& actual,
@@ -114,7 +114,7 @@ TEST(CoordsConverterTest, should_convert3) {
     const double abs_error = 0.2;
     // TODO: die folgende Zeile wierder aktivieren, um getFrenet() zu entwickeln.
     // expect_near(frenet, coordsConverter.getFrenet(point), abs_error);
-      expect_near(point, coordsConverter.getXY(frenet), abs_error, asString([&](stringstream& buffer) {buffer << point << " == coordsConverter.getXY(" << frenet <<")";}));
+      expect_near(point, coordsConverter.getXY(frenet), abs_error, asString([&](stringstream& stream) {stream << point << " == coordsConverter.getXY(" << frenet <<")";}));
     };
 
   // WHEN & THEN
