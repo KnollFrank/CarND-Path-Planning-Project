@@ -27,6 +27,7 @@
 
 #include "tests/coordsConverterTest.cpp"
 #include "tests/pathPlannerTest.cpp"
+#include "tests/parametricSplineTest.h"
 
 #define COLLECT_DATA_FOR_UNIT_TESTS false
 

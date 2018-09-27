@@ -75,21 +75,6 @@ TEST(CoordsConverterTest, should_convert) {
   test_convert(Point { 9, 0.5 }, Frenet { s1 + s2 + 4, -0.5 });
 }
 
-void print_array(string name, vector<double> xs) {
-  GTEST_COUT<< name << " = [";
-  for (int i = 0; i < xs.size(); i++) {
-    GTEST_COUT<< xs[i] << ", " << endl;
-  }
-  GTEST_COUT<< "]";
-}
-
-TEST(CoordsConverterTest, should_convert2) {
-  MapWaypoints mapWaypoints = MapWaypoints::load();
-  ParametricSpline spline(mapWaypoints.map_waypoints, SplineType::CatmullRom,
-                          ParameterizationType::chordLength);
-  EXPECT_EQ(6947, int(spline.length()));
-}
-
 TEST(CoordsConverterTest, should_convert3) {
   // GIVEN
   MapWaypoints mapWaypoints = MapWaypoints::load();
