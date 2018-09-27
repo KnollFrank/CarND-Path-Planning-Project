@@ -32,6 +32,7 @@ class Simulator {
   static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
   static bool isCollision(const EgoCar& egoCar,
                           const vector<Vehicle>& vehicles);
+  static bool oneRoundDriven(const EgoCar& egoCar);
 
  private:
   double driveEgoCarAndVehicles(function<void(void)> afterEachMovementOfEgoCar);
@@ -81,8 +82,12 @@ void Simulator::drive(function<void(void)> afterEachMovementOfEgoCar) {
   }
 }
 
-bool Simulator::oneRoundDriven() {
+bool Simulator::oneRoundDriven(const EgoCar& egoCar) {
   return egoCar.getPos_frenet().s > 6900;
+}
+
+bool Simulator::oneRoundDriven() {
+  return oneRoundDriven(egoCar);
 }
 
 double Simulator::driveEgoCarAndVehicles(
@@ -144,9 +149,8 @@ void Simulator::drive2PointOfEgoCar(
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
 // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
-  ASSERT_FALSE(isCollision(egoCar, vehicles))
-      << "COLLISION between ego car and another vehicle:" << endl << egoCar
-      << vehicles;
+  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION between ego car and another vehicle:" << endl << egoCar
+  << vehicles;
   afterEachMovementOfEgoCar();
 }
 

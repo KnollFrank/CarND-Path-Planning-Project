@@ -4,6 +4,7 @@
 #include <uWS/Hub.h>
 #include <uWS/WebSocket.h>
 #include <uWS/WebSocketProtocol.h>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <map>
@@ -11,18 +12,22 @@
 #include <vector>
 
 #include "car.h"
+#include "coords/cart.h"
 #include "coords/coordsConverter.h"
+#include "coords/frenet.h"
+#include "coords/frenetCart.h"
 #include "coords/waypoints.h"
 #include "json.hpp"
 #include "lane.h"
 #include "path.h"
 #include "pathPlanner.h"
 #include "previousData.h"
+#include "tests/simulator.h"
 
 #include "tests/coordsConverterTest.cpp"
 #include "tests/pathPlannerTest.cpp"
 
-#define COLLECT_DATA_FOR_UNIT_TESTS true
+#define COLLECT_DATA_FOR_UNIT_TESTS false
 
 // for convenience
 using json = nlohmann::json;
@@ -139,7 +144,7 @@ int main(int argc, char **argv) {
             EgoCar egoCar = createEgoCar(j, coordsConverter);
 #if COLLECT_DATA_FOR_UNIT_TESTS
       egoCarPositions.push_back(egoCar.getPos());
-      if(egoCar.getPos_frenet().s > 6900) {
+      if(Simulator::oneRoundDriven(egoCar)) {
         print(egoCarPositions, coordsConverter);
         exit(0);
       }
