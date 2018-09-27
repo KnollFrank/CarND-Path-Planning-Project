@@ -36,14 +36,19 @@ TEST(ParametricSplineTest, should_get_length) {
 TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
   // Given
   MapWaypoints mapWaypoints = MapWaypoints::load();
+  CoordsConverter coordsConverter(mapWaypoints);
+
   ParametricSpline spline(mapWaypoints.map_waypoints, SplineType::CatmullRom,
                           ParameterizationType::chordLength);
+  double distanceExpected = 5;
+  Point point = coordsConverter.getXY(Frenet { spline.length() * 0.5,
+      distanceExpected });
 
   // When
-  double d = distance(Point {10, 20}, spline);
+  double distanceActual = distance(point, spline);
 
   // Then
-  EXPECT_EQ(3, d);
+  EXPECT_EQ(distanceExpected, distanceActual);
 }
 
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */
