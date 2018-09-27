@@ -21,7 +21,7 @@ enum ParameterizationType {
 class ParametricSpline {
 
  public:
-  ParametricSpline(const vector<Point> &points, const SplineType st,
+  ParametricSpline(const vector<Point>& points, const SplineType st,
                    const ParameterizationType pt);
 
   Point operator()(double t) const;
@@ -62,7 +62,7 @@ real_2d_array ParametricSpline::as_real_2d_array(const vector<Point> &points) co
   return xy;
 }
 
-ParametricSpline::ParametricSpline(const vector<Point> &points, const SplineType st,
+ParametricSpline::ParametricSpline(const vector<Point>& points, const SplineType st,
                                    const ParameterizationType pt) {
   real_2d_array xy = as_real_2d_array(points);
   pspline2buildperiodic(xy, points.size(), st, pt, spline);
