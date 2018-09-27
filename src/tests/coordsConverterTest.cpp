@@ -86,22 +86,7 @@ void print_array(string name, vector<double> xs) {
 TEST(CoordsConverterTest, should_convert2) {
   MapWaypoints mapWaypoints = MapWaypoints::load();
   ParametricSpline spline(mapWaypoints.map_waypoints, SplineType::CatmullRom,
-                          ParameterizationType::uniform);
-  double x;
-  double y;
-  vector<double> xs;
-  vector<double> ys;
-
-  for (double t = 0.0; t < 1.0; t += 0.01) {
-    Point p = spline(t);
-    xs.push_back(p.x);
-    ys.push_back(p.y);
-  }
-
-  print_array("x", xs);
-  GTEST_COUT<< endl;
-  print_array("y", ys);
-
+                          ParameterizationType::chordLength);
   EXPECT_EQ(6947, int(spline.length()));
 }
 
