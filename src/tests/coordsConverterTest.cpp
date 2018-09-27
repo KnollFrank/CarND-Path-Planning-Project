@@ -1,13 +1,13 @@
 #include "../coords/coordsConverter.h"
 
 #include <gtest/gtest.h>
+#include <gtest/gtest-message.h>
 #include <cmath>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
-#include "../alglib/ap.h"
-#include "../alglib/interpolation.h"
 #include "../coords/cart.h"
 #include "../coords/frenet.h"
 #include "../coords/waypoints.h"
@@ -15,10 +15,16 @@
 
 #define GTEST_COUT std::cerr
 
+string asString(function<void(stringstream&)> print2BufferFn) {
+  stringstream buffer;
+  print2BufferFn(buffer);
+  return buffer.str();
+}
+
 void expect_near(const Frenet& expected, const Frenet& actual,
-                 const double abs_error) {
-  EXPECT_NEAR(expected.s, actual.s, abs_error);
-  EXPECT_NEAR(expected.d, actual.d, abs_error);
+                 const double abs_error, const string error_msg = "") {
+  EXPECT_NEAR(expected.s, actual.s, abs_error) << error_msg;
+  EXPECT_NEAR(expected.d, actual.d, abs_error) << error_msg;
 }
 
 void expect_near(const Point& expected, const Point& actual,
@@ -108,9 +114,7 @@ TEST(CoordsConverterTest, should_convert3) {
     const double abs_error = 0.2;
     // TODO: die folgende Zeile wierder aktivieren, um getFrenet() zu entwickeln.
     // expect_near(frenet, coordsConverter.getFrenet(point), abs_error);
-      stringstream buffer;
-      buffer << point << " == coordsConverter.getXY(" << frenet <<")";
-      expect_near(point, coordsConverter.getXY(frenet), abs_error, buffer.str());
+      expect_near(point, coordsConverter.getXY(frenet), abs_error, asString([&](stringstream& buffer) {buffer << point << " == coordsConverter.getXY(" << frenet <<")";}));
     };
 
   // WHEN & THEN
