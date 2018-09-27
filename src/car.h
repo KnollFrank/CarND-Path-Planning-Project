@@ -19,6 +19,7 @@ class EgoCar {
   double speed_mph;
 
   void setPos(const Point& pos_cart, const Frenet& pos_frenet);
+  FrenetCart getPos() const;
 
   void setPos_cart(const Point& pos);
   Point getPos_cart() const;
@@ -54,6 +55,10 @@ EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
 
 void EgoCar::setPos(const Point& pos_cart, const Frenet& pos_frenet) {
   pos = FrenetCart(pos_frenet, pos_cart);
+}
+
+FrenetCart EgoCar::getPos() const {
+  return pos;
 }
 
 Point EgoCar::getPos_cart() const {

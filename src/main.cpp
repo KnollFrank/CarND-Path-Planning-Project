@@ -22,6 +22,8 @@
 #include "tests/coordsConverterTest.cpp"
 #include "tests/pathPlannerTest.cpp"
 
+#define COLLECT_DATA_FOR_UNIT_TESTS true
+
 // for convenience
 using json = nlohmann::json;
 
@@ -84,6 +86,18 @@ vector<Vehicle> createVehicles(
   return vehicles;
 }
 
+void print(const vector<FrenetCart>& positions,
+           const CoordsConverter& coordsConverter) {
+  cout << "{";
+  for (const FrenetCart& position : positions) {
+    Frenet frenet = position.getFrenet(coordsConverter);
+    Point point = position.getXY(coordsConverter);
+    cout << "FrenetCart(Frenet {" << frenet.s << ", " << frenet.d
+         << "}, Point {" << point.x << ", " << point.y << "}), " << endl;
+  }
+  cout << "}" << endl;
+}
+
 int main(int argc, char **argv) {
   if (argc > 1 && strcmp(argv[1], "test") == 0) {
     testing::InitGoogleTest(&argc, argv);
@@ -102,48 +116,55 @@ int main(int argc, char **argv) {
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
   double dt = 0.02;
+  vector<FrenetCart> egoCarPositions;
 
-  h.onMessage(
-      [dt, &refPoint,&lane,&coordsConverter](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
-          uWS::OpCode opCode) {
-        // "42" at the start of the message means there's a websocket message event.
-        // The 4 signifies a websocket message
-        // The 2 signifies a websocket event
-        //auto sdata = string(data).substr(0, length);
-        //cout << sdata << endl;
-        if (length && length > 2 && data[0] == '4' && data[1] == '2') {
-          auto s = hasData(data);
+  h.onMessage([&](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+      uWS::OpCode opCode) {
+    // "42" at the start of the message means there's a websocket message event.
+    // The 4 signifies a websocket message
+    // The 2 signifies a websocket event
+    //auto sdata = string(data).substr(0, length);
+    //cout << sdata << endl;
+      if (length && length > 2 && data[0] == '4' && data[1] == '2') {
+        auto s = hasData(data);
 
-          if (s != "") {
-            nlohmann::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::adl_serializer> j = json::parse(s);
+        if (s != "") {
+          nlohmann::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::adl_serializer> j = json::parse(s);
 
-            string event = j[0].get<string>();
+          string event = j[0].get<string>();
 
-            if (event == "telemetry") {
-              // j[1] is the data JSON object
+          if (event == "telemetry") {
+            // j[1] is the data JSON object
 
-              EgoCar egoCar = createEgoCar(j, coordsConverter);
-              PreviousData previousData = PreviousData::fromJson(j, coordsConverter);
-              vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"], coordsConverter);
-              PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
-              Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles);
+            EgoCar egoCar = createEgoCar(j, coordsConverter);
+#if COLLECT_DATA_FOR_UNIT_TESTS
+      egoCarPositions.push_back(egoCar.getPos());
+      if(egoCar.getPos_frenet().s > 6900) {
+        print(egoCarPositions, coordsConverter);
+        exit(0);
+      }
+#endif
+      PreviousData previousData = PreviousData::fromJson(j, coordsConverter);
+      vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"], coordsConverter);
+      PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
+      Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles);
 
-              json msgJson;
-              msgJson["next_x"] = next_vals.asXVals(coordsConverter);
-              msgJson["next_y"] = next_vals.asYVals(coordsConverter);
+      json msgJson;
+      msgJson["next_x"] = next_vals.asXVals(coordsConverter);
+      msgJson["next_y"] = next_vals.asYVals(coordsConverter);
 
-              auto msg = "42[\"control\","+ msgJson.dump()+"]";
+      auto msg = "42[\"control\","+ msgJson.dump()+"]";
 
-              //this_thread::sleep_for(chrono::milliseconds(1000));
-              ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-            }
-          } else {
-            // Manual driving
-            std::string msg = "42[\"manual\",{}]";
-            ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-          }
-        }
-      });
+      //this_thread::sleep_for(chrono::milliseconds(1000));
+      ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+    }
+  } else {
+    // Manual driving
+    std::string msg = "42[\"manual\",{}]";
+    ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+  }
+}
+});
 
   // We don't need this since we're not using HTTP but if it's removed the
   // program
@@ -154,7 +175,7 @@ int main(int argc, char **argv) {
     if (req.getUrl().valueLength == 1) {
       res->end(s.data(), s.length());
     } else {
-      // i guess this should be done more gracefully?
+// i guess this should be done more gracefully?
       res->end(nullptr, 0);
     }
   });

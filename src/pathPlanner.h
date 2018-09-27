@@ -151,28 +151,28 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   refPoint.point = egoCar.getPos_frenet();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
-  Path path;
-  addPointsFromPreviousData(path, egoCar, previousData);
-  addNewPoints(path, egoCar);
-
-  vector<FrenetCart> points =
-      workWithPathInCarsCoordinateSystem(
-          path,
-          [&](const Path& carsPath) {
-            return createSplinePoints(carsPath.asSpline(coordsConverter), path_size - previousData.sizeOfPreviousPath());
-          });
+//  Path path;
+//  addPointsFromPreviousData(path, egoCar, previousData);
+//  addNewPoints(path, egoCar);
+//
+//  vector<FrenetCart> points =
+//      workWithPathInCarsCoordinateSystem(
+//          path,
+//          [&](const Path& carsPath) {
+//            return createSplinePoints(carsPath.asSpline(coordsConverter), path_size - previousData.sizeOfPreviousPath());
+//          });
+//
+//  Path next_vals;
+//  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
+//  appendSnd2Fst(next_vals.points, points);
 
   Path next_vals;
-  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-  appendSnd2Fst(next_vals.points, points);
-
-//  Path next_vals;
-//  double dist_inc = 0.5;
-//  for (int i = 0; i < 50; i++) {
-//    double next_s = egoCar.getPos_frenet().s + dist_inc * (i + 1);
-//    double next_d = 6;
-//    next_vals.points.push_back(FrenetCart(Frenet { next_s, next_d }));
-//  }
+  double dist_inc = 0.5;
+  for (int i = 0; i < 50; i++) {
+    double next_s = egoCar.getPos_frenet().s + dist_inc * (i + 1);
+    double next_d = 6;
+    next_vals.points.push_back(FrenetCart(Frenet { next_s, next_d }));
+  }
 
   return next_vals;
 }
