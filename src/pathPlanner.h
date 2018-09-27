@@ -1,6 +1,7 @@
 #ifndef PATHPLANNER_H_
 #define PATHPLANNER_H_
 
+#include "json.hpp"
 #include <math.h>
 #include <algorithm>
 #include <iostream>
@@ -14,7 +15,6 @@
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
 #include "funs.h"
-#include "json.hpp"
 #include "lane.h"
 #include "path.h"
 #include "previousData.h"

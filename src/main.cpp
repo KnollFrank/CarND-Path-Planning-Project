@@ -1,3 +1,4 @@
+#include "json.hpp"
 #include <gtest/gtest.h>
 #include <stddef.h>
 #include <uWS/HTTPSocket.h>
@@ -18,7 +19,6 @@
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
 #include "coords/waypoints.h"
-#include "json.hpp"
 #include "lane.h"
 #include "path.h"
 #include "pathPlanner.h"

@@ -10,10 +10,6 @@
 #include <tuple>
 #include <vector>
 
-#include "/usr/include/c++/5/iosfwd"
-#include "/usr/include/c++/5/istream"
-#include "/usr/include/c++/5/string"
-#include "/usr/include/c++/5/vector"
 #include "cart.h"
 #include "lineSegment.h"
 
