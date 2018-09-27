@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <tuple>
 
 #include "car.h"
 #include "coords/cart.h"
@@ -91,16 +92,15 @@ vector<Vehicle> createVehicles(
   return vehicles;
 }
 
-void print(const vector<FrenetCart>& positions,
-           const CoordsConverter& coordsConverter) {
-  cout << "{";
-  for (const FrenetCart& position : positions) {
-    Frenet frenet = position.getFrenet(coordsConverter);
-    Point point = position.getXY(coordsConverter);
-    cout << "FrenetCart(Frenet {" << frenet.s << ", " << frenet.d
+void print(const vector<tuple<Frenet, Point>>& frenetPointTuples) {
+  cout << "vector<tuple<Frenet, Point>> frenetPointTuples = {" << endl;
+  for (const tuple<Frenet, Point>& frenetPointTuple : frenetPointTuples) {
+    const Frenet& frenet = get<0>(frenetPointTuple);
+    const Point& point = get<1>(frenetPointTuple);
+    cout << "make_tuple(Frenet {" << frenet.s << ", " << frenet.d
          << "}, Point {" << point.x << ", " << point.y << "}), " << endl;
   }
-  cout << "}" << endl;
+  cout << "};" << endl;
 }
 
 int main(int argc, char **argv) {
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
   double dt = 0.02;
-  vector<FrenetCart> egoCarPositions;
+  vector<tuple<Frenet, Point>> frenetPointTuples;
 
   h.onMessage([&](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
       uWS::OpCode opCode) {
@@ -143,9 +143,9 @@ int main(int argc, char **argv) {
 
             EgoCar egoCar = createEgoCar(j, coordsConverter);
 #if COLLECT_DATA_FOR_UNIT_TESTS
-      egoCarPositions.push_back(egoCar.getPos());
+      frenetPointTuples.push_back(make_tuple(Frenet {j[1]["s"], j[1]["d"]}, Point {j[1]["x"], j[1]["y"]}));
       if(Simulator::oneRoundDriven(egoCar)) {
-        print(egoCarPositions, coordsConverter);
+        print(frenetPointTuples);
         exit(0);
       }
 #endif
@@ -171,9 +171,9 @@ int main(int argc, char **argv) {
 }
 });
 
-  // We don't need this since we're not using HTTP but if it's removed the
-  // program
-  // doesn't compile :-(
+// We don't need this since we're not using HTTP but if it's removed the
+// program
+// doesn't compile :-(
   h.onHttpRequest([](uWS::HttpResponse *res, uWS::HttpRequest req, char *data,
       size_t, size_t) {
     const std::string s = "<h1>Hello world!</h1>";
