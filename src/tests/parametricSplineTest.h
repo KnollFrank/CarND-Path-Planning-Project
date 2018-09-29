@@ -23,8 +23,7 @@ void print_array(string name, vector<double> xs) {
 TEST(ParametricSplineTest, should_get_length) {
   // Given
   MapWaypoints mapWaypoints = MapWaypoints::load();
-  ParametricSpline spline(mapWaypoints.map_waypoints, SplineType::CatmullRom,
-                          ParameterizationType::chordLength);
+  ParametricSpline spline(mapWaypoints.map_waypoints);
 
   // When
   double length = spline.length();
@@ -38,8 +37,7 @@ TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
 
-  ParametricSpline spline(mapWaypoints.map_waypoints, SplineType::CatmullRom,
-                          ParameterizationType::chordLength);
+  ParametricSpline spline(mapWaypoints.map_waypoints);
   double distanceExpected = 5;
   Point point = coordsConverter.getXY(Frenet { spline.length() * 0.5,
       distanceExpected });

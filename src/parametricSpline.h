@@ -21,8 +21,7 @@ enum ParameterizationType {
 class ParametricSpline {
 
  public:
-  ParametricSpline(const vector<Point>& points, const SplineType st,
-                   const ParameterizationType pt);
+  ParametricSpline(const vector<Point>& points);
 
   Point operator()(double t) const;
   Point getTangent(double t) const;
@@ -54,6 +53,7 @@ Point ParametricSpline::operator()(double t) const {
 
 real_2d_array ParametricSpline::as_real_2d_array(
     const vector<Point> &points) const {
+
   real_2d_array xy;
   xy.setlength(points.size(), 2);
   for (int row = 0; row < points.size(); row++) {
@@ -63,11 +63,10 @@ real_2d_array ParametricSpline::as_real_2d_array(
   return xy;
 }
 
-ParametricSpline::ParametricSpline(const vector<Point>& points,
-                                   const SplineType st,
-                                   const ParameterizationType pt) {
+ParametricSpline::ParametricSpline(const vector<Point>& points) {
   real_2d_array xy = as_real_2d_array(points);
-  pspline2buildperiodic(xy, points.size(), st, pt, spline);
+  pspline2buildperiodic(xy, points.size(), SplineType::CatmullRom,
+                        ParameterizationType::chordLength, spline);
 }
 
 double distance(const Point& point, const ParametricSpline& spline) {
