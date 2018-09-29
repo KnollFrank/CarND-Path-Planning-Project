@@ -5,6 +5,16 @@
 #include "alglib/interpolation.h"
 #include "coords/cart.h"
 
+#include <boost/math/tools/roots.hpp>
+
+#include <boost/math/special_functions/next.hpp> // For float_distance.
+#include <tuple> // for std::tuple and std::make_tuple.
+#include <boost/math/special_functions/cbrt.hpp> // For boost::math::cbrt.
+
+#include <iostream>
+#include <iomanip>
+#include <limits>
+
 using namespace alglib;
 
 enum SplineType {
@@ -30,6 +40,7 @@ class ParametricSpline {
  private:
   real_2d_array as_real_2d_array(const vector<Point> &points) const;
 
+ public:
   pspline2interpolant spline;
 };
 
@@ -69,6 +80,44 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
                         ParameterizationType::chordLength, spline);
 }
 
+double evaluatePoly(const vector<double>& coeff, double x) {
+  return coeff[0] + coeff[1] * x + coeff[2] * x * x + coeff[3] * x * x * x
+      + coeff[4] * x * x * x * x + coeff[5] * x * x * x * x * x
+      + coeff[6] * x * x * x * x * x * x;
+}
+
+struct distancePrimeFunctor {
+
+  distancePrimeFunctor(const vector<double>& distancePrimeCoeffs)
+      : a(distancePrimeCoeffs) {
+  }
+
+  std::pair<double, double> operator()(double x) {
+    double fx = evaluatePoly(a, x);
+    double dx = a[1] + 2 * a[2] * x + 3 * a[3] * x * x + 4 * a[4] + x * x * x
+        + 5 * a[5] * x * x * x * x + 6 * a[6] * x * x * x * x * x;
+    return std::make_pair(fx, dx);
+  }
+
+ private:
+  const vector<double>& a;
+};
+
+double distancePrimeRoot(const vector<double>& distancePrimeCoeffs) {
+  using namespace boost::math::tools;
+  double guess = 0;
+  double min = 0;
+  double max = 0;
+  const int digits = std::numeric_limits<double>::digits;
+  int get_digits = static_cast<int>(digits * 0.6);
+  const boost::uintmax_t maxit = 20;
+  boost::uintmax_t it = maxit;
+  double result = newton_raphson_iterate(
+      distancePrimeFunctor(distancePrimeCoeffs), guess, min, max, get_digits,
+      it);
+  return result;
+}
+
 vector<double> polySquared(const vector<double>& a) {
   vector<double> d(7);
   d[0] = a[0] * a[0];
@@ -81,8 +130,9 @@ vector<double> polySquared(const vector<double>& a) {
   return d;
 }
 
-vector<double> getDistancePrime(const Point& point, const vector<double>& a,
-                                const vector<double>& b) {
+vector<double> getDistancePrimeCoeffs(const Point& point,
+                                      const vector<double>& a,
+                                      const vector<double>& b) {
   vector<double> d = polySquared(a);
   vector<double> e = polySquared(b);
   vector<double> distancePrime(6);
@@ -97,11 +147,44 @@ vector<double> getDistancePrime(const Point& point, const vector<double>& a,
   return distancePrime;
 }
 
+double getDistance(double t, const Point& point, const vector<double>& a,
+                   const vector<double>& b) {
+  vector<double> d = polySquared(a);
+  vector<double> e = polySquared(b);
+  vector<double> distance(7);
+  distance[0] = point.x * point.x + point.y * point.y - 2 * point.x * a[0]
+      + d[0] - 2 * point.y * b[0] + e[0];
+  distance[1] = -2 * point.x * a[1] + d[1] - 2 * point.y * b[1] + e[1];
+  distance[2] = -2 * point.x * a[2] + d[2] - 2 * point.y * b[2] + e[2];
+  distance[3] = -2 * point.x * a[3] + d[3] - 2 * point.y * b[3] + e[3];
+  distance[4] = d[4] + e[4];
+  distance[5] = d[5] + e[5];
+  distance[6] = d[6] + e[6];
+  return evaluatePoly(distance, t);
+}
+
 double distance(const Point& point, const ParametricSpline& spline) {
   vector<double> a(4);
   vector<double> b(4);
-  vector<double> distancePrime = getDistancePrime(point, a, b);
-  return 4711;
+
+  const pspline2interpolant &p1 = spline.spline;
+  alglib_impl::pspline2interpolant* p =
+      const_cast<alglib_impl::pspline2interpolant*>(p1.c_ptr());
+  alglib_impl::spline1dinterpolant* c = &p->x;
+  a[0] = c->c.ptr.p_double[0];
+  a[1] = c->c.ptr.p_double[1];
+  a[2] = c->c.ptr.p_double[2];
+  a[3] = c->c.ptr.p_double[3];
+
+  alglib_impl::spline1dinterpolant* d = &p->y;
+  b[0] = d->c.ptr.p_double[0];
+  b[1] = d->c.ptr.p_double[1];
+  b[2] = d->c.ptr.p_double[2];
+  b[3] = d->c.ptr.p_double[3];
+
+  vector<double> distancePrime = getDistancePrimeCoeffs(point, a, b);
+  double root = distancePrimeRoot(distancePrime);
+  return getDistance(root, point, a, b);
 }
 
 #endif /* PARAMETRICSPLINE_H_ */

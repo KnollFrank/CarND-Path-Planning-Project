@@ -39,8 +39,7 @@ TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
 
   ParametricSpline spline(mapWaypoints.map_waypoints);
   double distanceExpected = 5;
-  Point point = coordsConverter.getXY(Frenet { spline.length() * 0.5,
-      distanceExpected });
+  Point point = coordsConverter.getXY(Frenet { 10, distanceExpected });
 
   // When
   double distanceActual = distance(point, spline);
