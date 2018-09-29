@@ -1,6 +1,11 @@
 project(Path_Planning_eclipse)
 
 cmake_minimum_required (VERSION 3.5)
+
+set (BOOST_ROOT "/home/frankknoll/udacity/SDCND/boost_1_67_0")
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+
 find_package(GTest REQUIRED)
 
 set(CXX_FLAGS "-Wall")
