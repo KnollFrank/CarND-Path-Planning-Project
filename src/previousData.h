@@ -1,6 +1,7 @@
 #ifndef PREVIOUSDATA_H_
 #define PREVIOUSDATA_H_
 
+#include "json.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -9,7 +10,6 @@
 #include "coords/coordsConverter.h"
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
-#include "json.hpp"
 #include "path.h"
 
 using namespace std;
