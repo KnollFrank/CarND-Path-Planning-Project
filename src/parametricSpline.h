@@ -140,20 +140,12 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
 }
 
 polynomial<double> derivation(const polynomial<double>& poly) {
-	polynomial<double> polyPrime { {
-	//
-			poly[1],
-			//
-			2 * poly[2],
-			//
-			3 * poly[3],
-			//
-			4 * poly[4],
-			//
-			5 * poly[5],
-			//
-			6 * poly[6] } };
-	return polyPrime;
+	vector<double> coeffs;
+	for (int i = 1; i <= poly.degree(); i++) {
+		coeffs.push_back(i * poly[i]);
+	}
+	polynomial<double> deriv(coeffs.begin(), coeffs.end());
+	return deriv;
 }
 
 struct DistancePrimeFunctor {
