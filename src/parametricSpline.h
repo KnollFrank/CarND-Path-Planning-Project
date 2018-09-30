@@ -200,19 +200,18 @@ double distance(const Point& point, const ParametricSpline& spline) {
 	const pspline2interpolant &p1 = spline.spline;
 	alglib_impl::pspline2interpolant* p =
 			const_cast<alglib_impl::pspline2interpolant*>(p1.c_ptr());
-	alglib_impl::spline1dinterpolant* c = &p->x;
 	ae_int_t n;
 	real_2d_array tbl;
 	xparams _xparams;
 	spline1dunpack2(p->x, n, tbl, _xparams);
+	double start = tbl(0, 0);
+	double end = tbl(0, 1);
 	a[0] = tbl(0, 2);
 	a[1] = tbl(0, 3);
 	a[2] = tbl(0, 4);
 	a[3] = tbl(0, 5);
 
 	spline1dunpack2(p->y, n, tbl, _xparams);
-	alglib_impl::spline1dinterpolant* d = &p->y;
-	// double tmp = tbl(1, 0);
 	b[0] = tbl(0, 2);
 	b[1] = tbl(0, 3);
 	b[2] = tbl(0, 4);
@@ -222,11 +221,8 @@ double distance(const Point& point, const ParametricSpline& spline) {
 	double length = spline.length();
 	double root = distancePrimeRoot(distancePrime, length);
 	double dist1 = sqrt(getSquaredDistance(root, point, a, b));
-	double dist2 = sqrt(getSquaredDistance(c->x.ptr.p_double[0], point, a, b));
-	double dist3 = sqrt(getSquaredDistance(c->x.ptr.p_double[1], point, a, b));
-	double bla0 = c->x.ptr.p_double[0] * length;
-	double bla1 = c->x.ptr.p_double[1] * length;
-	double bla2 = c->x.ptr.p_double[2] * length;
+	double dist2 = sqrt(getSquaredDistance(start, point, a, b));
+	double dist3 = sqrt(getSquaredDistance(end, point, a, b));
 	return dist1;
 }
 
