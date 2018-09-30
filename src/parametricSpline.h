@@ -55,22 +55,6 @@ struct SplineDescription {
 	vector<double> coeff;
 };
 
-SplineDescription createSplineDescription(
-		alglib_impl::spline1dinterpolant &spline) {
-	ae_int_t n;
-	real_2d_array tbl;
-	xparams _xparams;
-	spline1dunpack2(spline, n, tbl, _xparams);
-	SplineDescription splineDescription;
-	splineDescription.start = tbl(0, 0);
-	splineDescription.end = tbl(0, 1);
-	splineDescription.coeff.push_back(tbl(0, 2));
-	splineDescription.coeff.push_back(tbl(0, 3));
-	splineDescription.coeff.push_back(tbl(0, 4));
-	splineDescription.coeff.push_back(tbl(0, 5));
-	return splineDescription;
-}
-
 class ParametricSpline {
 
 public:
@@ -85,9 +69,28 @@ public:
 private:
 	real_2d_array as_real_2d_array(const vector<Point> &points) const;
 	alglib_impl::pspline2interpolant* asImplPtr() const;
+	SplineDescription createSplineDescription(
+			alglib_impl::spline1dinterpolant &spline) const;
 
 	pspline2interpolant spline;
 };
+
+SplineDescription ParametricSpline::createSplineDescription(
+		alglib_impl::spline1dinterpolant &spline) const {
+
+	ae_int_t n;
+	real_2d_array tbl;
+	xparams _xparams;
+	spline1dunpack2(spline, n, tbl, _xparams);
+	SplineDescription splineDescription;
+	splineDescription.start = tbl(0, 0);
+	splineDescription.end = tbl(0, 1);
+	splineDescription.coeff.push_back(tbl(0, 2));
+	splineDescription.coeff.push_back(tbl(0, 3));
+	splineDescription.coeff.push_back(tbl(0, 4));
+	splineDescription.coeff.push_back(tbl(0, 5));
+	return splineDescription;
+}
 
 alglib_impl::pspline2interpolant* ParametricSpline::asImplPtr() const {
 	return const_cast<alglib_impl::pspline2interpolant*>(spline.c_ptr());
