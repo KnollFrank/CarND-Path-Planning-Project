@@ -200,17 +200,11 @@ struct SplineDescription {
 	vector<double> coeff;
 };
 
-double distance(const Point& point, const ParametricSpline& spline) {
-	vector<double> b(4);
-
-	const pspline2interpolant &p1 = spline.spline;
-	alglib_impl::pspline2interpolant* p =
-			const_cast<alglib_impl::pspline2interpolant*>(p1.c_ptr());
-
+SplineDescription createSplineDescription(alglib_impl::spline1dinterpolant &spline) {
 	ae_int_t n;
 	real_2d_array tbl;
 	xparams _xparams;
-	spline1dunpack2(p->x, n, tbl, _xparams);
+	spline1dunpack2(spline, n, tbl, _xparams);
 	SplineDescription splineDescription;
 	splineDescription.start = tbl(0, 0);
 	splineDescription.end = tbl(0, 1);
@@ -218,19 +212,22 @@ double distance(const Point& point, const ParametricSpline& spline) {
 	splineDescription.coeff.push_back(tbl(0, 3));
 	splineDescription.coeff.push_back(tbl(0, 4));
 	splineDescription.coeff.push_back(tbl(0, 5));
+	return splineDescription;
+}
 
-	spline1dunpack2(p->y, n, tbl, _xparams);
-	b[0] = tbl(0, 2);
-	b[1] = tbl(0, 3);
-	b[2] = tbl(0, 4);
-	b[3] = tbl(0, 5);
+double distance(const Point& point, const ParametricSpline& spline) {
+	const pspline2interpolant &p1 = spline.spline;
+	alglib_impl::pspline2interpolant* p =
+			const_cast<alglib_impl::pspline2interpolant*>(p1.c_ptr());
 
-	vector<double> distancePrime = getDistancePrimeCoeffs(point, splineDescription.coeff, b);
-	double length = spline.length();
-	double root = distancePrimeRoot(distancePrime, length);
-	double dist1 = sqrt(getSquaredDistance(root, point, splineDescription.coeff, b));
-	double dist2 = sqrt(getSquaredDistance(splineDescription.start, point, splineDescription.coeff, b));
-	double dist3 = sqrt(getSquaredDistance(splineDescription.end, point, splineDescription.coeff, b));
+	SplineDescription splineX = createSplineDescription(p->x);
+	SplineDescription splineY = createSplineDescription(p->y);
+
+	vector<double> distancePrime = getDistancePrimeCoeffs(point, splineX.coeff, splineY.coeff);
+	double root = distancePrimeRoot(distancePrime, spline.length());
+	double dist1 = sqrt(getSquaredDistance(root, point, splineX.coeff, splineY.coeff));
+	double dist2 = sqrt(getSquaredDistance(splineX.start, point, splineX.coeff, splineY.coeff));
+	double dist3 = sqrt(getSquaredDistance(splineX.end, point, splineX.coeff, splineY.coeff));
 	return dist1;
 }
 
