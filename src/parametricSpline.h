@@ -84,22 +84,23 @@ public:
 
 private:
 	real_2d_array as_real_2d_array(const vector<Point> &points) const;
+	alglib_impl::pspline2interpolant* asImplPtr() const;
 
 public:
 	// TODO: make private again
 	pspline2interpolant spline;
 };
 
+alglib_impl::pspline2interpolant* ParametricSpline::asImplPtr() const {
+	return const_cast<alglib_impl::pspline2interpolant*>(spline.c_ptr());
+}
+
 SplineDescription ParametricSpline::getXSplineDescription() const {
-	alglib_impl::pspline2interpolant* p =
-			const_cast<alglib_impl::pspline2interpolant*>(spline.c_ptr());
-	return createSplineDescription(p->x);
+	return createSplineDescription(asImplPtr()->x);
 }
 
 SplineDescription ParametricSpline::getYSplineDescription() const {
-	alglib_impl::pspline2interpolant* p =
-			const_cast<alglib_impl::pspline2interpolant*>(spline.c_ptr());
-	return createSplineDescription(p->y);
+	return createSplineDescription(asImplPtr()->y);
 }
 
 double ParametricSpline::length() const {
