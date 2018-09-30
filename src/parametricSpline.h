@@ -5,6 +5,7 @@
 #include "alglib/interpolation.h"
 #include "coords/cart.h"
 
+#include <boost/math/tools/polynomial.hpp>
 #include <boost/math/tools/roots.hpp>
 
 #include <boost/math/special_functions/next.hpp> // For float_distance.
@@ -16,6 +17,7 @@
 #include <limits>
 
 using namespace alglib;
+using namespace boost::math::tools;
 
 enum SplineType {
 	CatmullRom = 1, Cubic = 2
@@ -141,9 +143,8 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
 }
 
 double evaluatePoly(const vector<double>& coeff, double x) {
-	return coeff[0] + coeff[1] * x + coeff[2] * x * x + coeff[3] * x * x * x
-			+ coeff[4] * x * x * x * x + coeff[5] * x * x * x * x * x
-			+ coeff[6] * x * x * x * x * x * x;
+	polynomial<double> poly(coeff.begin(), coeff.end());
+	return poly.evaluate(x);
 }
 
 struct DistancePrimeFunctor {
