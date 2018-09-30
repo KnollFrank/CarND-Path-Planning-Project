@@ -150,8 +150,8 @@ vector<double> getDistancePrimeCoeffs(const Point& point,
   return distancePrime;
 }
 
-double getDistance(double t, const Point& point, const vector<double>& a,
-                   const vector<double>& b) {
+vector<double> getDistanceCoeffs(const Point& point, const vector<double>& a,
+                                    const vector<double>& b) {
   vector<double> d = polySquared(a);
   vector<double> e = polySquared(b);
   vector<double> distance(7);
@@ -163,7 +163,13 @@ double getDistance(double t, const Point& point, const vector<double>& a,
   distance[4] = d[4] + e[4];
   distance[5] = d[5] + e[5];
   distance[6] = d[6] + e[6];
-  return evaluatePoly(distance, t);
+  return distance;
+}
+
+double getDistance(double t, const Point& point, const vector<double>& a,
+                   const vector<double>& b) {
+  vector<double> distanceCoeffs = getDistanceCoeffs(point, a, b);
+  return evaluatePoly(distanceCoeffs, t);
 }
 
 double distance(const Point& point, const ParametricSpline& spline) {
