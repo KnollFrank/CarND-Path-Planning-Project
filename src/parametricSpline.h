@@ -139,6 +139,23 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
 			ParameterizationType::chordLength, spline);
 }
 
+polynomial<double> derivation(const polynomial<double>& poly) {
+	polynomial<double> polyPrime { {
+	//
+			poly[1],
+			//
+			2 * poly[2],
+			//
+			3 * poly[3],
+			//
+			4 * poly[4],
+			//
+			5 * poly[5],
+			//
+			6 * poly[6] } };
+	return polyPrime;
+}
+
 struct DistancePrimeFunctor {
 
 	DistancePrimeFunctor(const polynomial<double>& _poly) :
@@ -146,20 +163,8 @@ struct DistancePrimeFunctor {
 	}
 
 	std::pair<double, double> operator()(double x) {
-		polynomial<double> polyPrime { {
-		//
-				poly[1],
-				//
-				2 * poly[2],
-				//
-				3 * poly[3],
-				//
-				4 * poly[4],
-				//
-				5 * poly[5],
-				//
-				6 * poly[6] } };
-		return std::make_pair(poly.evaluate(x), polyPrime.evaluate(x));
+		// TODO: derivation(poly) im Konstruktor berechnen und in Instanzvariable speichern.
+		return std::make_pair(poly.evaluate(x), derivation(poly).evaluate(x));
 	}
 
 private:
