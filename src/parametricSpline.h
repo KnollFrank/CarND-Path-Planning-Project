@@ -189,29 +189,14 @@ double distancePrimeRoot(const polynomial<double>& distancePrime,
 	return result;
 }
 
-polynomial<double> getSquaredDistancePrimePoly(const Point& point,
-		const polynomial<double>& x, const polynomial<double>& y) {
-	polynomial<double> x2 = pow(x, 2);
-	polynomial<double> y2 = pow(y, 2);
-	polynomial<double> squaredDistancePrime { {
-	//
-			-2 * point.x * x[1] + x2[1] - 2 * point.y * y[1] + y2[1],
-			//
-			2 * (-2 * point.x * x[2] + x2[2] - 2 * point.y * y[2] + y2[2]),
-			//
-			3 * (-2 * point.x * x[3] + x2[3] - 2 * point.y * y[3] + y2[3]),
-			//
-			4 * (x2[4] + y2[4]),
-			//
-			5 * (x2[5] + y2[5]),
-			//
-			6 * (x2[6] + y2[6]) } };
-	return squaredDistancePrime;
-}
-
 polynomial<double> getSquaredDistancePoly(const Point& point,
 		const polynomial<double>& x, const polynomial<double>& y) {
 	return pow(point.x - x, 2) + pow(point.y - y, 2);
+}
+
+polynomial<double> getSquaredDistancePrimePoly(const Point& point,
+		const polynomial<double>& x, const polynomial<double>& y) {
+	return derivation(getSquaredDistancePoly(point, x, y));
 }
 
 double getSquaredDistance(double t, const Point& point,
