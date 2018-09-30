@@ -79,8 +79,8 @@ private:
 			const polynomial<double>& x, const polynomial<double>& y);
 	polynomial<double> getSquaredDistancePoly(const Point& point,
 			const polynomial<double>& x, const polynomial<double>& y);
-	double distancePrimeRoot(const polynomial<double>& distancePrime,
-			double length);
+	double squaredDistancePrimeRoot(
+			const polynomial<double>& squaredDistancePrime, double length);
 	SplineDescription getXSplineDescription() const;
 	SplineDescription getYSplineDescription() const;
 
@@ -174,8 +174,8 @@ private:
 	const polynomial<double>& poly;
 };
 
-double ParametricSpline::distancePrimeRoot(
-		const polynomial<double>& distancePrime, double length) {
+double ParametricSpline::squaredDistancePrimeRoot(
+		const polynomial<double>& squaredDistancePrime, double length) {
 	using namespace boost::math::tools;
 	// double guess = -distancePrimeCoeffs[0] / distancePrimeCoeffs[1];
 	double min = 0;
@@ -185,7 +185,7 @@ double ParametricSpline::distancePrimeRoot(
 	int get_digits = static_cast<int>(digits * 0.6);
 	const boost::uintmax_t maxit = 20;
 	boost::uintmax_t it = maxit;
-	DistancePrimeFunctor functor = DistancePrimeFunctor(distancePrime);
+	DistancePrimeFunctor functor = DistancePrimeFunctor(squaredDistancePrime);
 	double result = newton_raphson_iterate(functor, guess, min, max,
 			get_digits/*, it*/);
 	pair<double, double> tmp = functor(result);
@@ -212,9 +212,9 @@ double ParametricSpline::distanceTo(const Point& point) {
 	SplineDescription splineX = getXSplineDescription();
 	SplineDescription splineY = getYSplineDescription();
 
-	polynomial<double> distancePrime = getSquaredDistancePrimePoly(point,
+	polynomial<double> squaredDistancePrime = getSquaredDistancePrimePoly(point,
 			splineX.poly, splineY.poly);
-	double root = distancePrimeRoot(distancePrime, length());
+	double root = squaredDistancePrimeRoot(squaredDistancePrime, length());
 	double dist1 = sqrt(
 			getSquaredDistance(root, point, splineX.poly, splineY.poly));
 	double dist2 = sqrt(
