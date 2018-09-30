@@ -25,6 +25,52 @@ enum ParameterizationType {
 	uniform = 0, chordLength = 1, centripetal = 2
 };
 
+void spline1dunpack2(alglib_impl::spline1dinterpolant &c, ae_int_t &n,
+		real_2d_array &tbl, const xparams _xparams) {
+	jmp_buf _break_jump;
+	alglib_impl::ae_state _alglib_env_state;
+	alglib_impl::ae_state_init(&_alglib_env_state);
+	if (setjmp(_break_jump)) {
+#if !defined(AE_NO_EXCEPTIONS)
+		_ALGLIB_CPP_EXCEPTION(_alglib_env_state.error_msg);
+#else
+		_ALGLIB_SET_ERROR_FLAG(_alglib_env_state.error_msg);
+		return;
+#endif
+	}
+	ae_state_set_break_jump(&_alglib_env_state, &_break_jump);
+	if (_xparams.flags != 0x0)
+		ae_state_set_flags(&_alglib_env_state, _xparams.flags);
+	alglib_impl::spline1dunpack(&c, &n,
+			const_cast<alglib_impl::ae_matrix*>(tbl.c_ptr()),
+			&_alglib_env_state);
+	alglib_impl::ae_state_clear(&_alglib_env_state);
+	return;
+}
+
+struct SplineDescription {
+
+	double start;
+	double end;
+	vector<double> coeff;
+};
+
+SplineDescription createSplineDescription(
+		alglib_impl::spline1dinterpolant &spline) {
+	ae_int_t n;
+	real_2d_array tbl;
+	xparams _xparams;
+	spline1dunpack2(spline, n, tbl, _xparams);
+	SplineDescription splineDescription;
+	splineDescription.start = tbl(0, 0);
+	splineDescription.end = tbl(0, 1);
+	splineDescription.coeff.push_back(tbl(0, 2));
+	splineDescription.coeff.push_back(tbl(0, 3));
+	splineDescription.coeff.push_back(tbl(0, 4));
+	splineDescription.coeff.push_back(tbl(0, 5));
+	return splineDescription;
+}
+
 class ParametricSpline {
 
 public:
@@ -33,6 +79,8 @@ public:
 	Point operator()(double t) const;
 	Point getTangent(double t) const;
 	double length() const;
+	SplineDescription getXSplineDescription() const;
+	SplineDescription getYSplineDescription() const;
 
 private:
 	real_2d_array as_real_2d_array(const vector<Point> &points) const;
@@ -41,6 +89,18 @@ public:
 	// TODO: make private again
 	pspline2interpolant spline;
 };
+
+SplineDescription ParametricSpline::getXSplineDescription() const {
+	alglib_impl::pspline2interpolant* p =
+			const_cast<alglib_impl::pspline2interpolant*>(spline.c_ptr());
+	return createSplineDescription(p->x);
+}
+
+SplineDescription ParametricSpline::getYSplineDescription() const {
+	alglib_impl::pspline2interpolant* p =
+			const_cast<alglib_impl::pspline2interpolant*>(spline.c_ptr());
+	return createSplineDescription(p->y);
+}
 
 double ParametricSpline::length() const {
 	return pspline2arclength(spline, 0, 1);
@@ -170,64 +230,21 @@ double getSquaredDistance(double t, const Point& point, const vector<double>& a,
 	return evaluatePoly(distanceCoeffs, t);
 }
 
-void spline1dunpack2(alglib_impl::spline1dinterpolant &c, ae_int_t &n,
-		real_2d_array &tbl, const xparams _xparams) {
-	jmp_buf _break_jump;
-	alglib_impl::ae_state _alglib_env_state;
-	alglib_impl::ae_state_init(&_alglib_env_state);
-	if (setjmp(_break_jump)) {
-#if !defined(AE_NO_EXCEPTIONS)
-		_ALGLIB_CPP_EXCEPTION(_alglib_env_state.error_msg);
-#else
-		_ALGLIB_SET_ERROR_FLAG(_alglib_env_state.error_msg);
-		return;
-#endif
-	}
-	ae_state_set_break_jump(&_alglib_env_state, &_break_jump);
-	if (_xparams.flags != 0x0)
-		ae_state_set_flags(&_alglib_env_state, _xparams.flags);
-	alglib_impl::spline1dunpack(&c, &n,
-			const_cast<alglib_impl::ae_matrix*>(tbl.c_ptr()),
-			&_alglib_env_state);
-	alglib_impl::ae_state_clear(&_alglib_env_state);
-	return;
-}
-
-struct SplineDescription {
-
-	double start;
-	double end;
-	vector<double> coeff;
-};
-
-SplineDescription createSplineDescription(alglib_impl::spline1dinterpolant &spline) {
-	ae_int_t n;
-	real_2d_array tbl;
-	xparams _xparams;
-	spline1dunpack2(spline, n, tbl, _xparams);
-	SplineDescription splineDescription;
-	splineDescription.start = tbl(0, 0);
-	splineDescription.end = tbl(0, 1);
-	splineDescription.coeff.push_back(tbl(0, 2));
-	splineDescription.coeff.push_back(tbl(0, 3));
-	splineDescription.coeff.push_back(tbl(0, 4));
-	splineDescription.coeff.push_back(tbl(0, 5));
-	return splineDescription;
-}
-
 double distance(const Point& point, const ParametricSpline& spline) {
-	const pspline2interpolant &p1 = spline.spline;
-	alglib_impl::pspline2interpolant* p =
-			const_cast<alglib_impl::pspline2interpolant*>(p1.c_ptr());
+	SplineDescription splineX = spline.getXSplineDescription();
+	SplineDescription splineY = spline.getYSplineDescription();
 
-	SplineDescription splineX = createSplineDescription(p->x);
-	SplineDescription splineY = createSplineDescription(p->y);
-
-	vector<double> distancePrime = getDistancePrimeCoeffs(point, splineX.coeff, splineY.coeff);
+	vector<double> distancePrime = getDistancePrimeCoeffs(point, splineX.coeff,
+			splineY.coeff);
 	double root = distancePrimeRoot(distancePrime, spline.length());
-	double dist1 = sqrt(getSquaredDistance(root, point, splineX.coeff, splineY.coeff));
-	double dist2 = sqrt(getSquaredDistance(splineX.start, point, splineX.coeff, splineY.coeff));
-	double dist3 = sqrt(getSquaredDistance(splineX.end, point, splineX.coeff, splineY.coeff));
+	double dist1 = sqrt(
+			getSquaredDistance(root, point, splineX.coeff, splineY.coeff));
+	double dist2 = sqrt(
+			getSquaredDistance(splineX.start, point, splineX.coeff,
+					splineY.coeff));
+	double dist3 = sqrt(
+			getSquaredDistance(splineX.end, point, splineX.coeff,
+					splineY.coeff));
 	return dist1;
 }
 
