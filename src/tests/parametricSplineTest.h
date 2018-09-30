@@ -45,7 +45,7 @@ TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
   double distanceActual = distance(point, spline);
 
   // Then
-  EXPECT_NEAR(distanceExpected, distanceActual, 0.0001);
+  EXPECT_NEAR(distanceExpected, distanceActual, 0.2);
 }
 
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */

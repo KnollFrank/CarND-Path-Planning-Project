@@ -110,7 +110,7 @@ double distancePrimeRoot(const vector<double>& distancePrimeCoeffs,
   // double guess = -distancePrimeCoeffs[0] / distancePrimeCoeffs[1];
   double min = 0;
   double max = 30.0 / length;
-  double guess = 10.0 / length;
+  double guess = 11.0 / length;
   const int digits = std::numeric_limits<double>::digits;
   int get_digits = static_cast<int>(digits * 0.6);
   const boost::uintmax_t maxit = 20;
