@@ -55,7 +55,13 @@ struct SplineDescription {
 	double start;
 	double end;
 	polynomial<double> poly;
+
+	double operator()(double x) const;
 };
+
+double SplineDescription::operator()(double x) const {
+	return poly.evaluate(x - start);
+}
 
 class ParametricSpline {
 
@@ -66,21 +72,21 @@ public:
 	Point getTangent(double t) const;
 	double length() const;
 	double distanceTo(const Point& point);
-	static polynomial<double> derivation(const polynomial<double>& poly);
+	static SplineDescription derivation(const SplineDescription& poly);
 
 private:
 	real_2d_array as_real_2d_array(const vector<Point> &points) const;
 	alglib_impl::pspline2interpolant* asImplPtr() const;
 	SplineDescription createSplineDescription(
 			alglib_impl::spline1dinterpolant &spline) const;
-	polynomial<double> getSquaredDistancePrimePoly(const Point& point,
-			const polynomial<double>& x, const polynomial<double>& y);
+	SplineDescription getSquaredDistancePrimePoly(const Point& point,
+			const SplineDescription& x, const SplineDescription& y);
 	double getSquaredDistance(double t, const Point& point,
-			const polynomial<double>& x, const polynomial<double>& y);
-	polynomial<double> getSquaredDistancePoly(const Point& point,
-			const polynomial<double>& x, const polynomial<double>& y);
+			const SplineDescription& x, const SplineDescription& y);
+	SplineDescription getSquaredDistancePoly(const Point& point,
+			const SplineDescription& x, const SplineDescription& y);
 	double squaredDistancePrimeRoot(
-			const polynomial<double>& squaredDistancePrime, double length);
+			const SplineDescription& squaredDistancePrime, double length);
 	SplineDescription getXSplineDescription() const;
 	SplineDescription getYSplineDescription() const;
 
@@ -149,35 +155,41 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
 			ParameterizationType::chordLength, spline);
 }
 
-polynomial<double> ParametricSpline::derivation(
-		const polynomial<double>& poly) {
+SplineDescription ParametricSpline::derivation(const SplineDescription& poly) {
 	vector<double> coeffs;
-	for (int i = 1; i <= poly.degree(); i++) {
-		coeffs.push_back(i * poly[i]);
+	for (int i = 1; i <= poly.poly.degree(); i++) {
+		coeffs.push_back(i * poly.poly[i]);
 	}
 	polynomial<double> deriv(coeffs.begin(), coeffs.end());
-	return deriv;
+	// TODO: introduce constructor
+	SplineDescription result;
+	result.start = poly.start;
+	result.end = poly.end;
+	result.poly = deriv;
+	return result;
 }
 
 struct DistancePrimeFunctor {
 
-	DistancePrimeFunctor(const polynomial<double>& _poly) :
+	DistancePrimeFunctor(const SplineDescription& _poly) :
 			poly(_poly) {
 	}
 
 	std::pair<double, double> operator()(double x) {
-		return std::make_pair(poly.evaluate(x),
-				ParametricSpline::derivation(poly).evaluate(x));
+		return std::make_pair(poly(x), ParametricSpline::derivation(poly)(x));
 	}
 
 private:
-	const polynomial<double>& poly;
+	const SplineDescription& poly;
 };
 
 double ParametricSpline::squaredDistancePrimeRoot(
-		const polynomial<double>& squaredDistancePrime, double length) {
+		const SplineDescription& squaredDistancePrime, double length) {
 	using namespace boost::math::tools;
-	// double guess = -distancePrimeCoeffs[0] / distancePrimeCoeffs[1];
+	// double guess = -squaredDistancePrime[0] / squaredDistancePrime[1];
+//	double min = 120.0 / length;
+//	double max = 150.0 / length;
+//	double guess = 124.0 / length;
 	double min = 0;
 	double max = 30.0 / length;
 	double guess = 25.0 / length;
@@ -192,36 +204,42 @@ double ParametricSpline::squaredDistancePrimeRoot(
 	return result;
 }
 
-polynomial<double> ParametricSpline::getSquaredDistancePoly(const Point& point,
-		const polynomial<double>& x, const polynomial<double>& y) {
-	return pow(point.x - x, 2) + pow(point.y - y, 2);
+SplineDescription ParametricSpline::getSquaredDistancePoly(const Point& point,
+		const SplineDescription& x, const SplineDescription& y) {
+	SplineDescription result;
+	result.start = x.start;
+	result.end = x.end;
+	result.poly = pow(point.x - x.poly, 2) + pow(point.y - y.poly, 2);
+	return result;
 }
 
-polynomial<double> ParametricSpline::getSquaredDistancePrimePoly(
-		const Point& point, const polynomial<double>& x,
-		const polynomial<double>& y) {
+SplineDescription ParametricSpline::getSquaredDistancePrimePoly(
+		const Point& point, const SplineDescription& x,
+		const SplineDescription& y) {
 	return derivation(getSquaredDistancePoly(point, x, y));
 }
 
+// TODO: const SplineDescription& x und const SplineDescription& y zu struct oder class ParametricSplineDescription zusammenfassen.
 double ParametricSpline::getSquaredDistance(double t, const Point& point,
-		const polynomial<double>& x, const polynomial<double>& y) {
-	return getSquaredDistancePoly(point, x, y).evaluate(t);
+		const SplineDescription& x, const SplineDescription& y) {
+	return getSquaredDistancePoly(point, x, y)(t);
 }
 
 double ParametricSpline::distanceTo(const Point& point) {
 	SplineDescription splineX = getXSplineDescription();
 	SplineDescription splineY = getYSplineDescription();
 
-	polynomial<double> squaredDistancePrime = getSquaredDistancePrimePoly(point,
-			splineX.poly, splineY.poly);
+	SplineDescription squaredDistancePrime = getSquaredDistancePrimePoly(point,
+			splineX, splineY);
 	double root = squaredDistancePrimeRoot(squaredDistancePrime, length());
-	double dist1 = sqrt(
-			getSquaredDistance(root, point, splineX.poly, splineY.poly));
+	if (splineX.start < root && root < splineX.end) {
+		cout << "Juhu;" << endl;
+	}
+	double dist1 = sqrt(getSquaredDistance(root, point, splineX, splineY));
 	double dist2 = sqrt(
-			getSquaredDistance(splineX.start, point, splineX.poly,
-					splineY.poly));
+			getSquaredDistance(splineX.start, point, splineX, splineY));
 	double dist3 = sqrt(
-			getSquaredDistance(splineX.end, point, splineX.poly, splineY.poly));
+			getSquaredDistance(splineX.end, point, splineX, splineY));
 	return dist1;
 }
 
