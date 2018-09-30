@@ -54,7 +54,7 @@ struct SplineDescription {
 
 	double start;
 	double end;
-	vector<double> coeff;
+	polynomial<double> poly;
 };
 
 class ParametricSpline {
@@ -87,10 +87,7 @@ SplineDescription ParametricSpline::createSplineDescription(
 	SplineDescription splineDescription;
 	splineDescription.start = tbl(0, 0);
 	splineDescription.end = tbl(0, 1);
-	splineDescription.coeff.push_back(tbl(0, 2));
-	splineDescription.coeff.push_back(tbl(0, 3));
-	splineDescription.coeff.push_back(tbl(0, 4));
-	splineDescription.coeff.push_back(tbl(0, 5));
+	splineDescription.poly = { {tbl(0, 2), tbl(0, 3), tbl(0, 4), tbl(0, 5)}};
 	return splineDescription;
 }
 
@@ -142,111 +139,102 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
 			ParameterizationType::chordLength, spline);
 }
 
-double evaluatePoly(const vector<double>& coeff, double x) {
-	polynomial<double> poly(coeff.begin(), coeff.end());
-	return poly.evaluate(x);
-}
-
 struct DistancePrimeFunctor {
 
-	DistancePrimeFunctor(const vector<double>& distancePrimeCoeffs) :
-			a(distancePrimeCoeffs) {
+	DistancePrimeFunctor(const polynomial<double>& _poly) :
+			poly(_poly) {
 	}
 
 	std::pair<double, double> operator()(double x) {
-		double fx = evaluatePoly(a, x);
-		polynomial<double> polyPrime{{a[1], 2 * a[2], 3 * a[3], 4 * a[4], 5 * a[5], 6 * a[6]}};
-		double dx = polyPrime.evaluate(x);
-		return std::make_pair(fx, dx);
+		polynomial<double> polyPrime { { poly[1], 2 * poly[2], 3 * poly[3], 4
+				* poly[4], 5 * poly[5], 6 * poly[6] } };
+		return std::make_pair(poly.evaluate(x), polyPrime.evaluate(x));
 	}
 
 private:
-	const vector<double>& a;
+	const polynomial<double>& poly;
 };
 
-double distancePrimeRoot(const vector<double>& distancePrimeCoeffs,
+double distancePrimeRoot(const polynomial<double>& distancePrime,
 		double length) {
 	using namespace boost::math::tools;
 	// double guess = -distancePrimeCoeffs[0] / distancePrimeCoeffs[1];
 	double min = 0;
 	double max = 30.0 / length;
-	double guess = 11.0 / length;
+	double guess = 15.0 / length;
 	const int digits = std::numeric_limits<double>::digits;
 	int get_digits = static_cast<int>(digits * 0.6);
 	const boost::uintmax_t maxit = 20;
 	boost::uintmax_t it = maxit;
-	DistancePrimeFunctor functor = DistancePrimeFunctor(distancePrimeCoeffs);
+	DistancePrimeFunctor functor = DistancePrimeFunctor(distancePrime);
 	double result = newton_raphson_iterate(functor, guess, min, max,
 			get_digits/*, it*/);
 	pair<double, double> tmp = functor(result);
 	return result;
 }
 
-vector<double> polySquared(const vector<double>& a) {
-	vector<double> d(7);
-	d[0] = a[0] * a[0];
-	d[1] = 2 * a[1] * a[0];
-	d[2] = 2 * a[2] * a[0] + a[1] * a[1];
-	d[3] = 2 * a[3] * a[0] + 2 * a[2] * a[1];
-	d[4] = 2 * a[3] * a[1] + a[2] * a[2];
-	d[5] = 2 * a[3] * a[2];
-	d[6] = a[3] * a[3];
-	return d;
-}
-
-vector<double> getDistancePrimeCoeffs(const Point& point,
-		const vector<double>& a, const vector<double>& b) {
-	vector<double> d = polySquared(a);
-	vector<double> e = polySquared(b);
-	vector<double> distancePrime(6);
-	distancePrime[0] = -2 * point.x * a[1] + d[1] - 2 * point.y * b[1] + e[1];
-	distancePrime[1] = 2
-			* (-2 * point.x * a[2] + d[2] - 2 * point.y * b[2] + e[2]);
-	distancePrime[2] = 3
-			* (-2 * point.x * a[3] + d[3] - 2 * point.y * b[3] + e[3]);
-	distancePrime[3] = 4 * (d[4] + e[4]);
-	distancePrime[4] = 5 * (d[5] + e[5]);
-	distancePrime[5] = 6 * (d[6] + e[6]);
+polynomial<double> getDistancePrimePoly(const Point& point,
+		const polynomial<double>& a, const polynomial<double>& b) {
+	polynomial<double> d = pow(a, 2);
+	polynomial<double> e = pow(b, 2);
+	polynomial<double> distancePrime { {
+	//
+			-2 * point.x * a[1] + d[1] - 2 * point.y * b[1] + e[1],
+			//
+			2 * (-2 * point.x * a[2] + d[2] - 2 * point.y * b[2] + e[2]),
+			//
+			3 * (-2 * point.x * a[3] + d[3] - 2 * point.y * b[3] + e[3]),
+			//
+			4 * (d[4] + e[4]),
+			//
+			5 * (d[5] + e[5]),
+			//
+			6 * (d[6] + e[6]) } };
 	return distancePrime;
 }
 
-vector<double> getDistanceCoeffs(const Point& point, const vector<double>& a,
-		const vector<double>& b) {
-	vector<double> d = polySquared(a);
-	vector<double> e = polySquared(b);
-	vector<double> distance(7);
-	distance[0] = point.x * point.x + point.y * point.y - 2 * point.x * a[0]
-			+ d[0] - 2 * point.y * b[0] + e[0];
-	distance[1] = -2 * point.x * a[1] + d[1] - 2 * point.y * b[1] + e[1];
-	distance[2] = -2 * point.x * a[2] + d[2] - 2 * point.y * b[2] + e[2];
-	distance[3] = -2 * point.x * a[3] + d[3] - 2 * point.y * b[3] + e[3];
-	distance[4] = d[4] + e[4];
-	distance[5] = d[5] + e[5];
-	distance[6] = d[6] + e[6];
+polynomial<double> getDistancePoly(const Point& point,
+		const polynomial<double>& a, const polynomial<double>& b) {
+	polynomial<double> d = pow(a, 2);
+	polynomial<double> e = pow(b, 2);
+	polynomial<double> distance(
+			{ { point.x * point.x + point.y * point.y - 2 * point.x * a[0]
+					+ d[0] - 2 * point.y * b[0] + e[0],
+			//
+					-2 * point.x * a[1] + d[1] - 2 * point.y * b[1] + e[1],
+					//
+					-2 * point.x * a[2] + d[2] - 2 * point.y * b[2] + e[2],
+					//
+					-2 * point.x * a[3] + d[3] - 2 * point.y * b[3] + e[3],
+					//
+					d[4] + e[4],
+					//
+					d[5] + e[5],
+					//
+					d[6] + e[6] } });
 	return distance;
 }
 
-double getSquaredDistance(double t, const Point& point, const vector<double>& a,
-		const vector<double>& b) {
-	vector<double> distanceCoeffs = getDistanceCoeffs(point, a, b);
-	return evaluatePoly(distanceCoeffs, t);
+double getSquaredDistance(double t, const Point& point,
+		const polynomial<double>& a, const polynomial<double>& b) {
+	polynomial<double> distanceCoeffs = getDistancePoly(point, a, b);
+	return distanceCoeffs.evaluate(t);
 }
 
 double distance(const Point& point, const ParametricSpline& spline) {
 	SplineDescription splineX = spline.getXSplineDescription();
 	SplineDescription splineY = spline.getYSplineDescription();
 
-	vector<double> distancePrime = getDistancePrimeCoeffs(point, splineX.coeff,
-			splineY.coeff);
+	polynomial<double> distancePrime = getDistancePrimePoly(point, splineX.poly,
+			splineY.poly);
 	double root = distancePrimeRoot(distancePrime, spline.length());
 	double dist1 = sqrt(
-			getSquaredDistance(root, point, splineX.coeff, splineY.coeff));
+			getSquaredDistance(root, point, splineX.poly, splineY.poly));
 	double dist2 = sqrt(
-			getSquaredDistance(splineX.start, point, splineX.coeff,
-					splineY.coeff));
+			getSquaredDistance(splineX.start, point, splineX.poly,
+					splineY.poly));
 	double dist3 = sqrt(
-			getSquaredDistance(splineX.end, point, splineX.coeff,
-					splineY.coeff));
+			getSquaredDistance(splineX.end, point, splineX.poly, splineY.poly));
 	return dist1;
 }
 
