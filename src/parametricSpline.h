@@ -146,8 +146,19 @@ struct DistancePrimeFunctor {
 	}
 
 	std::pair<double, double> operator()(double x) {
-		polynomial<double> polyPrime { { poly[1], 2 * poly[2], 3 * poly[3], 4
-				* poly[4], 5 * poly[5], 6 * poly[6] } };
+		polynomial<double> polyPrime { {
+		//
+				poly[1],
+				//
+				2 * poly[2],
+				//
+				3 * poly[3],
+				//
+				4 * poly[4],
+				//
+				5 * poly[5],
+				//
+				6 * poly[6] } };
 		return std::make_pair(poly.evaluate(x), polyPrime.evaluate(x));
 	}
 
@@ -173,60 +184,60 @@ double distancePrimeRoot(const polynomial<double>& distancePrime,
 	return result;
 }
 
-polynomial<double> getDistancePrimePoly(const Point& point,
-		const polynomial<double>& a, const polynomial<double>& b) {
-	polynomial<double> d = pow(a, 2);
-	polynomial<double> e = pow(b, 2);
-	polynomial<double> distancePrime { {
+polynomial<double> getSquaredDistancePrimePoly(const Point& point,
+		const polynomial<double>& x, const polynomial<double>& y) {
+	polynomial<double> x2 = pow(x, 2);
+	polynomial<double> y2 = pow(y, 2);
+	polynomial<double> squaredDistancePrime { {
 	//
-			-2 * point.x * a[1] + d[1] - 2 * point.y * b[1] + e[1],
+			-2 * point.x * x[1] + x2[1] - 2 * point.y * y[1] + y2[1],
 			//
-			2 * (-2 * point.x * a[2] + d[2] - 2 * point.y * b[2] + e[2]),
+			2 * (-2 * point.x * x[2] + x2[2] - 2 * point.y * y[2] + y2[2]),
 			//
-			3 * (-2 * point.x * a[3] + d[3] - 2 * point.y * b[3] + e[3]),
+			3 * (-2 * point.x * x[3] + x2[3] - 2 * point.y * y[3] + y2[3]),
 			//
-			4 * (d[4] + e[4]),
+			4 * (x2[4] + y2[4]),
 			//
-			5 * (d[5] + e[5]),
+			5 * (x2[5] + y2[5]),
 			//
-			6 * (d[6] + e[6]) } };
-	return distancePrime;
+			6 * (x2[6] + y2[6]) } };
+	return squaredDistancePrime;
 }
 
-polynomial<double> getDistancePoly(const Point& point,
-		const polynomial<double>& a, const polynomial<double>& b) {
-	polynomial<double> d = pow(a, 2);
-	polynomial<double> e = pow(b, 2);
+polynomial<double> getSquaredDistancePoly(const Point& point,
+		const polynomial<double>& x, const polynomial<double>& y) {
+
+	polynomial<double> x2 = pow(x, 2);
+	polynomial<double> y2 = pow(y, 2);
 	polynomial<double> distance(
-			{ { point.x * point.x + point.y * point.y - 2 * point.x * a[0]
-					+ d[0] - 2 * point.y * b[0] + e[0],
+			{ { point.x * point.x + point.y * point.y - 2 * point.x * x[0]
+					+ x2[0] - 2 * point.y * y[0] + y2[0],
 			//
-					-2 * point.x * a[1] + d[1] - 2 * point.y * b[1] + e[1],
+					-2 * point.x * x[1] + x2[1] - 2 * point.y * y[1] + y2[1],
 					//
-					-2 * point.x * a[2] + d[2] - 2 * point.y * b[2] + e[2],
+					-2 * point.x * x[2] + x2[2] - 2 * point.y * y[2] + y2[2],
 					//
-					-2 * point.x * a[3] + d[3] - 2 * point.y * b[3] + e[3],
+					-2 * point.x * x[3] + x2[3] - 2 * point.y * y[3] + y2[3],
 					//
-					d[4] + e[4],
+					x2[4] + y2[4],
 					//
-					d[5] + e[5],
+					x2[5] + y2[5],
 					//
-					d[6] + e[6] } });
+					x2[6] + y2[6] } });
 	return distance;
 }
 
 double getSquaredDistance(double t, const Point& point,
-		const polynomial<double>& a, const polynomial<double>& b) {
-	polynomial<double> distanceCoeffs = getDistancePoly(point, a, b);
-	return distanceCoeffs.evaluate(t);
+		const polynomial<double>& x, const polynomial<double>& y) {
+	return getSquaredDistancePoly(point, x, y).evaluate(t);
 }
 
 double distance(const Point& point, const ParametricSpline& spline) {
 	SplineDescription splineX = spline.getXSplineDescription();
 	SplineDescription splineY = spline.getYSplineDescription();
 
-	polynomial<double> distancePrime = getDistancePrimePoly(point, splineX.poly,
-			splineY.poly);
+	polynomial<double> distancePrime = getSquaredDistancePrimePoly(point,
+			splineX.poly, splineY.poly);
 	double root = distancePrimeRoot(distancePrime, spline.length());
 	double dist1 = sqrt(
 			getSquaredDistance(root, point, splineX.poly, splineY.poly));
