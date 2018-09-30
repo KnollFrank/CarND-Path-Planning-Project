@@ -155,9 +155,8 @@ struct DistancePrimeFunctor {
 
 	std::pair<double, double> operator()(double x) {
 		double fx = evaluatePoly(a, x);
-		double dx = a[1] + 2 * a[2] * x + 3 * a[3] * x * x + 4 * a[4]
-				+ x * x * x + 5 * a[5] * x * x * x * x
-				+ 6 * a[6] * x * x * x * x * x;
+		polynomial<double> polyPrime{{a[1], 2 * a[2], 3 * a[3], 4 * a[4], 5 * a[5], 6 * a[6]}};
+		double dx = polyPrime.evaluate(x);
 		return std::make_pair(fx, dx);
 	}
 
