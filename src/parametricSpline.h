@@ -65,6 +65,8 @@ public:
 	Point operator()(double t) const;
 	Point getTangent(double t) const;
 	double length() const;
+	double distanceTo(const Point& point);
+	// TODO: make private:
 	SplineDescription getXSplineDescription() const;
 	SplineDescription getYSplineDescription() const;
 
@@ -195,13 +197,13 @@ double getSquaredDistance(double t, const Point& point,
 	return getSquaredDistancePoly(point, x, y).evaluate(t);
 }
 
-double distance(const Point& point, const ParametricSpline& spline) {
-	SplineDescription splineX = spline.getXSplineDescription();
-	SplineDescription splineY = spline.getYSplineDescription();
+double ParametricSpline::distanceTo(const Point& point) {
+	SplineDescription splineX = getXSplineDescription();
+	SplineDescription splineY = getYSplineDescription();
 
 	polynomial<double> distancePrime = getSquaredDistancePrimePoly(point,
 			splineX.poly, splineY.poly);
-	double root = distancePrimeRoot(distancePrime, spline.length());
+	double root = distancePrimeRoot(distancePrime, length());
 	double dist1 = sqrt(
 			getSquaredDistance(root, point, splineX.poly, splineY.poly));
 	double dist2 = sqrt(

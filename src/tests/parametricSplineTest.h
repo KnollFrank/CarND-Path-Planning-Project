@@ -42,10 +42,26 @@ TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
   Point point = coordsConverter.getXY(Frenet { 10, distanceExpected });
 
   // When
-  double distanceActual = distance(point, spline);
+  double distanceActual = spline.distanceTo(point);
 
   // Then
-  EXPECT_NEAR(distanceExpected, distanceActual, 0.2);
+  EXPECT_NEAR(distanceExpected, distanceActual, 0.001);
+}
+
+TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline2) {
+  // Given
+  MapWaypoints mapWaypoints = MapWaypoints::load();
+  CoordsConverter coordsConverter(mapWaypoints);
+
+  ParametricSpline spline(mapWaypoints.map_waypoints);
+  double distanceExpected = 5;
+  Point point = coordsConverter.getXY(Frenet { 50, distanceExpected });
+
+  // When
+  double distanceActual = spline.distanceTo(point);
+
+  // Then
+  EXPECT_NEAR(distanceExpected, distanceActual, 0.001);
 }
 
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */
