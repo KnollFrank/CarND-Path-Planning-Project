@@ -155,7 +155,6 @@ struct DistancePrimeFunctor {
 	}
 
 	std::pair<double, double> operator()(double x) {
-		// TODO: derivation(poly) im Konstruktor berechnen und in Instanzvariable speichern.
 		return std::make_pair(poly.evaluate(x), derivation(poly).evaluate(x));
 	}
 
