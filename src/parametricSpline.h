@@ -66,15 +66,23 @@ public:
 	Point getTangent(double t) const;
 	double length() const;
 	double distanceTo(const Point& point);
-	// TODO: make private:
-	SplineDescription getXSplineDescription() const;
-	SplineDescription getYSplineDescription() const;
+	static polynomial<double> derivation(const polynomial<double>& poly);
 
 private:
 	real_2d_array as_real_2d_array(const vector<Point> &points) const;
 	alglib_impl::pspline2interpolant* asImplPtr() const;
 	SplineDescription createSplineDescription(
 			alglib_impl::spline1dinterpolant &spline) const;
+	polynomial<double> getSquaredDistancePrimePoly(const Point& point,
+			const polynomial<double>& x, const polynomial<double>& y);
+	double getSquaredDistance(double t, const Point& point,
+			const polynomial<double>& x, const polynomial<double>& y);
+	polynomial<double> getSquaredDistancePoly(const Point& point,
+			const polynomial<double>& x, const polynomial<double>& y);
+	double distancePrimeRoot(const polynomial<double>& distancePrime,
+			double length);
+	SplineDescription getXSplineDescription() const;
+	SplineDescription getYSplineDescription() const;
 
 	pspline2interpolant spline;
 };
@@ -141,7 +149,8 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
 			ParameterizationType::chordLength, spline);
 }
 
-polynomial<double> derivation(const polynomial<double>& poly) {
+polynomial<double> ParametricSpline::derivation(
+		const polynomial<double>& poly) {
 	vector<double> coeffs;
 	for (int i = 1; i <= poly.degree(); i++) {
 		coeffs.push_back(i * poly[i]);
@@ -157,15 +166,16 @@ struct DistancePrimeFunctor {
 	}
 
 	std::pair<double, double> operator()(double x) {
-		return std::make_pair(poly.evaluate(x), derivation(poly).evaluate(x));
+		return std::make_pair(poly.evaluate(x),
+				ParametricSpline::derivation(poly).evaluate(x));
 	}
 
 private:
 	const polynomial<double>& poly;
 };
 
-double distancePrimeRoot(const polynomial<double>& distancePrime,
-		double length) {
+double ParametricSpline::distancePrimeRoot(
+		const polynomial<double>& distancePrime, double length) {
 	using namespace boost::math::tools;
 	// double guess = -distancePrimeCoeffs[0] / distancePrimeCoeffs[1];
 	double min = 0;
@@ -182,17 +192,18 @@ double distancePrimeRoot(const polynomial<double>& distancePrime,
 	return result;
 }
 
-polynomial<double> getSquaredDistancePoly(const Point& point,
+polynomial<double> ParametricSpline::getSquaredDistancePoly(const Point& point,
 		const polynomial<double>& x, const polynomial<double>& y) {
 	return pow(point.x - x, 2) + pow(point.y - y, 2);
 }
 
-polynomial<double> getSquaredDistancePrimePoly(const Point& point,
-		const polynomial<double>& x, const polynomial<double>& y) {
+polynomial<double> ParametricSpline::getSquaredDistancePrimePoly(
+		const Point& point, const polynomial<double>& x,
+		const polynomial<double>& y) {
 	return derivation(getSquaredDistancePoly(point, x, y));
 }
 
-double getSquaredDistance(double t, const Point& point,
+double ParametricSpline::getSquaredDistance(double t, const Point& point,
 		const polynomial<double>& x, const polynomial<double>& y) {
 	return getSquaredDistancePoly(point, x, y).evaluate(t);
 }
