@@ -193,23 +193,31 @@ void spline1dunpack2(alglib_impl::spline1dinterpolant &c, ae_int_t &n,
 	return;
 }
 
+struct SplineDescription {
+
+	double start;
+	double end;
+	vector<double> coeff;
+};
+
 double distance(const Point& point, const ParametricSpline& spline) {
-	vector<double> a(4);
 	vector<double> b(4);
 
 	const pspline2interpolant &p1 = spline.spline;
 	alglib_impl::pspline2interpolant* p =
 			const_cast<alglib_impl::pspline2interpolant*>(p1.c_ptr());
+
 	ae_int_t n;
 	real_2d_array tbl;
 	xparams _xparams;
 	spline1dunpack2(p->x, n, tbl, _xparams);
-	double start = tbl(0, 0);
-	double end = tbl(0, 1);
-	a[0] = tbl(0, 2);
-	a[1] = tbl(0, 3);
-	a[2] = tbl(0, 4);
-	a[3] = tbl(0, 5);
+	SplineDescription splineDescription;
+	splineDescription.start = tbl(0, 0);
+	splineDescription.end = tbl(0, 1);
+	splineDescription.coeff.push_back(tbl(0, 2));
+	splineDescription.coeff.push_back(tbl(0, 3));
+	splineDescription.coeff.push_back(tbl(0, 4));
+	splineDescription.coeff.push_back(tbl(0, 5));
 
 	spline1dunpack2(p->y, n, tbl, _xparams);
 	b[0] = tbl(0, 2);
@@ -217,12 +225,12 @@ double distance(const Point& point, const ParametricSpline& spline) {
 	b[2] = tbl(0, 4);
 	b[3] = tbl(0, 5);
 
-	vector<double> distancePrime = getDistancePrimeCoeffs(point, a, b);
+	vector<double> distancePrime = getDistancePrimeCoeffs(point, splineDescription.coeff, b);
 	double length = spline.length();
 	double root = distancePrimeRoot(distancePrime, length);
-	double dist1 = sqrt(getSquaredDistance(root, point, a, b));
-	double dist2 = sqrt(getSquaredDistance(start, point, a, b));
-	double dist3 = sqrt(getSquaredDistance(end, point, a, b));
+	double dist1 = sqrt(getSquaredDistance(root, point, splineDescription.coeff, b));
+	double dist2 = sqrt(getSquaredDistance(splineDescription.start, point, splineDescription.coeff, b));
+	double dist3 = sqrt(getSquaredDistance(splineDescription.end, point, splineDescription.coeff, b));
 	return dist1;
 }
 
