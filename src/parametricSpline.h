@@ -86,8 +86,6 @@ private:
 	real_2d_array as_real_2d_array(const vector<Point> &points) const;
 	alglib_impl::pspline2interpolant* asImplPtr() const;
 
-public:
-	// TODO: make private again
 	pspline2interpolant spline;
 };
 
