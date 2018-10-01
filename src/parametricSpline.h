@@ -130,7 +130,6 @@ vector<Polynom> ParametricSpline::createPolynoms(
     poly.end = tbl(i, 1);
     poly.poly = { {tbl(i, 2), tbl(i, 3), tbl(i, 4), tbl(i, 5)}};
     polys.push_back(poly);
-
   }
   return polys;
 }
