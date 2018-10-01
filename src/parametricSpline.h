@@ -249,14 +249,14 @@ vector<PolynomDescription2D> ParametricSpline::getPolys() const {
 }
 
 double ParametricSpline::distanceTo(const Point& point) {
-  vector<PolynomDescription2D> polys = getPolys();
   auto get_min_element =
-      [](const vector<double>& v) {return std::min_element(v.begin(), v.end());};
+      [](const auto& v) {return std::min_element(v.begin(), v.end());};
 
-  auto index_of_minimum = [&](const vector<double>& v) {
+  auto index_of_minimum = [&](const auto& v) {
     return std::distance(v.begin(), get_min_element(v));
   };
 
+  vector<PolynomDescription2D> polys = getPolys();
   vector<double> distancesFromPoint2Polys =
       map2<PolynomDescription2D, double>(
           polys,
