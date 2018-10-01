@@ -187,22 +187,24 @@ struct DistancePrimeFunctor {
 
   DistancePrimeFunctor(const Polynom& _poly)
       : poly(_poly) {
+    polyDerivative = poly.getDerivative();
   }
 
   std::pair<double, double> operator()(double x) {
-    return std::make_pair(poly(x), poly.getDerivative()(x));
+    return std::make_pair(poly(x), polyDerivative(x));
   }
 
  private:
   const Polynom& poly;
+  Polynom polyDerivative;
 };
 
 double ParametricSpline::getRootOf(const Polynom& poly) const {
   using namespace boost::math::tools;
   double min = poly.start;
   double max = poly.end;
-  // guess is the root of the linear term of squaredDistancePrime
-  // double guess = -squaredDistancePrime.poly[0] / squaredDistancePrime.poly[1];
+  // guess is the root of the linear term of poly
+  // double guess = -poly.poly[0] / poly.poly[1];
   double guess = (min + max) / 2.0;
   const int digits = std::numeric_limits<double>::digits;
   int get_digits = static_cast<int>(digits * 0.6);
