@@ -97,6 +97,7 @@ class ParametricSpline {
       const PolynomDescription& squaredDistancePrime, double length);
   PolynomDescription getXPoly() const;
   PolynomDescription getYPoly() const;
+  PolynomDescription2D getPoly2D() const;
 
   pspline2interpolant spline;
 };
@@ -234,11 +235,15 @@ double ParametricSpline::getSquaredDistance(double t, const Point& point,
   return getSquaredDistancePoly(point, poly)(t);
 }
 
-double ParametricSpline::distanceTo(const Point& point) {
+PolynomDescription2D ParametricSpline::getPoly2D() const {
   PolynomDescription2D poly;
   poly.x = getXPoly();
   poly.y = getYPoly();
+  return poly;
+}
 
+double ParametricSpline::distanceTo(const Point& point) {
+  PolynomDescription2D poly = getPoly2D();
   PolynomDescription squaredDistancePrime = getSquaredDistancePrimePoly(point,
                                                                         poly);
   double root = squaredDistancePrimeRoot(squaredDistancePrime, length());
