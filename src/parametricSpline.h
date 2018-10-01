@@ -15,7 +15,9 @@
 #include "coords/cart.h"
 #include "coords/frenet.h"
 #include "funs.h"
+#include <experimental/optional>
 
+using namespace std::experimental;
 using namespace alglib;
 using namespace boost::math::tools;
 
@@ -92,6 +94,7 @@ public:
 	Point getTangent(double t) const;
 	double getLength() const;
 	Frenet getFrenet(const Point& point) const;
+	double toSplineParameter(double s) const;
 
 private:
 	real_2d_array as_real_2d_array(const vector<Point> &points) const;
@@ -106,8 +109,10 @@ private:
 	Frenet getFrenet(const Polynom2D& poly, const Point& point) const;
 	vector<Frenet> getFrenets(const vector<Polynom2D>&,
 			const Point& point) const;
+	double fromSplineParameter(double s) const;
 
 	pspline2interpolant spline;
+	double length;
 };
 
 vector<Polynom> ParametricSpline::createPolynoms(
@@ -142,7 +147,7 @@ vector<Polynom> ParametricSpline::getYPolys() const {
 }
 
 double ParametricSpline::getLength() const {
-	return pspline2arclength(spline, 0, 1);
+	return length;
 }
 
 Point ParametricSpline::getTangent(double t) const {
@@ -175,6 +180,7 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
 	real_2d_array xy = as_real_2d_array(points);
 	pspline2buildperiodic(xy, points.size(), SplineType::CatmullRom,
 			ParameterizationType::chordLength, spline);
+	length = pspline2arclength(spline, 0, 1);
 }
 
 struct DistancePrimeFunctor {
@@ -245,12 +251,20 @@ Frenet ParametricSpline::getFrenet(const Polynom2D& poly,
 			});
 }
 
-vector<Frenet> ParametricSpline::getFrenets(
-		const vector<Polynom2D>& polys, const Point& point) const {
+vector<Frenet> ParametricSpline::getFrenets(const vector<Polynom2D>& polys,
+		const Point& point) const {
 
 	return map2<Polynom2D, Frenet>(polys, [&](const Polynom2D& poly) {
 		return getFrenet(poly, point);
 	});
+}
+
+double ParametricSpline::fromSplineParameter(double s) const {
+	return s * getLength();
+}
+
+double ParametricSpline::toSplineParameter(double s) const {
+	return s / getLength();
 }
 
 Frenet ParametricSpline::getFrenet(const Point& point) const {
@@ -259,8 +273,7 @@ Frenet ParametricSpline::getFrenet(const Point& point) const {
 			[&](const Frenet& frenet1, const Frenet& frenet2) {
 				return frenet1.d < frenet2.d;
 			});
-	// TODO: "frenet.s * getLength()" is the reverse of CoordsConverter::getXY's "double t = point.s / splineLength;". So, make a function or something similar out of it.
-	return Frenet { frenet.s * getLength(), frenet.d };
+	return Frenet { fromSplineParameter(frenet.s), frenet.d };
 }
 
 #endif /* PARAMETRICSPLINE_H_ */
