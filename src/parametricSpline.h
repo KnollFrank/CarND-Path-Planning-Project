@@ -214,9 +214,7 @@ double ParametricSpline::squaredDistancePrimeRoot(
   const boost::uintmax_t maxit = 20;
   boost::uintmax_t it = maxit;
   DistancePrimeFunctor functor = DistancePrimeFunctor(squaredDistancePrime);
-  double result = newton_raphson_iterate(functor, guess, min, max,
-                                         get_digits/*, it*/);
-  return result;
+  return newton_raphson_iterate(functor, guess, min, max, get_digits/*, it*/);
 }
 
 PolynomDescription ParametricSpline::getSquaredDistancePoly(
