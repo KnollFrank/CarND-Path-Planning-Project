@@ -102,14 +102,9 @@ class ParametricSpline {
   alglib_impl::pspline2interpolant* asImplPtr() const;
   vector<PolynomDescription> createPolynomDescriptions(
       alglib_impl::spline1dinterpolant &spline) const;
-  PolynomDescription getSquaredDistancePrimePoly(
-      const Point& point, const PolynomDescription2D& poly) const;
-  double getSquaredDistance(double t, const Point& point,
-                            const PolynomDescription2D& poly) const;
-  PolynomDescription getSquaredDistancePoly(
-      const Point& point, const PolynomDescription2D& poly) const;
-  double squaredDistancePrimeRoot(
-      const PolynomDescription& squaredDistancePrime) const;
+  PolynomDescription getSquaredDistance(const Point& point,
+                                        const PolynomDescription2D& poly) const;
+  double getRootOf(const PolynomDescription& poly) const;
   vector<PolynomDescription> getXPolys() const;
   vector<PolynomDescription> getYPolys() const;
   vector<PolynomDescription2D> getPolys() const;
@@ -203,11 +198,10 @@ struct DistancePrimeFunctor {
   const PolynomDescription& poly;
 };
 
-double ParametricSpline::squaredDistancePrimeRoot(
-    const PolynomDescription& squaredDistancePrime) const {
+double ParametricSpline::getRootOf(const PolynomDescription& poly) const {
   using namespace boost::math::tools;
-  double min = squaredDistancePrime.start;
-  double max = squaredDistancePrime.end;
+  double min = poly.start;
+  double max = poly.end;
   // guess is the root of the linear term of squaredDistancePrime
   // double guess = -squaredDistancePrime.poly[0] / squaredDistancePrime.poly[1];
   double guess = (min + max) / 2.0;
@@ -215,11 +209,11 @@ double ParametricSpline::squaredDistancePrimeRoot(
   int get_digits = static_cast<int>(digits * 0.6);
   const boost::uintmax_t maxit = 20;
   boost::uintmax_t it = maxit;
-  DistancePrimeFunctor functor = DistancePrimeFunctor(squaredDistancePrime);
+  DistancePrimeFunctor functor = DistancePrimeFunctor(poly);
   return newton_raphson_iterate(functor, guess, min, max, get_digits/*, it*/);
 }
 
-PolynomDescription ParametricSpline::getSquaredDistancePoly(
+PolynomDescription ParametricSpline::getSquaredDistance(
     const Point& point, const PolynomDescription2D& poly) const {
   PolynomDescription squaredDistance;
   squaredDistance.start = poly.x.start;
@@ -227,16 +221,6 @@ PolynomDescription ParametricSpline::getSquaredDistancePoly(
   squaredDistance.poly = pow(point.x - poly.x.poly, 2)
       + pow(point.y - poly.y.poly, 2);
   return squaredDistance;
-}
-
-PolynomDescription ParametricSpline::getSquaredDistancePrimePoly(
-    const Point& point, const PolynomDescription2D& poly) const {
-  return getSquaredDistancePoly(point, poly).getDerivative();
-}
-
-double ParametricSpline::getSquaredDistance(
-    double t, const Point& point, const PolynomDescription2D& poly) const {
-  return getSquaredDistancePoly(point, poly)(t);
 }
 
 vector<PolynomDescription2D> ParametricSpline::getPolys() const {
@@ -255,12 +239,10 @@ vector<PolynomDescription2D> ParametricSpline::getPolys() const {
 double ParametricSpline::getDistanceOfPoly2Point(
     const PolynomDescription2D& poly, const Point& point) const {
 
-  PolynomDescription squaredDistancePrime = getSquaredDistancePrimePoly(point,
-                                                                        poly);
-  double root = squaredDistancePrimeRoot(squaredDistancePrime);
+  PolynomDescription squaredDistance = getSquaredDistance(point, poly);
   vector<double> distances = map2<double, double>(
-      { root, poly.x.start, poly.x.end },
-      [&](double x) {return sqrt(getSquaredDistance(x, point, poly));});
+      { getRootOf(squaredDistance.getDerivative()), poly.x.start, poly.x.end },
+      [&](double x) {return sqrt(squaredDistance(x));});
   return getMinimum(distances);
 }
 
