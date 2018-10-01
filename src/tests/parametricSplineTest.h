@@ -8,6 +8,9 @@
 #include <string>
 #include <vector>
 
+#include "../coords/cart.h"
+#include "../coords/coordsConverter.h"
+#include "../coords/frenet.h"
 #include "../coords/waypoints.h"
 
 #define GTEST_COUT std::cerr
