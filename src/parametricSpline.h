@@ -99,7 +99,7 @@ class ParametricSpline {
  private:
   real_2d_array as_real_2d_array(const vector<Point> &points) const;
   alglib_impl::pspline2interpolant* asImplPtr() const;
-  PolynomDescription createPolynomDescription(
+  vector<PolynomDescription> createPolynomDescriptions(
       alglib_impl::spline1dinterpolant &spline) const;
   PolynomDescription getSquaredDistancePrimePoly(
       const Point& point, const PolynomDescription2D& poly);
@@ -109,37 +109,43 @@ class ParametricSpline {
                                             const PolynomDescription2D& poly);
   double squaredDistancePrimeRoot(
       const PolynomDescription& squaredDistancePrime, double length);
-  PolynomDescription getXPoly() const;
-  PolynomDescription getYPoly() const;
-  PolynomDescription2D getPoly2D() const;
+  vector<PolynomDescription> getXPolys() const;
+  vector<PolynomDescription> getYPolys() const;
+  vector<PolynomDescription2D> getPolys() const;
 
   pspline2interpolant spline;
 };
 
-PolynomDescription ParametricSpline::createPolynomDescription(
+vector<PolynomDescription> ParametricSpline::createPolynomDescriptions(
     alglib_impl::spline1dinterpolant &spline) const {
 
   ae_int_t n;
   real_2d_array tbl;
   xparams _xparams;
   spline1dunpack2(spline, n, tbl, _xparams);
-  PolynomDescription polyDescr;
-  polyDescr.start = tbl(0, 0);
-  polyDescr.end = tbl(0, 1);
-  polyDescr.poly = { {tbl(0, 2), tbl(0, 3), tbl(0, 4), tbl(0, 5)}};
-  return polyDescr;
+
+  vector<PolynomDescription> polys;
+  for (int i = 0; i < n - 1; i++) {
+    PolynomDescription poly;
+    poly.start = tbl(i, 0);
+    poly.end = tbl(i, 1);
+    poly.poly = { {tbl(i, 2), tbl(i, 3), tbl(i, 4), tbl(i, 5)}};
+    polys.push_back(poly);
+
+  }
+  return polys;
 }
 
 alglib_impl::pspline2interpolant* ParametricSpline::asImplPtr() const {
   return const_cast<alglib_impl::pspline2interpolant*>(spline.c_ptr());
 }
 
-PolynomDescription ParametricSpline::getXPoly() const {
-  return createPolynomDescription(asImplPtr()->x);
+vector<PolynomDescription> ParametricSpline::getXPolys() const {
+  return createPolynomDescriptions(asImplPtr()->x);
 }
 
-PolynomDescription ParametricSpline::getYPoly() const {
-  return createPolynomDescription(asImplPtr()->y);
+vector<PolynomDescription> ParametricSpline::getYPolys() const {
+  return createPolynomDescriptions(asImplPtr()->y);
 }
 
 double ParametricSpline::length() const {
@@ -196,12 +202,12 @@ double ParametricSpline::squaredDistancePrimeRoot(
     const PolynomDescription& squaredDistancePrime, double length) {
   using namespace boost::math::tools;
   // double guess = -squaredDistancePrime[0] / squaredDistancePrime[1];
-  double min = 120.0 / length;
-  double max = 150.0 / length;
-  double guess = 124.0 / length;
-//  double min = 0;
-//  double max = 30.0 / length;
-//  double guess = 25.0 / length;
+//  double min = 120.0 / length;
+//  double max = 150.0 / length;
+//  double guess = 124.0 / length;
+  double min = 0;
+  double max = 30.0 / length;
+  double guess = 25.0 / length;
   const int digits = std::numeric_limits<double>::digits;
   int get_digits = static_cast<int>(digits * 0.6);
   const boost::uintmax_t maxit = 20;
@@ -232,15 +238,22 @@ double ParametricSpline::getSquaredDistance(double t, const Point& point,
   return getSquaredDistancePoly(point, poly)(t);
 }
 
-PolynomDescription2D ParametricSpline::getPoly2D() const {
-  PolynomDescription2D poly;
-  poly.x = getXPoly();
-  poly.y = getYPoly();
-  return poly;
+vector<PolynomDescription2D> ParametricSpline::getPolys() const {
+  vector<PolynomDescription2D> polys;
+  vector<PolynomDescription> xpolys = getXPolys();
+  vector<PolynomDescription> ypolys = getYPolys();
+  for (int i = 0; i < xpolys.size(); i++) {
+    PolynomDescription2D poly;
+    poly.x = xpolys[i];
+    poly.y = ypolys[i];
+    polys.push_back(poly);
+  }
+  return polys;
 }
 
 double ParametricSpline::distanceTo(const Point& point) {
-  PolynomDescription2D poly = getPoly2D();
+  vector<PolynomDescription2D> polys = getPolys();
+  PolynomDescription2D poly = polys[0];
   PolynomDescription squaredDistancePrime = getSquaredDistancePrimePoly(point,
                                                                         poly);
   double root = squaredDistancePrimeRoot(squaredDistancePrime, length());
