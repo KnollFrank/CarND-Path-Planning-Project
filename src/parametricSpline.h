@@ -108,7 +108,7 @@ class ParametricSpline {
   PolynomDescription getSquaredDistancePoly(const Point& point,
                                             const PolynomDescription2D& poly);
   double squaredDistancePrimeRoot(
-      const PolynomDescription& squaredDistancePrime, double length);
+      const PolynomDescription& squaredDistancePrime);
   vector<PolynomDescription> getXPolys() const;
   vector<PolynomDescription> getYPolys() const;
   vector<PolynomDescription2D> getPolys() const;
@@ -199,11 +199,8 @@ struct DistancePrimeFunctor {
 };
 
 double ParametricSpline::squaredDistancePrimeRoot(
-    const PolynomDescription& squaredDistancePrime, double length) {
+    const PolynomDescription& squaredDistancePrime) {
   using namespace boost::math::tools;
-//  double min = 120.0 / length;
-//  double max = 150.0 / length;
-//  double guess = 124.0 / length;
   double min = squaredDistancePrime.start;
   double max = squaredDistancePrime.end;
   // guess is the root of the linear term of squaredDistancePrime
@@ -252,17 +249,25 @@ vector<PolynomDescription2D> ParametricSpline::getPolys() const {
 
 double ParametricSpline::distanceTo(const Point& point) {
   vector<PolynomDescription2D> polys = getPolys();
-  PolynomDescription2D poly = polys[0];
-  PolynomDescription squaredDistancePrime = getSquaredDistancePrimePoly(point,
-                                                                        poly);
-  double root = squaredDistancePrimeRoot(squaredDistancePrime, length());
-  if (poly.x.start < root && root < poly.x.end) {
-    cout << "Juhu;" << endl;
-  }
-  double dist1 = sqrt(getSquaredDistance(root, point, poly));
-  double dist2 = sqrt(getSquaredDistance(poly.x.start, point, poly));
-  double dist3 = sqrt(getSquaredDistance(poly.x.end, point, poly));
-  return dist1;
+  auto index_of_minimum = [](const vector<double>& v) {
+    return std::distance(
+        v.begin(),
+        std::min_element(v.begin(), v.end()));
+  };
+
+  vector<double> distancesFromPoint2Polys = map2<PolynomDescription2D,
+      double>(polys, [&](const PolynomDescription2D& poly) {
+    PolynomDescription squaredDistancePrime = getSquaredDistancePrimePoly(point,
+        poly);
+    double root = squaredDistancePrimeRoot(squaredDistancePrime);
+    double dist1 = sqrt(getSquaredDistance(root, point, poly));
+    double dist2 = sqrt(getSquaredDistance(poly.x.start, point, poly));
+    double dist3 = sqrt(getSquaredDistance(poly.x.end, point, poly));
+    return min(dist1, min(dist2, dist3));
+  });
+
+  int min_index = index_of_minimum(distancesFromPoint2Polys);
+  return distancesFromPoint2Polys[min_index];
 }
 
 #endif /* PARAMETRICSPLINE_H_ */
