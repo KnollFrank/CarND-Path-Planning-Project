@@ -53,7 +53,7 @@ template<typename T>
 std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
   if (!v.empty()) {
     out << '[';
-    std::copy(v.begin(), v.end(), std::ostream_iterator < T > (out, ", "));
+    std::copy(v.begin(), v.end(), std::ostream_iterator<T>(out, ", "));
     out << "\b\b]";
   }
   return out;
@@ -62,6 +62,14 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
 template<typename T>
 void appendSnd2Fst(vector<T>& fst, const vector<T>& snd) {
   fst.insert(std::end(fst), std::begin(snd), std::end(snd));
+}
+
+double getMinimum(const vector<double>& v) {
+  return *std::min_element(v.begin(), v.end());
+}
+
+double getIndexOfMinimum(const vector<double>& v) {
+  return std::distance(v.begin(), std::min_element(v.begin(), v.end()));
 }
 
 #endif /* FUNS_H_ */
