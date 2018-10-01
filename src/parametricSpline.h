@@ -95,7 +95,7 @@ class ParametricSpline {
   Point operator()(double t) const;
   Point getTangent(double t) const;
   double length() const;
-  double distanceTo(const Point& point);
+  double distanceTo(const Point& point) const;
 
  private:
   real_2d_array as_real_2d_array(const vector<Point> &points) const;
@@ -255,7 +255,7 @@ vector<double> ParametricSpline::getDistancesOfPolys2Point(
   });
 }
 
-double ParametricSpline::distanceTo(const Point& point) {
+double ParametricSpline::distanceTo(const Point& point) const {
   return getMinimum(getDistancesOfPolys2Point(getPolys(), point));
 }
 

@@ -32,36 +32,36 @@ TEST(ParametricSplineTest, should_get_length) {
   EXPECT_EQ(6947, int(length));
 }
 
+void check_distanceTo(const Frenet& frenet,
+                      const CoordsConverter& coordsConverter,
+                      const ParametricSpline& spline) {
+
+  // Given
+  const Point& point = coordsConverter.getXY(frenet);
+
+  // When
+  double distance = spline.distanceTo(point);
+
+  // Then
+  EXPECT_NEAR(frenet.d, distance, 0.001);
+}
+
 TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
   // Given
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
-
   ParametricSpline spline(mapWaypoints.map_waypoints);
-  double distanceExpected = 5;
-  Point point = coordsConverter.getXY(Frenet { 10, distanceExpected });
 
-  // When
-  double distanceActual = spline.distanceTo(point);
-
-  // Then
-  EXPECT_NEAR(distanceExpected, distanceActual, 0.001);
+  check_distanceTo(Frenet { 10, 5 }, coordsConverter, spline);
 }
 
 TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline2) {
   // Given
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
-
   ParametricSpline spline(mapWaypoints.map_waypoints);
-  double distanceExpected = 5;
-  Point point = coordsConverter.getXY(Frenet { 124.834, distanceExpected });
 
-  // When
-  double distanceActual = spline.distanceTo(point);
-
-  // Then
-  EXPECT_NEAR(distanceExpected, distanceActual, 0.001);
+  check_distanceTo(Frenet { 124.834, 5 }, coordsConverter, spline);
 }
 
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */
