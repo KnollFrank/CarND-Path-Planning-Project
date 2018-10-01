@@ -66,6 +66,11 @@ double PolynomDescription::operator()(double x) const {
   return poly.evaluate(x - start);
 }
 
+struct PolynomDescription2D {
+  PolynomDescription x;
+  PolynomDescription y;
+};
+
 class ParametricSpline {
 
  public:
@@ -82,15 +87,12 @@ class ParametricSpline {
   alglib_impl::pspline2interpolant* asImplPtr() const;
   PolynomDescription createPolynomDescription(
       alglib_impl::spline1dinterpolant &spline) const;
-  PolynomDescription getSquaredDistancePrimePoly(const Point& point,
-                                                 const PolynomDescription& x,
-                                                 const PolynomDescription& y);
+  PolynomDescription getSquaredDistancePrimePoly(
+      const Point& point, const PolynomDescription2D& poly);
   double getSquaredDistance(double t, const Point& point,
-                            const PolynomDescription& x,
-                            const PolynomDescription& y);
+                            const PolynomDescription2D& poly);
   PolynomDescription getSquaredDistancePoly(const Point& point,
-                                            const PolynomDescription& x,
-                                            const PolynomDescription& y);
+                                            const PolynomDescription2D& poly);
   double squaredDistancePrimeRoot(
       const PolynomDescription& squaredDistancePrime, double length);
   PolynomDescription getXPoly() const;
@@ -212,41 +214,40 @@ double ParametricSpline::squaredDistancePrimeRoot(
 }
 
 PolynomDescription ParametricSpline::getSquaredDistancePoly(
-    const Point& point, const PolynomDescription& x,
-    const PolynomDescription& y) {
+    const Point& point, const PolynomDescription2D& poly) {
   PolynomDescription squaredDistance;
-  squaredDistance.start = x.start;
-  squaredDistance.end = x.end;
-  squaredDistance.poly = pow(point.x - x.poly, 2) + pow(point.y - y.poly, 2);
+  squaredDistance.start = poly.x.start;
+  squaredDistance.end = poly.x.end;
+  squaredDistance.poly = pow(point.x - poly.x.poly, 2)
+      + pow(point.y - poly.y.poly, 2);
   return squaredDistance;
 }
 
 PolynomDescription ParametricSpline::getSquaredDistancePrimePoly(
-    const Point& point, const PolynomDescription& x,
-    const PolynomDescription& y) {
-  return derivation(getSquaredDistancePoly(point, x, y));
+    const Point& point, const PolynomDescription2D& poly) {
+  return derivation(getSquaredDistancePoly(point, poly));
 }
 
 // TODO: const SplineDescription& x und const SplineDescription& y zu struct oder class ParametricSplineDescription zusammenfassen.
 double ParametricSpline::getSquaredDistance(double t, const Point& point,
-                                            const PolynomDescription& x,
-                                            const PolynomDescription& y) {
-  return getSquaredDistancePoly(point, x, y)(t);
+                                            const PolynomDescription2D& poly) {
+  return getSquaredDistancePoly(point, poly)(t);
 }
 
 double ParametricSpline::distanceTo(const Point& point) {
-  PolynomDescription x = getXPoly();
-  PolynomDescription y = getYPoly();
+  PolynomDescription2D poly;
+  poly.x = getXPoly();
+  poly.y = getYPoly();
 
   PolynomDescription squaredDistancePrime = getSquaredDistancePrimePoly(point,
-                                                                        x, y);
+                                                                        poly);
   double root = squaredDistancePrimeRoot(squaredDistancePrime, length());
-  if (x.start < root && root < x.end) {
+  if (poly.x.start < root && root < poly.x.end) {
     cout << "Juhu;" << endl;
   }
-  double dist1 = sqrt(getSquaredDistance(root, point, x, y));
-  double dist2 = sqrt(getSquaredDistance(x.start, point, x, y));
-  double dist3 = sqrt(getSquaredDistance(x.end, point, x, y));
+  double dist1 = sqrt(getSquaredDistance(root, point, poly));
+  double dist2 = sqrt(getSquaredDistance(poly.x.start, point, poly));
+  double dist3 = sqrt(getSquaredDistance(poly.x.end, point, poly));
   return dist1;
 }
 
