@@ -15,6 +15,7 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
+#include "funs.h"
 
 using namespace alglib;
 using namespace boost::math::tools;
@@ -249,22 +250,23 @@ vector<PolynomDescription2D> ParametricSpline::getPolys() const {
 
 double ParametricSpline::distanceTo(const Point& point) {
   vector<PolynomDescription2D> polys = getPolys();
-  auto index_of_minimum = [](const vector<double>& v) {
-    return std::distance(
-        v.begin(),
-        std::min_element(v.begin(), v.end()));
+  auto get_min_element =
+      [](const vector<double>& v) {return std::min_element(v.begin(), v.end());};
+
+  auto index_of_minimum = [&](const vector<double>& v) {
+    return std::distance(v.begin(), get_min_element(v));
   };
 
-  vector<double> distancesFromPoint2Polys = map2<PolynomDescription2D,
-      double>(polys, [&](const PolynomDescription2D& poly) {
-    PolynomDescription squaredDistancePrime = getSquaredDistancePrimePoly(point,
-        poly);
-    double root = squaredDistancePrimeRoot(squaredDistancePrime);
-    double dist1 = sqrt(getSquaredDistance(root, point, poly));
-    double dist2 = sqrt(getSquaredDistance(poly.x.start, point, poly));
-    double dist3 = sqrt(getSquaredDistance(poly.x.end, point, poly));
-    return min(dist1, min(dist2, dist3));
-  });
+  vector<double> distancesFromPoint2Polys =
+      map2<PolynomDescription2D, double>(
+          polys,
+          [&](const PolynomDescription2D& poly) {
+            PolynomDescription squaredDistancePrime = getSquaredDistancePrimePoly(point,
+                poly);
+            double root = squaredDistancePrimeRoot(squaredDistancePrime);
+            vector<double> distances = map2<double, double>( {root, poly.x.start, poly.x.end}, [&](double x) {return sqrt(getSquaredDistance(x, point, poly));});
+            return *get_min_element(distances);
+          });
 
   int min_index = index_of_minimum(distancesFromPoint2Polys);
   return distancesFromPoint2Polys[min_index];
