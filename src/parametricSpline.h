@@ -103,9 +103,8 @@ private:
 	vector<Polynom> getXPolys() const;
 	vector<Polynom> getYPolys() const;
 	vector<Polynom2D> getPolys() const;
-	Frenet getDistanceOfPoly2Point(const Polynom2D& poly,
-			const Point& point) const;
-	vector<Frenet> getDistancesOfPolys2Point(const vector<Polynom2D>&,
+	Frenet getFrenet(const Polynom2D& poly, const Point& point) const;
+	vector<Frenet> getFrenets(const vector<Polynom2D>&,
 			const Point& point) const;
 
 	pspline2interpolant spline;
@@ -232,7 +231,7 @@ vector<Polynom2D> ParametricSpline::getPolys() const {
 	return polys;
 }
 
-Frenet ParametricSpline::getDistanceOfPoly2Point(const Polynom2D& poly,
+Frenet ParametricSpline::getFrenet(const Polynom2D& poly,
 		const Point& point) const {
 
 	Polynom squaredDistance = getSquaredDistance(point, poly);
@@ -246,17 +245,16 @@ Frenet ParametricSpline::getDistanceOfPoly2Point(const Polynom2D& poly,
 			});
 }
 
-// TODO: rename this function and similar named ones.
-vector<Frenet> ParametricSpline::getDistancesOfPolys2Point(
+vector<Frenet> ParametricSpline::getFrenets(
 		const vector<Polynom2D>& polys, const Point& point) const {
 
 	return map2<Polynom2D, Frenet>(polys, [&](const Polynom2D& poly) {
-		return getDistanceOfPoly2Point(poly, point);
+		return getFrenet(poly, point);
 	});
 }
 
 Frenet ParametricSpline::getFrenet(const Point& point) const {
-	vector<Frenet> frenets = getDistancesOfPolys2Point(getPolys(), point);
+	vector<Frenet> frenets = getFrenets(getPolys(), point);
 	Frenet frenet = *min_element(frenets.begin(), frenets.end(),
 			[&](const Frenet& frenet1, const Frenet& frenet2) {
 				return frenet1.d < frenet2.d;
