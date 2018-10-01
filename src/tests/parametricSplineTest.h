@@ -76,10 +76,11 @@ TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline3) {
   double splineLength = spline.getLength();
 
   // When & Then
-  for (int i = 0; i < 100; i++) {
-    double s = i / 100.0 * splineLength;
-    checkDistanceBetweenPointAndSpline(Frenet { s, 5 }, spline,
-                                       coordsConverter);
+  for (double d : { 2.0, 6.0, 10.0 }) {
+    for (double s = 0.0; s < splineLength; s+=10) {
+      checkDistanceBetweenPointAndSpline(
+          Frenet { s, d }, spline, coordsConverter);
+    }
   }
 }
 
