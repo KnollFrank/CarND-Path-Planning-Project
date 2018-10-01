@@ -48,7 +48,7 @@ class CoordsConverter {
 CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
   spline = new ParametricSpline(map_waypoints.map_waypoints);
-  splineLength = spline->length();
+  splineLength = spline->getLength();
 }
 
 CoordsConverter::~CoordsConverter() {
