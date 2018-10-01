@@ -201,13 +201,14 @@ struct DistancePrimeFunctor {
 double ParametricSpline::squaredDistancePrimeRoot(
     const PolynomDescription& squaredDistancePrime, double length) {
   using namespace boost::math::tools;
-  // double guess = -squaredDistancePrime[0] / squaredDistancePrime[1];
 //  double min = 120.0 / length;
 //  double max = 150.0 / length;
 //  double guess = 124.0 / length;
-  double min = 0;
-  double max = 30.0 / length;
-  double guess = 25.0 / length;
+  double min = squaredDistancePrime.start;
+  double max = squaredDistancePrime.end;
+  // guess is the root of the linear term of squaredDistancePrime
+  // double guess = -squaredDistancePrime.poly[0] / squaredDistancePrime.poly[1];
+  double guess = (min + max) / 2.0;
   const int digits = std::numeric_limits<double>::digits;
   int get_digits = static_cast<int>(digits * 0.6);
   const boost::uintmax_t maxit = 20;
