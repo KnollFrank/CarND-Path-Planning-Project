@@ -52,34 +52,17 @@ TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
   ParametricSpline spline(mapWaypoints.map_waypoints);
-
-  // When & Then
-  checkDistanceBetweenPointAndSpline(Frenet { 10, 5 }, spline, coordsConverter);
-}
-
-TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline2) {
-  // Given
-  MapWaypoints mapWaypoints = MapWaypoints::load();
-  CoordsConverter coordsConverter(mapWaypoints);
-  ParametricSpline spline(mapWaypoints.map_waypoints);
-
-  // When & Then
-  checkDistanceBetweenPointAndSpline(Frenet { 124.834, 5 }, spline,
-                                     coordsConverter);
-}
-
-TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline3) {
-  // Given
-  MapWaypoints mapWaypoints = MapWaypoints::load();
-  CoordsConverter coordsConverter(mapWaypoints);
-  ParametricSpline spline(mapWaypoints.map_waypoints);
   double splineLength = spline.getLength();
 
   // When & Then
   for (double d : { 2.0, 6.0, 10.0 }) {
-    for (double s = 0.0; s < splineLength; s+=10) {
-      checkDistanceBetweenPointAndSpline(
-          Frenet { s, d }, spline, coordsConverter);
+    for (double s = 0.0; s < splineLength; s += 10) {
+      checkDistanceBetweenPointAndSpline(Frenet { s, d }, spline,
+                                         coordsConverter);
+    }
+    for (double s : mapWaypoints.map_waypoints_s) {
+      checkDistanceBetweenPointAndSpline(Frenet { s, d }, spline,
+                                         coordsConverter);
     }
   }
 }
