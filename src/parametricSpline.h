@@ -60,10 +60,25 @@ struct PolynomDescription {
   polynomial<double> poly;
 
   double operator()(double x) const;
+  PolynomDescription getDerivative() const;
 };
 
 double PolynomDescription::operator()(double x) const {
   return poly.evaluate(x - start);
+}
+
+PolynomDescription PolynomDescription::getDerivative() const {
+  vector<double> coeffs;
+  for (int i = 1; i <= poly.degree(); i++) {
+    coeffs.push_back(i * poly[i]);
+  }
+  polynomial<double> deriv(coeffs.begin(), coeffs.end());
+  // TODO: introduce constructor
+  PolynomDescription polyPrime;
+  polyPrime.start = start;
+  polyPrime.end = end;
+  polyPrime.poly = deriv;
+  return polyPrime;
 }
 
 struct PolynomDescription2D {
@@ -80,7 +95,6 @@ class ParametricSpline {
   Point getTangent(double t) const;
   double length() const;
   double distanceTo(const Point& point);
-  static PolynomDescription derivation(const PolynomDescription& poly);
 
  private:
   real_2d_array as_real_2d_array(const vector<Point> &points) const;
@@ -164,21 +178,6 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
                         ParameterizationType::chordLength, spline);
 }
 
-PolynomDescription ParametricSpline::derivation(
-    const PolynomDescription& poly) {
-  vector<double> coeffs;
-  for (int i = 1; i <= poly.poly.degree(); i++) {
-    coeffs.push_back(i * poly.poly[i]);
-  }
-  polynomial<double> deriv(coeffs.begin(), coeffs.end());
-  // TODO: introduce constructor
-  PolynomDescription polyPrime;
-  polyPrime.start = poly.start;
-  polyPrime.end = poly.end;
-  polyPrime.poly = deriv;
-  return polyPrime;
-}
-
 struct DistancePrimeFunctor {
 
   DistancePrimeFunctor(const PolynomDescription& _poly)
@@ -186,7 +185,7 @@ struct DistancePrimeFunctor {
   }
 
   std::pair<double, double> operator()(double x) {
-    return std::make_pair(poly(x), ParametricSpline::derivation(poly)(x));
+    return std::make_pair(poly(x), poly.getDerivative()(x));
   }
 
  private:
@@ -197,12 +196,12 @@ double ParametricSpline::squaredDistancePrimeRoot(
     const PolynomDescription& squaredDistancePrime, double length) {
   using namespace boost::math::tools;
   // double guess = -squaredDistancePrime[0] / squaredDistancePrime[1];
-//	double min = 120.0 / length;
-//	double max = 150.0 / length;
-//	double guess = 124.0 / length;
-  double min = 0;
-  double max = 30.0 / length;
-  double guess = 25.0 / length;
+  double min = 120.0 / length;
+  double max = 150.0 / length;
+  double guess = 124.0 / length;
+//  double min = 0;
+//  double max = 30.0 / length;
+//  double guess = 25.0 / length;
   const int digits = std::numeric_limits<double>::digits;
   int get_digits = static_cast<int>(digits * 0.6);
   const boost::uintmax_t maxit = 20;
@@ -210,7 +209,6 @@ double ParametricSpline::squaredDistancePrimeRoot(
   DistancePrimeFunctor functor = DistancePrimeFunctor(squaredDistancePrime);
   double result = newton_raphson_iterate(functor, guess, min, max,
                                          get_digits/*, it*/);
-  pair<double, double> tmp = functor(result);
   return result;
 }
 
@@ -226,7 +224,7 @@ PolynomDescription ParametricSpline::getSquaredDistancePoly(
 
 PolynomDescription ParametricSpline::getSquaredDistancePrimePoly(
     const Point& point, const PolynomDescription2D& poly) {
-  return derivation(getSquaredDistancePoly(point, poly));
+  return getSquaredDistancePoly(point, poly).getDerivative();
 }
 
 double ParametricSpline::getSquaredDistance(double t, const Point& point,
