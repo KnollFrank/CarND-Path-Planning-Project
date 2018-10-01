@@ -229,7 +229,6 @@ PolynomDescription ParametricSpline::getSquaredDistancePrimePoly(
   return derivation(getSquaredDistancePoly(point, poly));
 }
 
-// TODO: const SplineDescription& x und const SplineDescription& y zu struct oder class ParametricSplineDescription zusammenfassen.
 double ParametricSpline::getSquaredDistance(double t, const Point& point,
                                             const PolynomDescription2D& poly) {
   return getSquaredDistancePoly(point, poly)(t);
