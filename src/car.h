@@ -28,7 +28,8 @@ class EgoCar {
 
   void setPos(const FrenetCart& pos);
   FrenetCart getPos() const;
-  Frenet getAcceleration();
+  Frenet getAcceleration() const;
+  Frenet getJerk() const;
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
@@ -41,7 +42,8 @@ class EgoCar {
   }
 
  private:
-  Frenet getVelocity(PositionHistory positionHistory) const;
+  Frenet getVelocity(const PositionHistory& positionHistory) const;
+  Frenet getAcceleration(const PositionHistory& positionHistory) const;
 
   const CoordsConverter& coordsConverter;
   boost::circular_buffer<FrenetCart> positions;
@@ -70,17 +72,30 @@ FrenetCart EgoCar::getPos() const {
   return positions.back();
 }
 
-Frenet EgoCar::getVelocity(PositionHistory positionHistory) const {
+Frenet EgoCar::getVelocity(const PositionHistory& positionHistory) const {
   return (positions[positionHistory].getFrenet(coordsConverter)
       - positions[positionHistory - 1].getFrenet(coordsConverter)) / dt;
 }
 
-// TODO: when computing the acceleration in cartesian coordinates (which would be the correct way) we always exceed 10 m/s^2, so I shifted to the wrong way of using Frenet coordinates.
-Frenet EgoCar::getAcceleration() {
+Frenet EgoCar::getAcceleration(const PositionHistory& positionHistory) const {
   return
       positions.full() ?
-          (getVelocity(PositionHistory::ACTUAL)
-              - getVelocity(PositionHistory::PREVIOUS)) / dt :
+          (getVelocity(positionHistory)
+              - getVelocity(static_cast<PositionHistory>(positionHistory - 1)))
+              / dt :
+          Frenet::zero();
+}
+
+// TODO: when computing the acceleration in cartesian coordinates (which would be the correct way) we always exceed 10 m/s^2, so I shifted to the wrong way of using Frenet coordinates.
+Frenet EgoCar::getAcceleration() const {
+  return getAcceleration(PositionHistory::ACTUAL);
+}
+
+Frenet EgoCar::getJerk() const {
+  return
+      positions.full() ?
+          (getAcceleration(PositionHistory::ACTUAL)
+              - getAcceleration(PositionHistory::PREVIOUS)) / dt :
           Frenet::zero();
 }
 
