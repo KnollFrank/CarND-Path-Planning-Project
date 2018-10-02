@@ -52,7 +52,7 @@ TEST(ParametricSplineTest, should_getFrenet) {
 	MapWaypoints mapWaypoints = MapWaypoints::load();
 	CoordsConverter coordsConverter(mapWaypoints);
 	ParametricSpline spline(mapWaypoints.map_waypoints);
-	double splineLength = spline.getLength();
+	double splineLength = spline.getLength(); // = 6947.2427832056264
 
 	// When & Then
 	for (double d : { 2.0, 6.0, 10.0 }) {

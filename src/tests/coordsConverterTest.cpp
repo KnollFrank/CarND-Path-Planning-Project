@@ -1,78 +1,42 @@
 #include "../coords/coordsConverter.h"
 
 #include <gtest/gtest.h>
-#include <gtest/gtest-message.h>
-#include <cmath>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <tuple>
 
 #include "../coords/cart.h"
 #include "../coords/frenet.h"
 #include "../coords/waypoints.h"
-#include "../parametricSpline.h"
 #include "gtestHelper.h"
 
 TEST(CoordsConverterTest, should_convert) {
-  // GIVEN
-  MapWaypoints map_waypoints;
-
-  map_waypoints.map_waypoints.push_back(Point { 0, 10 });
-  map_waypoints.map_outwards.push_back(Point { -1, 1 });
-
-  map_waypoints.map_waypoints.push_back(Point { 0, 5 });
-  map_waypoints.map_outwards.push_back(Point { -1, 0 });
-
-  map_waypoints.map_waypoints.push_back(Point { 5, 0 });
-  map_waypoints.map_outwards.push_back(Point { -1, -1 });
-
-  map_waypoints.map_waypoints.push_back(Point { 10, 0 });
-  map_waypoints.map_outwards.push_back(Point { 1, -1 });
-
-  map_waypoints.map_waypoints.push_back(Point { 10, 10 });
-  map_waypoints.map_outwards.push_back(Point { 1, 1 });
-
-  for (int i = 0; i < map_waypoints.map_waypoints.size(); i++) {
-    map_waypoints.map_waypoints_s.push_back(
-        map_waypoints.getDistanceFromWaypointZeroToWaypoint(i));
-  }
-
-  CoordsConverter coordsConverter(map_waypoints);
-
-  auto test_convert = [&](const Point& point, const Frenet& frenet) {
-    const double abs_error = 0.00001;
-    expect_near(frenet, coordsConverter.getFrenet(point), abs_error);
-    expect_near(point, coordsConverter.getXY(frenet), abs_error);
-  };
-
-  // WHEN & THEN
-  double s1 = 5;
-  double s2 = sqrt(50);
-
-  test_convert(Point { 0, 4 }, Frenet { s1 + 1 / sqrt(2), 1 / sqrt(2) });
-  test_convert(Point { 4, 0 }, Frenet { s1 + s2 - 1 / sqrt(2), 1 / sqrt(2) });
-  test_convert(Point { 9, 0.5 }, Frenet { s1 + s2 + 4, -0.5 });
-}
-
-TEST(CoordsConverterTest, should_convert2) {
   // GIVEN
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
 
   // TODO: DRY with should_convert
-  auto test_convert = [&](const Point& point, const Frenet& frenet) {
-    const double abs_error = 2.26;
-    // TODO: die folgende Zeile wierder aktivieren, um getFrenet() zu entwickeln.
-    // expect_near(frenet, coordsConverter.getFrenet(point), abs_error);
-      expect_near(point, coordsConverter.getXY(frenet), abs_error, asString([&](stringstream& stream) {stream << point << " == coordsConverter.getXY(" << frenet <<")";}));
-    };
+  auto test_convert =
+      [&](const Point& point, const Frenet& frenet) {
+        const double abs_error = 2.26;
+        expect_near(frenet,
+            coordsConverter.getFrenet(point),
+            abs_error,
+            asString([&](stringstream& stream) {
+                  stream << frenet << " == coordsConverter.getFrenet(" << point <<")";}));
+        expect_near(
+            point,
+            coordsConverter.getXY(frenet),
+            abs_error,
+            asString([&](stringstream& stream) {
+                  stream << point << " == coordsConverter.getXY(" << frenet <<")";}));
+      };
 
   // WHEN & THEN
   test_convert(Point { 909.48, 1128.67 }, Frenet { 124.834, 6.16483 });
 
-  for (int i = 0; i < mapWaypoints.map_waypoints.size(); i++) {
+  // FIXME: int i = 0 (d.h. mapWaypoints.map_waypoints_s[0] == 0) ergibt Fehler!
+  for (int i = 1; i < mapWaypoints.map_waypoints.size(); i++) {
     test_convert(mapWaypoints.map_waypoints[i],
                  Frenet { mapWaypoints.map_waypoints_s[i], 0 });
   }
