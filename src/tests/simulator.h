@@ -47,6 +47,7 @@ class Simulator {
                           int numberOfUnprocessedPathElements,
                           const Path& path);
   bool oneRoundDriven();
+  void assertNoIncidentsHappened();
 
   ReferencePoint& refPoint;
   Lane& lane;
@@ -141,6 +142,11 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
 // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
+void Simulator::assertNoIncidentsHappened() {
+  ASSERT_LT(egoCar.speed_mph, 50);
+  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION between ego car and another vehicle:" << endl << egoCar << vehicles;
+}
+
 void Simulator::drive2PointOfEgoCar(
     const Frenet& dst, function<void(void)> afterEachMovementOfEgoCar) {
   const Frenet& src = egoCar.getPos_frenet();
@@ -149,7 +155,7 @@ void Simulator::drive2PointOfEgoCar(
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
 // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
-  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION between ego car and another vehicle:" << endl << egoCar << vehicles;
+  assertNoIncidentsHappened();
   afterEachMovementOfEgoCar();
 }
 

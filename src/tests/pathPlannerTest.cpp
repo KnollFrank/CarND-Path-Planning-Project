@@ -102,7 +102,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
   assert_car_drives_straight_ahead(path);
 }
 
-TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
+TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
@@ -113,7 +113,6 @@ TEST_F(PathPlannerTest, should_drive_with_max_50_mph) {
 
 // WHEN
   simulator.drive([&egoCar]() {
-    ASSERT_LT(egoCar.speed_mph, 50);
     ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos_frenet().d, 0.001);});
 
 // THEN
