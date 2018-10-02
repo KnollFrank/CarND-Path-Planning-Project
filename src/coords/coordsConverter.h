@@ -1,13 +1,9 @@
 #ifndef COORDS_COORDSCONVERTER_H_
 #define COORDS_COORDSCONVERTER_H_
 
-#include "../alglib/ap.h"
-#include "../funs.h"
 #include "../parametricSpline.h"
 #include "cart.h"
-#include "coordinateSystemCart.h"
 #include "frenet.h"
-#include "lineSegment.h"
 #include "waypoints.h"
 
 using namespace std;
