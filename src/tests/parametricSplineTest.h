@@ -34,8 +34,7 @@ TEST(ParametricSplineTest, should_get_length) {
 	EXPECT_EQ(6947, int(length));
 }
 
-void checkDistanceBetweenPointAndSpline(const Frenet& frenet,
-		const ParametricSpline& spline,
+void check_getFrenet(const Frenet& frenet, const ParametricSpline& spline,
 		const CoordsConverter& coordsConverter) {
 
 	// Given
@@ -48,7 +47,7 @@ void checkDistanceBetweenPointAndSpline(const Frenet& frenet,
 	expect_near(frenet, frenetActual, 0.001);
 }
 
-TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
+TEST(ParametricSplineTest, should_getFrenet) {
 	// Given
 	MapWaypoints mapWaypoints = MapWaypoints::load();
 	CoordsConverter coordsConverter(mapWaypoints);
@@ -59,14 +58,12 @@ TEST(ParametricSplineTest, should_get_distanceBetweenPointAndSpline) {
 	for (double d : { 2.0, 6.0, 10.0 }) {
 		// FIXME: double s = 0 ergibt Fehler!
 		for (double s = 1; s < splineLength; s += 10) {
-			checkDistanceBetweenPointAndSpline(Frenet { s, d }, spline,
-					coordsConverter);
+			check_getFrenet(Frenet { s, d }, spline, coordsConverter);
 		}
 		// FIXME: int i = 0 (d.h. mapWaypoints.map_waypoints_s[0] == 0) ergibt Fehler!
 		for (int i = 1; i < mapWaypoints.map_waypoints_s.size(); i++) {
-			checkDistanceBetweenPointAndSpline(
-					Frenet { mapWaypoints.map_waypoints_s[i], d }, spline,
-					coordsConverter);
+			check_getFrenet(Frenet { mapWaypoints.map_waypoints_s[i], d },
+					spline, coordsConverter);
 		}
 	}
 }
