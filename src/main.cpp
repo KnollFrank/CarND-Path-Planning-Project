@@ -56,8 +56,8 @@ EgoCar createEgoCar(
         std::allocator, nlohmann::adl_serializer> &j,
     const CoordsConverter& coordsConverter) {
   EgoCar egoCar(coordsConverter);
-  egoCar.setPos(Point { j[1]["x"], j[1]["y"] },
-                Frenet { j[1]["s"], j[1]["d"] });
+  egoCar.setPos(FrenetCart(Frenet { j[1]["s"], j[1]["d"] }, Point { j[1]["x"],
+                               j[1]["y"] }));
   egoCar.yaw_deg = j[1]["yaw"];
   egoCar.speed_mph = j[1]["speed"];
   return egoCar;

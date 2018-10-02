@@ -31,11 +31,12 @@ struct ReferencePoint {
   double vel_mph;
 };
 
-void printInfo(const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
+void printInfo(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
+               const CoordsConverter& coordsConverter) {
   auto isCloserToEgoCar =
-      [&egoCar](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-        double distance1 = egoCar.getPos_cart().distanceTo(vehicle1.getPos_cart());
-        double distance2 = egoCar.getPos_cart().distanceTo(vehicle2.getPos_cart());
+      [&](const Vehicle& vehicle1, const Vehicle& vehicle2) {
+        double distance1 = egoCar.getPos().getXY(coordsConverter).distanceTo(vehicle1.getPos_cart());
+        double distance2 = egoCar.getPos().getXY(coordsConverter).distanceTo(vehicle2.getPos_cart());
         return distance1 < distance2;
       };
 
@@ -141,14 +142,14 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   // printInfo(egoCar, vehicles);
 
   if (previousData.sizeOfPreviousPath() > 0) {
-    egoCar.setPos_frenet(previousData.end_path);
+    egoCar.setPos(FrenetCart(previousData.end_path));
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(
       egoCar, vehicles, previousData.sizeOfPreviousPath());
   lane = getNewLane(too_close, lane);
   refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
-  refPoint.point = egoCar.getPos_frenet();
+  refPoint.point = egoCar.getPos().getFrenet(coordsConverter);
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
   Path path;
@@ -198,8 +199,8 @@ bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
   double check_vehicle_s = vehicle.getPos_frenet().s
       + prev_size * dt * check_speed;
   // TODO: replace magic number 30 with constant
-  return check_vehicle_s > egoCar.getPos_frenet().s
-      && check_vehicle_s - egoCar.getPos_frenet().s < 30;
+  return check_vehicle_s > egoCar.getPos().getFrenet(coordsConverter).s
+      && check_vehicle_s - egoCar.getPos().getFrenet(coordsConverter).s < 30;
 }
 
 double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
@@ -215,7 +216,7 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
 Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
   if (too_close && lane > Lane::LEFT) {
     lane = Lane::LEFT;
-  } else if(too_close && lane < Lane::RIGHT) {
+  } else if (too_close && lane < Lane::RIGHT) {
     lane = Lane::RIGHT;
   }
 
@@ -227,10 +228,10 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
 
   vector<FrenetCart> points;
   if (previousData.sizeOfPreviousPath() < 2) {
-    Frenet prev = egoCar.getPos_frenet()
+    Frenet prev = egoCar.getPos().getFrenet(coordsConverter)
         - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
     points.push_back(FrenetCart(prev));
-    points.push_back(FrenetCart(egoCar.getPos_frenet()));
+    points.push_back(FrenetCart(egoCar.getPos().getFrenet(coordsConverter)));
   } else {
     refPoint.point = previousData.previous_path.points[previousData
         .sizeOfPreviousPath() - 1].getFrenet(coordsConverter);
@@ -245,12 +246,15 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
 
 vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
   vector<FrenetCart> points;
-  points.push_back(FrenetCart(Frenet { egoCar.getPos_frenet().s + 30,
-      getMiddleOfLane(lane) }));
-  points.push_back(FrenetCart(Frenet { egoCar.getPos_frenet().s + 60,
-      getMiddleOfLane(lane) }));
-  points.push_back(FrenetCart(Frenet { egoCar.getPos_frenet().s + 90,
-      getMiddleOfLane(lane) }));
+  points.push_back(
+      FrenetCart(Frenet { egoCar.getPos().getFrenet(coordsConverter).s + 30,
+          getMiddleOfLane(lane) }));
+  points.push_back(
+      FrenetCart(Frenet { egoCar.getPos().getFrenet(coordsConverter).s + 60,
+          getMiddleOfLane(lane) }));
+  points.push_back(
+      FrenetCart(Frenet { egoCar.getPos().getFrenet(coordsConverter).s + 90,
+          getMiddleOfLane(lane) }));
   return points;
 }
 

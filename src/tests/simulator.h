@@ -29,10 +29,12 @@ class Simulator {
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
             std::experimental::optional<int> minSecs2Drive);
   void drive(function<void(void)> afterEachMovementOfEgoCar);
-  static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
-  static bool isCollision(const EgoCar& egoCar,
-                          const vector<Vehicle>& vehicles);
-  static bool oneRoundDriven(const EgoCar& egoCar);
+  static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle,
+                          const CoordsConverter& coordsConverter);
+  static bool isCollision(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
+                          const CoordsConverter& coordsConverter);
+  static bool oneRoundDriven(const EgoCar& egoCar,
+                             const CoordsConverter& coordsConverter);
 
  private:
   double driveEgoCarAndVehicles(function<void(void)> afterEachMovementOfEgoCar);
@@ -83,12 +85,13 @@ void Simulator::drive(function<void(void)> afterEachMovementOfEgoCar) {
   }
 }
 
-bool Simulator::oneRoundDriven(const EgoCar& egoCar) {
-  return egoCar.getPos_frenet().s > 6900;
+bool Simulator::oneRoundDriven(const EgoCar& egoCar,
+                               const CoordsConverter& coordsConverter) {
+  return egoCar.getPos().getFrenet(coordsConverter).s > 6900;
 }
 
 bool Simulator::oneRoundDriven() {
-  return oneRoundDriven(egoCar);
+  return oneRoundDriven(egoCar, coordsConverter);
 }
 
 double Simulator::driveEgoCarAndVehicles(
@@ -145,14 +148,14 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
 void Simulator::assertNoIncidentsHappened() {
   // TODO: The car does not exceed a total acceleration of 10 m/s^2 and a jerk of 10 m/s^3.
   ASSERT_LT(egoCar.speed_mph, 50);
-  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION between ego car and another vehicle:" << endl << egoCar << vehicles;
+  ASSERT_FALSE(isCollision(egoCar, vehicles, coordsConverter))<< "COLLISION between ego car and another vehicle:" << endl << egoCar << vehicles;
 }
 
 void Simulator::drive2PointOfEgoCar(
     const Frenet& dst, function<void(void)> afterEachMovementOfEgoCar) {
-  const Frenet& src = egoCar.getPos_frenet();
+  const Frenet& src = egoCar.getPos().getFrenet(coordsConverter);
   egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
-  egoCar.setPos_frenet(dst);
+  egoCar.setPos(FrenetCart(dst));
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
 // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
@@ -160,16 +163,19 @@ void Simulator::drive2PointOfEgoCar(
   afterEachMovementOfEgoCar();
 }
 
-bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
-  return egoCar.getPos_cart().distanceTo(vehicle.getPos_cart())
-      <= EgoCar::carSize();
+bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle,
+                            const CoordsConverter& coordsConverter) {
+  return egoCar.getPos().getXY(coordsConverter).distanceTo(
+      vehicle.getPos_cart()) <= EgoCar::carSize();
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar,
-                            const vector<Vehicle>& vehicles) {
+                            const vector<Vehicle>& vehicles,
+                            const CoordsConverter& coordsConverter) {
   return std::any_of(
-      vehicles.cbegin(), vehicles.cend(),
-      [&](const Vehicle& vehicle) {return isCollision(egoCar, vehicle);});
+      vehicles.cbegin(),
+      vehicles.cend(),
+      [&](const Vehicle& vehicle) {return isCollision(egoCar, vehicle, coordsConverter);});
 }
 
 #endif /* TESTS_SIMULATOR_H_ */

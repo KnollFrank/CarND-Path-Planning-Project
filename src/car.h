@@ -18,14 +18,8 @@ class EgoCar {
   double yaw_deg;
   double speed_mph;
 
-  void setPos(const Point& pos_cart, const Frenet& pos_frenet);
+  void setPos(const FrenetCart& pos);
   FrenetCart getPos() const;
-
-  void setPos_cart(const Point& pos);
-  Point getPos_cart() const;
-
-  void setPos_frenet(const Frenet& pos);
-  Frenet getPos_frenet() const;
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
@@ -43,7 +37,7 @@ class EgoCar {
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   os << "EgoCar:" << endl;
-  os << "  pos_frenet = " << egoCar.pos << endl;
+  os << "  pos = " << egoCar.pos << endl;
   os << "  yaw = " << egoCar.yaw_deg << "°" << endl;
   os << "  speed = " << egoCar.speed_mph << " mph" << endl;
   return os;
@@ -53,28 +47,12 @@ EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
     : coordsConverter(_coordsConverter) {
 }
 
-void EgoCar::setPos(const Point& pos_cart, const Frenet& pos_frenet) {
-  pos = FrenetCart(pos_frenet, pos_cart);
+void EgoCar::setPos(const FrenetCart& pos) {
+  this->pos = pos;
 }
 
 FrenetCart EgoCar::getPos() const {
   return pos;
-}
-
-Point EgoCar::getPos_cart() const {
-  return pos.getXY(coordsConverter);
-}
-
-Frenet EgoCar::getPos_frenet() const {
-  return pos.getFrenet(coordsConverter);
-}
-
-void EgoCar::setPos_cart(const Point& pos) {
-  this->pos = FrenetCart(pos);
-}
-
-void EgoCar::setPos_frenet(const Frenet& pos) {
-  this->pos = FrenetCart(pos);
 }
 
 class Vehicle {
