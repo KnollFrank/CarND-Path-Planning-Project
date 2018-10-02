@@ -11,6 +11,12 @@
 
 using namespace std;
 
+enum PositionHistory {
+  ACTUAL = 2,
+  PREVIOUS = 1,
+  PREVIOUS_PREVIOUS = 0
+};
+
 // TODO: merge EgoCar and Vehicle, because they are essentially the same thing.
 class EgoCar {
 
@@ -34,6 +40,8 @@ class EgoCar {
   }
 
  private:
+  Point getVelocity(PositionHistory positionHistory) const;
+
   const CoordsConverter& coordsConverter;
   boost::circular_buffer<FrenetCart> positions;
   double dt;
@@ -61,21 +69,17 @@ FrenetCart EgoCar::getPos() const {
   return positions.back();
 }
 
-// TODO: refactor
-#define ACTUAL 2
-#define PREVIOUS 1
-#define PREVIOUS_PREVIOUS 0
+Point EgoCar::getVelocity(PositionHistory positionHistory) const {
+  return (positions[positionHistory].getXY(coordsConverter)
+      - positions[positionHistory - 1].getXY(coordsConverter)) / dt;
+}
 
 Point EgoCar::getAcceleration() {
-  if (!positions.full()) {
-    return Point::zero();
-  }
-
-  Point v_previous = (positions[PREVIOUS].getXY(coordsConverter)
-      - positions[PREVIOUS_PREVIOUS].getXY(coordsConverter)) / dt;
-  Point v = (positions[ACTUAL].getXY(coordsConverter)
-      - positions[PREVIOUS].getXY(coordsConverter)) / dt;
-  return (v - v_previous) / dt;
+  return
+      positions.full() ?
+          (getVelocity(PositionHistory::ACTUAL)
+              - getVelocity(PositionHistory::PREVIOUS)) / dt :
+          Point::zero();
 }
 
 class Vehicle {
