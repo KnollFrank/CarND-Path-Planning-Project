@@ -12,9 +12,10 @@
 using namespace std;
 
 enum PositionHistory {
-  ACTUAL = 2,
-  PREVIOUS = 1,
-  PREVIOUS_PREVIOUS = 0
+  ACTUAL = 3,
+  PREVIOUS = 2,
+  PREVIOUS_PREVIOUS = 1,
+  PREVIOUS_PREVIOUS_PREVIOUS = 0
 };
 
 // TODO: merge EgoCar and Vehicle, because they are essentially the same thing.
@@ -57,7 +58,7 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
 
 EgoCar::EgoCar(const CoordsConverter& _coordsConverter, double _dt)
     : coordsConverter(_coordsConverter),
-      positions(boost::circular_buffer<FrenetCart>(3)),
+      positions(boost::circular_buffer<FrenetCart>(4)),
       dt(_dt) {
 }
 
