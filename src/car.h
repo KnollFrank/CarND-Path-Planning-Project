@@ -7,6 +7,7 @@
 #include "coords/coordsConverter.h"
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
+#include <boost/circular_buffer.hpp>
 
 using namespace std;
 
@@ -32,28 +33,29 @@ class EgoCar {
   }
 
  private:
-  FrenetCart pos;
   const CoordsConverter& coordsConverter;
+  boost::circular_buffer<FrenetCart> positions;
 };
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   os << "EgoCar:" << endl;
-  os << "  pos = " << egoCar.pos << endl;
+  os << "  pos = " << egoCar.getPos() << endl;
   os << "  yaw = " << egoCar.yaw_deg << "°" << endl;
   os << "  speed = " << egoCar.speed_mph << " mph" << endl;
   return os;
 }
 
 EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
-    : coordsConverter(_coordsConverter) {
+    : coordsConverter(_coordsConverter),
+      positions(boost::circular_buffer<FrenetCart>(3)) {
 }
 
 void EgoCar::setPos(const FrenetCart& pos) {
-  this->pos = pos;
+  positions.push_back(pos);
 }
 
 FrenetCart EgoCar::getPos() const {
-  return pos;
+  return positions.back();
 }
 
 class Vehicle {
