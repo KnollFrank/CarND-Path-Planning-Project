@@ -110,8 +110,8 @@ private:
 	vector<Frenet> getFrenets(const vector<Polynom2D>&,
 			const Point& point) const;
 	double fromSplineParameter(double s) const;
-	static bool compareDCoordinates(const Frenet& frenet1,
-			const Frenet& frenet2);
+	Frenet getFrenetHavingMinimalDCoordinate(
+			const vector<Frenet>& frenets) const;
 
 	pspline2interpolant spline;
 	double length;
@@ -239,9 +239,11 @@ vector<Polynom2D> ParametricSpline::getPolys() const {
 	return polys;
 }
 
-bool ParametricSpline::compareDCoordinates(const Frenet& frenet1,
-		const Frenet& frenet2) {
-	return frenet1.d < frenet2.d;
+Frenet ParametricSpline::getFrenetHavingMinimalDCoordinate(
+		const vector<Frenet>& frenets) const {
+	return *min_element(frenets.cbegin(), frenets.cend(),
+			[](const Frenet& frenet1, const Frenet& frenet2) {
+				return frenet1.d < frenet2.d;});
 }
 
 Frenet ParametricSpline::getFrenet(const Polynom2D& poly,
@@ -252,7 +254,7 @@ Frenet ParametricSpline::getFrenet(const Polynom2D& poly,
 			{ getRootOf(squaredDistance.getDerivative()), poly.x.start,
 					poly.x.end },
 			[&](double s) {return Frenet {s, sqrt(squaredDistance(s))};});
-	return *min_element(frenets.begin(), frenets.end(), compareDCoordinates);
+	return getFrenetHavingMinimalDCoordinate(frenets);
 }
 
 vector<Frenet> ParametricSpline::getFrenets(const vector<Polynom2D>& polys,
@@ -273,8 +275,7 @@ double ParametricSpline::toSplineParameter(double s) const {
 
 Frenet ParametricSpline::getFrenet(const Point& point) const {
 	vector<Frenet> frenets = getFrenets(getPolys(), point);
-	Frenet frenet = *min_element(frenets.begin(), frenets.end(),
-			compareDCoordinates);
+	Frenet frenet = getFrenetHavingMinimalDCoordinate(frenets);
 	return Frenet { fromSplineParameter(frenet.s), frenet.d };
 }
 
