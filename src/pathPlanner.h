@@ -215,6 +215,8 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
 Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
   if (too_close && lane > Lane::LEFT) {
     lane = Lane::LEFT;
+  } else if(too_close && lane < Lane::RIGHT) {
+    lane = Lane::RIGHT;
   }
 
   return lane;
