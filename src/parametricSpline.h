@@ -274,8 +274,8 @@ double ParametricSpline::toSplineParameter(double s) const {
 }
 
 Frenet ParametricSpline::getFrenet(const Point& point) const {
-	vector<Frenet> frenets = getFrenets(getPolys(), point);
-	Frenet frenet = getFrenetHavingMinimalDCoordinate(frenets);
+	Frenet frenet = getFrenetHavingMinimalDCoordinate(
+			getFrenets(getPolys(), point));
 	return Frenet { fromSplineParameter(frenet.s), frenet.d };
 }
 
