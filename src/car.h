@@ -27,7 +27,7 @@ class EgoCar {
 
   void setPos(const FrenetCart& pos);
   FrenetCart getPos() const;
-  Point getAcceleration();
+  Frenet getAcceleration();
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
@@ -40,7 +40,7 @@ class EgoCar {
   }
 
  private:
-  Point getVelocity(PositionHistory positionHistory) const;
+  Frenet getVelocity(PositionHistory positionHistory) const;
 
   const CoordsConverter& coordsConverter;
   boost::circular_buffer<FrenetCart> positions;
@@ -69,17 +69,18 @@ FrenetCart EgoCar::getPos() const {
   return positions.back();
 }
 
-Point EgoCar::getVelocity(PositionHistory positionHistory) const {
-  return (positions[positionHistory].getXY(coordsConverter)
-      - positions[positionHistory - 1].getXY(coordsConverter)) / dt;
+Frenet EgoCar::getVelocity(PositionHistory positionHistory) const {
+  return (positions[positionHistory].getFrenet(coordsConverter)
+      - positions[positionHistory - 1].getFrenet(coordsConverter)) / dt;
 }
 
-Point EgoCar::getAcceleration() {
+// TODO: when computing the acceleration in cartesian coordinates (which would be the correct way) we always exceed 10 m/s^2, so I shifted to the wrong way of using Frenet coordinates.
+Frenet EgoCar::getAcceleration() {
   return
       positions.full() ?
           (getVelocity(PositionHistory::ACTUAL)
               - getVelocity(PositionHistory::PREVIOUS)) / dt :
-          Point::zero();
+          Frenet::zero();
 }
 
 class Vehicle {

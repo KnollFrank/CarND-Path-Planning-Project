@@ -22,6 +22,7 @@ struct Frenet {
   Frenet operator+(const Frenet& other) const;
   Frenet operator-(const Frenet& other) const;
   Frenet operator*(double scalar) const;
+  Frenet operator/(double scalar) const;
 
   double getHeading() const;
   double len() const;
@@ -41,6 +42,10 @@ Frenet Frenet::operator-(const Frenet &other) const {
 
 Frenet Frenet::operator*(double scalar) const {
   return Frenet { s * scalar, d * scalar };
+}
+
+Frenet Frenet::operator/(double scalar) const {
+  return *this * (1.0 / scalar);
 }
 
 ostream& operator<<(ostream& os, const Point& point) {
