@@ -15,12 +15,13 @@ using namespace std;
 class EgoCar {
 
  public:
-  EgoCar(const CoordsConverter& coordsConverter);
+  EgoCar(const CoordsConverter& coordsConverter, double dt);
   double yaw_deg;
   double speed_mph;
 
   void setPos(const FrenetCart& pos);
   FrenetCart getPos() const;
+  Point getAcceleration();
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
@@ -35,6 +36,7 @@ class EgoCar {
  private:
   const CoordsConverter& coordsConverter;
   boost::circular_buffer<FrenetCart> positions;
+  double dt;
 };
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
@@ -45,9 +47,10 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   return os;
 }
 
-EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
+EgoCar::EgoCar(const CoordsConverter& _coordsConverter, double _dt)
     : coordsConverter(_coordsConverter),
-      positions(boost::circular_buffer<FrenetCart>(3)) {
+      positions(boost::circular_buffer<FrenetCart>(3)),
+      dt(_dt) {
 }
 
 void EgoCar::setPos(const FrenetCart& pos) {
@@ -56,6 +59,23 @@ void EgoCar::setPos(const FrenetCart& pos) {
 
 FrenetCart EgoCar::getPos() const {
   return positions.back();
+}
+
+// TODO: refactor
+#define ACTUAL 2
+#define PREVIOUS 1
+#define PREVIOUS_PREVIOUS 0
+
+Point EgoCar::getAcceleration() {
+  if (!positions.full()) {
+    return Point::zero();
+  }
+
+  Point v_previous = (positions[PREVIOUS].getXY(coordsConverter)
+      - positions[PREVIOUS_PREVIOUS].getXY(coordsConverter)) / dt;
+  Point v = (positions[ACTUAL].getXY(coordsConverter)
+      - positions[PREVIOUS].getXY(coordsConverter)) / dt;
+  return (v - v_previous) / dt;
 }
 
 class Vehicle {

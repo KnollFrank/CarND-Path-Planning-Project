@@ -28,6 +28,7 @@ struct Point {
   Point operator+(const Point& other) const;
   Point operator-(const Point& other) const;
   Point operator*(double scalar) const;
+  Point operator/(double scalar) const;
   Point asNormalized() const;
 
   friend ostream& operator<<(ostream& os, const Point& point);
@@ -68,6 +69,10 @@ Point Point::operator-(const Point &other) const {
 
 Point Point::operator*(double scalar) const {
   return Point { x * scalar, y * scalar };
+}
+
+Point Point::operator/(double scalar) const {
+  return *this * (1.0 / scalar);
 }
 
 Point& Point::operator=(const Point &point) {
