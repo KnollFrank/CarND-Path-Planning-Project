@@ -26,6 +26,7 @@ class EgoCar {
   static double carRadius() {
     return 1.25;
   }
+
   static double carSize() {
     return 2 * carRadius();
   }
