@@ -15,7 +15,6 @@ TEST(CoordsConverterTest, should_convert) {
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
 
-  // TODO: DRY with should_convert
   auto test_convert =
       [&](const Point& point, const Frenet& frenet) {
         const double abs_error = 2.26;
