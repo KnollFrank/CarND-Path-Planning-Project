@@ -149,8 +149,7 @@ void Simulator::drive2PointOfEgoCar(
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
 // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
-  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION between ego car and another vehicle:" << endl << egoCar
-  << vehicles;
+  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION between ego car and another vehicle:" << endl << egoCar << vehicles;
   afterEachMovementOfEgoCar();
 }
 
