@@ -6,7 +6,6 @@
 #include "../funs.h"
 #include "waypoints.h"
 #include "lineSegment.h"
-#include "coordSys.h"
 
 // TODO: merge with CoordianteSystemCart using templates
 struct CoordinateSystem {

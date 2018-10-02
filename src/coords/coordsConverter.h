@@ -6,7 +6,6 @@
 #include "../parametricSpline.h"
 #include "cart.h"
 #include "coordinateSystemCart.h"
-#include "coordSys.h"
 #include "frenet.h"
 #include "lineSegment.h"
 #include "waypoints.h"
@@ -27,18 +26,7 @@ class CoordsConverter {
                                          const Point& end) const;
 
  private:
-  int getIndexOfClosestWaypoint(const Point& point) const;
-  int adaptWaypointIndex(int waypointIndex) const;
-  LineSegment createLineSegment(const int startWaypointIndex,
-                                const int endWaypointIndex) const;
-  const CoordSys createCoordSys(const Point& point,
-                                const int startWaypointIndex,
-                                const int endWaypointIndex) const;
-  int getStartIndex(const Frenet& point) const;
   Point getClockwisePerpendicular(Point v) const;
-  CoordinateSystemCart createCoordinateSystem(
-      const LineSegment& lineSegment) const;
-  LineSegment getLineSegmentContaining(const Frenet& point) const;
 
   const MapWaypoints& map_waypoints;
   ParametricSpline* spline;
@@ -55,72 +43,12 @@ CoordsConverter::~CoordsConverter() {
   delete spline;
 }
 
-int CoordsConverter::getIndexOfClosestWaypoint(const Point& point) const {
-  auto index_of_minimum = [](const vector<double>& v) {
-    return std::distance(
-        v.begin(),
-        std::min_element(v.begin(), v.end()));
-  };
-
-  vector<double> distancesFromPoint2Waypoints = map2<Point, double>(
-      map_waypoints.map_waypoints, [&point](const Point& p) {
-        return point.distanceTo(p);
-      });
-
-  return index_of_minimum(distancesFromPoint2Waypoints);
-}
-
-int CoordsConverter::adaptWaypointIndex(int waypointIndex) const {
-  return modulo(waypointIndex, map_waypoints.map_waypoints.size());
-}
-
-LineSegment CoordsConverter::createLineSegment(
-    const int startWaypointIndex, const int endWaypointIndex) const {
-
-  return LineSegment { map_waypoints.map_waypoints[startWaypointIndex],
-      map_waypoints.map_waypoints[endWaypointIndex] };
-}
-
-const CoordSys CoordsConverter::createCoordSys(
-    const Point& point, const int startWaypointIndex,
-    const int endWaypointIndex) const {
-
-  return CoordSys(map_waypoints, point,
-                  createLineSegment(startWaypointIndex, endWaypointIndex),
-                  startWaypointIndex);
-}
-
 Frenet CoordsConverter::getFrenet(const Point& point) const {
   return spline->getFrenet(point);
 }
 
-int CoordsConverter::getStartIndex(const Frenet& point) const {
-  int startIndex = -1;
-  while (point.s > map_waypoints.map_waypoints_s[startIndex + 1]
-      && (startIndex < (int) ((map_waypoints.map_waypoints_s.size() - 1)))) {
-    startIndex++;
-  }
-  return startIndex;
-}
-
 Point CoordsConverter::getClockwisePerpendicular(Point v) const {
   return Point { v.y, -v.x };
-}
-
-CoordinateSystemCart CoordsConverter::createCoordinateSystem(
-    const LineSegment& lineSegment) const {
-  Point e1 = lineSegment.getBasisVector();
-  // TODO: was ist, falls (dx, dy) in Richtung heading + pi() / 2 statt heading - pi() / 2 zeigen?
-  return CoordinateSystemCart { lineSegment.start, e1,
-      getClockwisePerpendicular(e1) };
-}
-
-LineSegment CoordsConverter::getLineSegmentContaining(
-    const Frenet& point) const {
-  int startIndex = getStartIndex(point);
-  LineSegment lineSegment = map_waypoints.getLineSegment(
-      startIndex, adaptWaypointIndex(startIndex + 1));
-  return lineSegment;
 }
 
 Point CoordsConverter::getXY(const Frenet& point) const {

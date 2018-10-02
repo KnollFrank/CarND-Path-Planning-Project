@@ -5,7 +5,6 @@
 #include "../funs.h"
 #include "waypoints.h"
 #include "lineSegment.h"
-#include "coordSys.h"
 
 struct CoordinateSystemCart {
   Point origin;
