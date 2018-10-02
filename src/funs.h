@@ -60,6 +60,7 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
   return out;
 }
 
+// TODO: DRY with std::ostream& operator<<(std::ostream& out, const std::vector<T>& v)
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const boost::circular_buffer<T>& v) {
   if (!v.empty()) {
