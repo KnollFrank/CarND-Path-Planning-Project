@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iterator>
 #include <vector>
+#include <boost/circular_buffer.hpp>
 
 using namespace std;
 
@@ -54,6 +55,16 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
   if (!v.empty()) {
     out << '[';
     std::copy(v.begin(), v.end(), std::ostream_iterator<T>(out, ", "));
+    out << "\b\b]";
+  }
+  return out;
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out, const boost::circular_buffer<T>& v) {
+  if (!v.empty()) {
+    out << '[';
+    std::copy(std::begin(v), std::end(v), std::ostream_iterator<T>(out, ", "));
     out << "\b\b]";
   }
   return out;

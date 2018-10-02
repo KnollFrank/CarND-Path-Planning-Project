@@ -147,7 +147,7 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
 
 void Simulator::assertNoIncidentsHappened() {
   // TODO: The car does not exceed a total acceleration of 10 m/s^2 and a jerk of 10 m/s^3.
-  ASSERT_LE(egoCar.getAcceleration().len(), 10);
+  ASSERT_LE(egoCar.getAcceleration().len(), 10) << egoCar;
   ASSERT_LE(egoCar.speed_mph, 50);
   ASSERT_FALSE(isCollision(egoCar, vehicles, coordsConverter))<< "COLLISION between ego car and another vehicle:" << endl << egoCar << vehicles;
 }

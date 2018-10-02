@@ -49,7 +49,7 @@ class EgoCar {
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   os << "EgoCar:" << endl;
-  os << "  pos = " << egoCar.getPos() << endl;
+  os << "  positions = " << egoCar.positions << endl;
   os << "  yaw = " << egoCar.yaw_deg << "°" << endl;
   os << "  speed = " << egoCar.speed_mph << " mph" << endl;
   return os;
