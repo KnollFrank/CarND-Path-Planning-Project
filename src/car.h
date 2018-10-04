@@ -133,6 +133,7 @@ Vehicle::Vehicle(int _id, FrenetCart _pos,
                  const CoordsConverter& _coordsConverter)
     : id(_id),
       pos(_pos),
+      vel_m_per_s(FrenetCart(Point::zero())),
       coordsConverter(_coordsConverter) {
 }
 
