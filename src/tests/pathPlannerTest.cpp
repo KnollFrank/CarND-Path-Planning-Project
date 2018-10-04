@@ -153,6 +153,37 @@ TEST_F(PathPlannerTest, should_not_collide) {
 // THEN
 }
 
+TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
+  // GIVEN
+  Lane lane = Lane::MIDDLE;
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
+                               0.02);
+  Vehicle vehicleInMiddleLane = createVehicle(
+      0, egoCar.getPos().getFrenet() + Frenet { 35, 0 }, Frenet {
+          mph2meter_per_sec(5), 0 });
+  Vehicle vehicleInLeftLane = createVehicle(
+      1,
+      Frenet { vehicleInMiddleLane.getPos().getFrenet().s, getMiddleOfLane(
+          Lane::LEFT) },
+      vehicleInMiddleLane.getVel_frenet_m_per_s());
+  Vehicle vehicleInRightLane = createVehicle(
+      1,
+      Frenet { vehicleInMiddleLane.getPos().getFrenet().s, getMiddleOfLane(
+          Lane::RIGHT) },
+      vehicleInMiddleLane.getVel_frenet_m_per_s());
+  vector<Vehicle> vehicles { vehicleInMiddleLane, vehicleInLeftLane, vehicleInRightLane };
+
+
+  Simulator simulator = createSimulator(lane, egoCar, vehicles,
+                                        std::experimental::nullopt);
+
+// WHEN
+  simulator.drive([&]() {
+    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));});
+
+// THEN
+}
+
 TEST_F(PathPlannerTest, should_overtake_vehicle) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
@@ -177,7 +208,6 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
 }
 
-// TODO: brauchen eine einfache API zur Generierung von Verkehrssituationen
 TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
