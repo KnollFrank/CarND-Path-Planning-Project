@@ -29,10 +29,9 @@ class Simulator {
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
             std::experimental::optional<int> minSecs2Drive);
   void drive(function<void(void)> afterEachMovementOfEgoCar);
-  static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle,
-                          const CoordsConverter& coordsConverter);
-  static bool isCollision(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
-                          const CoordsConverter& coordsConverter);
+  static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
+  static bool isCollision(const EgoCar& egoCar,
+                          const vector<Vehicle>& vehicles);
   static bool oneRoundDriven(const EgoCar& egoCar,
                              const CoordsConverter& coordsConverter);
 
@@ -150,7 +149,7 @@ void Simulator::assertNoIncidentsHappened() {
   ASSERT_LE(egoCar.getAcceleration().len(), 10)<< egoCar;
 //  ASSERT_LE(egoCar.getJerk().len(), 10) << egoCar;
   ASSERT_LE(egoCar.speed_mph, 50);
-  ASSERT_FALSE(isCollision(egoCar, vehicles, coordsConverter))<< "COLLISION between ego car and another vehicle:" << endl << egoCar << vehicles;
+  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION between ego car and another vehicle:" << endl << egoCar << vehicles;
 }
 
 void Simulator::drive2PointOfEgoCar(
@@ -165,19 +164,16 @@ void Simulator::drive2PointOfEgoCar(
   afterEachMovementOfEgoCar();
 }
 
-bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle,
-                            const CoordsConverter& coordsConverter) {
+bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
   return egoCar.getPos().getXY().distanceTo(vehicle.getPos().getXY())
       <= EgoCar::carSize();
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar,
-                            const vector<Vehicle>& vehicles,
-                            const CoordsConverter& coordsConverter) {
+                            const vector<Vehicle>& vehicles) {
   return std::any_of(
-      vehicles.cbegin(),
-      vehicles.cend(),
-      [&](const Vehicle& vehicle) {return isCollision(egoCar, vehicle, coordsConverter);});
+      vehicles.cbegin(), vehicles.cend(),
+      [&](const Vehicle& vehicle) {return isCollision(egoCar, vehicle);});
 }
 
 #endif /* TESTS_SIMULATOR_H_ */
