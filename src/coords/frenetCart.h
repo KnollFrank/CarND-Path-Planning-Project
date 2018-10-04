@@ -14,7 +14,7 @@ class FrenetCart {
   FrenetCart();
   FrenetCart(Frenet frenet, Point cart, const CoordsConverter& coordsConverter);
   FrenetCart(Frenet frenet, const CoordsConverter& _coordsConverter);
-  FrenetCart(Point cart);
+  FrenetCart(Point cart, const CoordsConverter& _coordsConverter);
 
   Frenet getFrenet(const CoordsConverter& coordsConverter) const;
   Point getXY(const CoordsConverter& coordsConverter) const;
@@ -56,9 +56,10 @@ FrenetCart::FrenetCart(Frenet _frenet, const CoordsConverter& _coordsConverter)
       coordsConverter(&_coordsConverter) {
 }
 
-FrenetCart::FrenetCart(Point _cart)
+FrenetCart::FrenetCart(Point _cart, const CoordsConverter& _coordsConverter)
     : frenet(std::experimental::nullopt),
-      cart(_cart) {
+      cart(_cart),
+      coordsConverter(&_coordsConverter) {
 }
 
 Frenet FrenetCart::getFrenet(const CoordsConverter& coordsConverter) const {
