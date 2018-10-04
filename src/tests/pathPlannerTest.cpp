@@ -158,6 +158,7 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
   Lane lane = Lane::MIDDLE;
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
                                0.02);
+  // TODO: refactor
   Vehicle vehicleInMiddleLane = createVehicle(
       0, egoCar.getPos().getFrenet() + Frenet { 35, 0 }, Frenet {
           mph2meter_per_sec(5), 0 });
@@ -167,7 +168,7 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
           Lane::LEFT) },
       vehicleInMiddleLane.getVel_frenet_m_per_s());
   Vehicle vehicleInRightLane = createVehicle(
-      1,
+      2,
       Frenet { vehicleInMiddleLane.getPos().getFrenet().s, getMiddleOfLane(
           Lane::RIGHT) },
       vehicleInMiddleLane.getVel_frenet_m_per_s());
