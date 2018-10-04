@@ -84,8 +84,9 @@ vector<Vehicle> createVehicles(
   for (int i = 0; i < sensor_fusion.size(); i++) {
     Vehicle vehicle(coordsConverter);
     vehicle.id = sensor_fusion[i][ID];
-    vehicle.setPos(Point { sensor_fusion[i][X], sensor_fusion[i][Y] }, Frenet {
-                       sensor_fusion[i][S], sensor_fusion[i][D] });
+    vehicle.setPos(
+        FrenetCart(Frenet { sensor_fusion[i][S], sensor_fusion[i][D] }, Point {
+                       sensor_fusion[i][X], sensor_fusion[i][Y] }));
     vehicle.setVel_cart_m_per_s(Point { sensor_fusion[i][VX],
         sensor_fusion[i][VY] });
     vehicles.push_back(vehicle);

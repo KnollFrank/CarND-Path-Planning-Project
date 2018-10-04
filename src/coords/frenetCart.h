@@ -8,6 +8,7 @@
 #include "frenet.h"
 #include <experimental/optional>
 
+// TODO: jeder Konstruktor soll einen CoordsConverter haben. Vereinfachung der Methoden getFrenet() und getXY()
 class FrenetCart {
  public:
   FrenetCart();

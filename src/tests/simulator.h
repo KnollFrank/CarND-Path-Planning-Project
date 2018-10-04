@@ -141,7 +141,7 @@ void Simulator::driveVehicles() {
 
 void Simulator::driveVehicle(Vehicle& vehicle) {
   const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s();
-  vehicle.setPos_frenet(vehicle.getPos_frenet() + (vel_frenet * dt));
+  vehicle.setPos(FrenetCart(vehicle.getPos().getFrenet(coordsConverter) + (vel_frenet * dt)));
 // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
@@ -167,7 +167,7 @@ void Simulator::drive2PointOfEgoCar(
 bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle,
                             const CoordsConverter& coordsConverter) {
   return egoCar.getPos().getXY(coordsConverter).distanceTo(
-      vehicle.getPos_cart()) <= EgoCar::carSize();
+      vehicle.getPos().getXY(coordsConverter)) <= EgoCar::carSize();
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar,

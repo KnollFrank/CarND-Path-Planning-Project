@@ -56,7 +56,7 @@ class PathPlannerTest : public ::testing::Test {
                         const Frenet& vel_m_per_sec) {
     Vehicle vehicle(*coordsConverter);
     vehicle.id = id;
-    vehicle.setPos_frenet(pos);
+    vehicle.setPos(FrenetCart(pos));
     vehicle.setVel_frenet_m_per_s(vel_m_per_sec);
     return vehicle;
   }
@@ -176,7 +176,7 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   bool egoCarOvertakesVehicle = false;
   simulator.drive(
       [&]() {
-        bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos_frenet().s;
+        bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos().getFrenet(*coordsConverter).s;
         egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
       });
 
@@ -184,6 +184,7 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
 }
 
+// TODO: brauchen eine einfache API zur Generierung von Verkehrssituationen
 TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
@@ -193,7 +194,7 @@ TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
       0, egoCar.getPos().getFrenet(*coordsConverter) + Frenet { 35, 0 },
       Frenet { mph2meter_per_sec(5), 0 });
   Vehicle vehicleInLeftLane =
-      createVehicle(1, Frenet { vehicle2Overtake.getPos_frenet().s,
+      createVehicle(1, Frenet { vehicle2Overtake.getPos().getFrenet(*coordsConverter).s,
                         getMiddleOfLane(Lane::LEFT) },
                     vehicle2Overtake.getVel_frenet_m_per_s());
   vector<Vehicle> vehicles { vehicle2Overtake, vehicleInLeftLane };
@@ -204,7 +205,7 @@ TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
   bool egoCarOvertakesVehicle = false;
   simulator.drive(
       [&]() {
-        bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos_frenet().s;
+        bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos().getFrenet(*coordsConverter).s;
         egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
       });
 

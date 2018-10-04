@@ -35,8 +35,8 @@ void printInfo(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
                const CoordsConverter& coordsConverter) {
   auto isCloserToEgoCar =
       [&](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-        double distance1 = egoCar.getPos().getXY(coordsConverter).distanceTo(vehicle1.getPos_cart());
-        double distance2 = egoCar.getPos().getXY(coordsConverter).distanceTo(vehicle2.getPos_cart());
+        double distance1 = egoCar.getPos().getXY(coordsConverter).distanceTo(vehicle1.getPos().getXY(coordsConverter));
+        double distance2 = egoCar.getPos().getXY(coordsConverter).distanceTo(vehicle2.getPos().getXY(coordsConverter));
         return distance1 < distance2;
       };
 
@@ -187,7 +187,7 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
       (const Vehicle& vehicle) {
-        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size);};
+        return isVehicleInLane(vehicle, lane, coordsConverter) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isEgoCarTooCloseToVehicleInLane);
@@ -196,7 +196,7 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
     const EgoCar& egoCar, const Vehicle& vehicle, const int prev_size) {
   double check_speed = vehicle.getVel_cart_m_per_s().len();
-  double check_vehicle_s = vehicle.getPos_frenet().s
+  double check_vehicle_s = vehicle.getPos().getFrenet(coordsConverter).s
       + prev_size * dt * check_speed;
   // TODO: replace magic number 30 with constant
   return check_vehicle_s > egoCar.getPos().getFrenet(coordsConverter).s

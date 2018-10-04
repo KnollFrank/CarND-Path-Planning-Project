@@ -103,13 +103,8 @@ class Vehicle {
 
  public:
   Vehicle(const CoordsConverter& coordsConverter);
-  void setPos(const Point& pos_cart, const Frenet& pos_frenet);
-
-  void setPos_cart(const Point& pos);
-  Point getPos_cart() const;
-
-  void setPos_frenet(const Frenet& pos);
-  Frenet getPos_frenet() const;
+  void setPos(const FrenetCart& pos);
+  FrenetCart getPos() const;
 
   void setVel_cart_m_per_s(const Point& vel);
   Point getVel_cart_m_per_s() const;
@@ -138,30 +133,28 @@ Vehicle::Vehicle(const CoordsConverter& _coordsConverter)
     : coordsConverter(_coordsConverter) {
 }
 
-void Vehicle::setPos(const Point& pos_cart, const Frenet& pos_frenet) {
-  pos = FrenetCart(pos_frenet, pos_cart);
+void Vehicle::setPos(const FrenetCart& pos) {
+  this->pos = pos;
 }
 
-Point Vehicle::getPos_cart() const {
-  return pos.getXY(coordsConverter);
-}
-
-Frenet Vehicle::getPos_frenet() const {
-  return pos.getFrenet(coordsConverter);
+FrenetCart Vehicle::getPos() const {
+  return pos;
 }
 
 void Vehicle::setVel_cart_m_per_s(const Point& vel) {
   vel_m_per_s = FrenetCart(
-      coordsConverter.createFrenetVectorFromStart2End(getPos_cart(),
-                                                      getPos_cart() + vel),
+      coordsConverter.createFrenetVectorFromStart2End(
+          getPos().getXY(coordsConverter),
+          getPos().getXY(coordsConverter) + vel),
       vel);
 }
 
 void Vehicle::setVel_frenet_m_per_s(const Frenet& vel) {
   vel_m_per_s = FrenetCart(
       vel,
-      coordsConverter.createCartVectorFromStart2End(getPos_frenet(),
-                                                    getPos_frenet() + vel));
+      coordsConverter.createCartVectorFromStart2End(
+          getPos().getFrenet(coordsConverter),
+          getPos().getFrenet(coordsConverter) + vel));
 }
 
 Point Vehicle::getVel_cart_m_per_s() const {
@@ -170,14 +163,6 @@ Point Vehicle::getVel_cart_m_per_s() const {
 
 Frenet Vehicle::getVel_frenet_m_per_s() const {
   return vel_m_per_s.getFrenet(coordsConverter);
-}
-
-void Vehicle::setPos_cart(const Point& pos) {
-  this->pos = FrenetCart(pos);
-}
-
-void Vehicle::setPos_frenet(const Frenet& pos) {
-  this->pos = FrenetCart(pos);
 }
 
 #endif /* CAR_H_ */
