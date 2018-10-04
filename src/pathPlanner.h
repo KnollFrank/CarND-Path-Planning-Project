@@ -232,23 +232,17 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
     return lane;
   }
 
-  if (lane == Lane::LEFT
-      && canSwitch2Lane(egoCar, Lane::MIDDLE, vehicles, prev_size)) {
+  auto canSwitchFromLane2Lane = [&](const Lane& from, const Lane& to) {
+    return lane == from && canSwitch2Lane(egoCar, to, vehicles, prev_size);
+  };
+
+  if (canSwitchFromLane2Lane(Lane::LEFT, Lane::MIDDLE)) {
     lane = Lane::MIDDLE;
-  }
-
-  if (lane == Lane::MIDDLE
-      && canSwitch2Lane(egoCar, Lane::LEFT, vehicles, prev_size)) {
+  } else if (canSwitchFromLane2Lane(Lane::MIDDLE, Lane::LEFT)) {
     lane = Lane::LEFT;
-  }
-
-  if (lane == Lane::MIDDLE
-      && canSwitch2Lane(egoCar, Lane::RIGHT, vehicles, prev_size)) {
+  } else if (canSwitchFromLane2Lane(Lane::MIDDLE, Lane::RIGHT)) {
     lane = Lane::RIGHT;
-  }
-
-  if (lane == Lane::RIGHT
-      && canSwitch2Lane(egoCar, Lane::MIDDLE, vehicles, prev_size)) {
+  } else if (canSwitchFromLane2Lane(Lane::RIGHT, Lane::MIDDLE)) {
     lane = Lane::MIDDLE;
   }
 
