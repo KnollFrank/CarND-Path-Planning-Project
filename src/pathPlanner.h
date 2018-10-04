@@ -201,11 +201,7 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
 bool PathPlanner::canSwitch2Lane(const EgoCar& egoCar, const Lane& lane,
                                  const vector<Vehicle>& vehicles,
                                  const int prev_size) {
-  // TODO: refactor
-  bool too_close = isEgoCarTooCloseToAnyVehicleInLane(egoCar, vehicles,
-                                                      prev_size, lane);
-
-  return !too_close;
+  return !isEgoCarTooCloseToAnyVehicleInLane(egoCar, vehicles, prev_size, lane);
 }
 
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
