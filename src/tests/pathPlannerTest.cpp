@@ -160,19 +160,6 @@ TEST_F(PathPlannerTest, should_not_collide) {
 // THEN
 }
 
-std::vector<bool>::iterator getEgoCarJustOvertakesVehicleIterator(
-    vector<bool>& overtakens) {
-
-  auto it = find(begin(overtakens), end(overtakens), true);
-  return begin(overtakens) + (it - begin(overtakens));
-}
-
-bool staysOvertaken(vector<bool>::const_iterator egoCarJustOvertakesVehicle,
-                    const vector<bool>& overtakens) {
-  return all_of(egoCarJustOvertakesVehicle, end(overtakens),
-                [](bool overtaken) {return overtaken;});
-}
-
 TEST_F(PathPlannerTest, should_overtake_vehicle) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
@@ -186,12 +173,12 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
 
 // WHEN
- bool egoCarOvertakesVehicle = false;
+  bool egoCarOvertakesVehicle = false;
   simulator.drive(
       [&]() {
         bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos_frenet().s;
         egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
-  });
+      });
 
 // THEN
   ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
@@ -214,16 +201,13 @@ TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
 
 // WHEN
-  vector<bool> overtakens;
+  bool egoCarOvertakesVehicle = false;
   simulator.drive(
       [&]() {
         bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos_frenet().s;
-        overtakens.push_back(overtaken);
+        egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
       });
 
   // THEN
-  auto egoCarJustOvertakesVehicle = getEgoCarJustOvertakesVehicleIterator(
-      overtakens);
-  ASSERT_NE(egoCarJustOvertakesVehicle, end(overtakens))<< "egoCar should overtake vehicle";
-  ASSERT_TRUE(staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
+  ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
 }
