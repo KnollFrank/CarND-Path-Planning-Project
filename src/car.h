@@ -124,7 +124,7 @@ class Vehicle {
 
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   os << "Vehicle(" << vehicle.id << "):" << endl;
-  os << "  pos_frenet = " << vehicle.pos << endl;
+  os << "  pos = " << vehicle.pos << endl;
   os << "  vel_m_per_s = " << vehicle.vel_m_per_s << " m/s" << endl;
   return os;
 }
