@@ -102,7 +102,7 @@ Frenet EgoCar::getJerk() const {
 class Vehicle {
 
  public:
-  Vehicle(const CoordsConverter& coordsConverter);
+  Vehicle(int id, const CoordsConverter& coordsConverter);
   void setPos(const FrenetCart& pos);
   FrenetCart getPos() const;
 
@@ -129,8 +129,9 @@ ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   return os;
 }
 
-Vehicle::Vehicle(const CoordsConverter& _coordsConverter)
-    : coordsConverter(_coordsConverter) {
+Vehicle::Vehicle(int _id, const CoordsConverter& _coordsConverter)
+    : id(_id),
+      coordsConverter(_coordsConverter) {
 }
 
 void Vehicle::setPos(const FrenetCart& pos) {

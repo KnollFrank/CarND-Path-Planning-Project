@@ -54,8 +54,7 @@ class PathPlannerTest : public ::testing::Test {
 
   Vehicle createVehicle(int id, const Frenet& pos,
                         const Frenet& vel_m_per_sec) {
-    Vehicle vehicle(*coordsConverter);
-    vehicle.id = id;
+    Vehicle vehicle(id, *coordsConverter);
     vehicle.setPos(FrenetCart(pos));
     vehicle.setVel_frenet_m_per_s(vel_m_per_sec);
     return vehicle;

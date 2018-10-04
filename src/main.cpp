@@ -82,8 +82,7 @@ vector<Vehicle> createVehicles(
 
   vector<Vehicle> vehicles;
   for (int i = 0; i < sensor_fusion.size(); i++) {
-    Vehicle vehicle(coordsConverter);
-    vehicle.id = sensor_fusion[i][ID];
+    Vehicle vehicle(sensor_fusion[i][ID], coordsConverter);
     vehicle.setPos(
         FrenetCart(Frenet { sensor_fusion[i][S], sensor_fusion[i][D] }, Point {
                        sensor_fusion[i][X], sensor_fusion[i][Y] }));
