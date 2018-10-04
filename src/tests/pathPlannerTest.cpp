@@ -186,17 +186,15 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
 
 // WHEN
-  vector<bool> overtakens;
+ bool egoCarOvertakesVehicle = false;
   simulator.drive(
       [&]() {
         bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos_frenet().s;
-        overtakens.push_back(overtaken);});
+        egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
+  });
 
 // THEN
-  auto egoCarJustOvertakesVehicle = getEgoCarJustOvertakesVehicleIterator(
-      overtakens);
-  ASSERT_NE(egoCarJustOvertakesVehicle, end(overtakens))<< "egoCar should overtake vehicle";
-  ASSERT_TRUE(staysOvertaken(egoCarJustOvertakesVehicle, overtakens))<< "egoCar should stay ahead of vehicle";
+  ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
 }
 
 TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
