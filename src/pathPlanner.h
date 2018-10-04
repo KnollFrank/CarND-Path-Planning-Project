@@ -245,17 +245,13 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
 }
 
 vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
-  vector<FrenetCart> points;
-  points.push_back(
-      FrenetCart(Frenet { egoCar.getPos().getFrenet(coordsConverter).s + 30,
-          getMiddleOfLane(lane) }));
-  points.push_back(
-      FrenetCart(Frenet { egoCar.getPos().getFrenet(coordsConverter).s + 60,
-          getMiddleOfLane(lane) }));
-  points.push_back(
-      FrenetCart(Frenet { egoCar.getPos().getFrenet(coordsConverter).s + 90,
-          getMiddleOfLane(lane) }));
-  return points;
+  auto createNewPoint = [&](int s_offset) {
+    return FrenetCart(
+        Frenet {egoCar.getPos().getFrenet(coordsConverter).s + s_offset,
+          getMiddleOfLane(lane)});
+  };
+
+  return {createNewPoint(30), createNewPoint(60), createNewPoint( 90)};
 }
 
 void PathPlanner::addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
