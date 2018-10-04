@@ -61,7 +61,7 @@ class PathPlannerTest : public ::testing::Test {
 
   void assert_car_drives_in_middle_of_lane(const Path& path, Lane lane) {
     for (const FrenetCart& frenet : path.points) {
-      ASSERT_NEAR(2 + 4 * lane, frenet.getFrenet(*coordsConverter).d, 0.001);
+      ASSERT_NEAR(2 + 4 * lane, frenet.getFrenet().d, 0.001);
     }
   }
 
@@ -69,7 +69,7 @@ class PathPlannerTest : public ::testing::Test {
 
     return map2<FrenetCart, double>(
         path.points,
-        [&](const FrenetCart& frenet) {return frenet.getFrenet(*coordsConverter).s;});
+        [&](const FrenetCart& frenet) {return frenet.getFrenet().s;});
   }
 
   void assert_car_drives_straight_ahead(const Path& path) {
@@ -113,9 +113,8 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
                                         std::experimental::nullopt);
 
 // WHEN
-  simulator.drive(
-      [&]() {
-        ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos().getFrenet(*coordsConverter).d, 0.001);});
+  simulator.drive([&]() {
+    ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos().getFrenet().d, 0.001);});
 
 // THEN
 }
@@ -125,9 +124,7 @@ TEST_F(PathPlannerTest, should_collide) {
   EgoCar egoCar = createEgoCar(
       Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) }, 0.02);
   Vehicle vehicle = createVehicle(
-      0,
-      egoCar.getPos().getFrenet(*coordsConverter)
-          + Frenet { EgoCar::carRadius() / 2, 0 },
+      0, egoCar.getPos().getFrenet() + Frenet { EgoCar::carRadius() / 2, 0 },
       Frenet::zero());
 
 // WHEN
@@ -142,9 +139,7 @@ TEST_F(PathPlannerTest, should_not_collide) {
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
                                0.02);
   Vehicle vehicle = createVehicle(
-      0,
-      egoCar.getPos().getFrenet(*coordsConverter)
-          + Frenet { 10 * EgoCar::carSize(), 0 },
+      0, egoCar.getPos().getFrenet() + Frenet { 10 * EgoCar::carSize(), 0 },
       Frenet { 5, 0 });
   vector<Vehicle> vehicles = { vehicle };
 
@@ -163,9 +158,9 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   Lane lane = Lane::MIDDLE;
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
                                0.02);
-  Vehicle vehicle = createVehicle(
-      0, egoCar.getPos().getFrenet(*coordsConverter) + Frenet { 35, 0 },
-      Frenet { mph2meter_per_sec(5), 0 });
+  Vehicle vehicle = createVehicle(0, egoCar.getPos().getFrenet() + Frenet { 35,
+      0 },
+                                  Frenet { mph2meter_per_sec(5), 0 });
   vector<Vehicle> vehicles = { vehicle };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
@@ -174,7 +169,7 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   bool egoCarOvertakesVehicle = false;
   simulator.drive(
       [&]() {
-        bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos().getFrenet(*coordsConverter).s;
+        bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
         egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
       });
 
@@ -189,10 +184,10 @@ TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
                                0.02);
   Vehicle vehicle2Overtake = createVehicle(
-      0, egoCar.getPos().getFrenet(*coordsConverter) + Frenet { 35, 0 },
+      0, egoCar.getPos().getFrenet() + Frenet { 35, 0 },
       Frenet { mph2meter_per_sec(5), 0 });
   Vehicle vehicleInLeftLane = createVehicle(
-      1, Frenet { vehicle2Overtake.getPos().getFrenet(*coordsConverter).s,
+      1, Frenet { vehicle2Overtake.getPos().getFrenet().s,
           getMiddleOfLane(Lane::LEFT) },
       vehicle2Overtake.getVel_frenet_m_per_s());
   vector<Vehicle> vehicles { vehicle2Overtake, vehicleInLeftLane };
@@ -203,7 +198,7 @@ TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
   bool egoCarOvertakesVehicle = false;
   simulator.drive(
       [&]() {
-        bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos().getFrenet(*coordsConverter).s;
+        bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
         egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
       });
 

@@ -43,7 +43,7 @@ vector<Point> Path::asPoints(const CoordsConverter& coordsConverter) const {
 
 vector<Frenet> Path::asFrenets(const CoordsConverter& coordsConverter) const {
   return map2<FrenetCart, Frenet>(points, [&](const FrenetCart& point) {
-    return point.getFrenet(coordsConverter);
+    return point.getFrenet();
   });
 }
 

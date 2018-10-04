@@ -30,8 +30,8 @@ bool isInLane(float d, Lane lane) {
   return startOfLane(lane) < d && d < endOfLane(lane);
 }
 
-bool isVehicleInLane(const Vehicle &vehicle, Lane lane, const CoordsConverter& coordsConverter) {
-  return isInLane(vehicle.getPos().getFrenet(coordsConverter).d, lane);
+bool isVehicleInLane(const Vehicle &vehicle, Lane lane) {
+  return isInLane(vehicle.getPos().getFrenet().d, lane);
 }
 
 #endif /* LANE_H_ */

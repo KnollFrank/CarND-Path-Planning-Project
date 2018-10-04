@@ -87,7 +87,7 @@ void Simulator::drive(function<void(void)> afterEachMovementOfEgoCar) {
 
 bool Simulator::oneRoundDriven(const EgoCar& egoCar,
                                const CoordsConverter& coordsConverter) {
-  return egoCar.getPos().getFrenet(coordsConverter).s > 6900;
+  return egoCar.getPos().getFrenet().s > 6900;
 }
 
 bool Simulator::oneRoundDriven() {
@@ -114,7 +114,7 @@ void Simulator::updatePreviousData(const vector<FrenetCart>& points,
     previousData.previous_path.points.push_back(path.points[i]);
   }
   previousData.end_path = points[points.size() - numberOfUnprocessedPathElements
-      - 1].getFrenet(coordsConverter);
+      - 1].getFrenet();
 }
 
 double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
@@ -125,8 +125,7 @@ double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
       - numberOfUnprocessedPathElements;
   for (int i = 0; i < numberOfProcessedPathElements; i++) {
     driveVehicles();
-    drive2PointOfEgoCar(points[i].getFrenet(coordsConverter),
-                        afterEachMovementOfEgoCar);
+    drive2PointOfEgoCar(points[i].getFrenet(), afterEachMovementOfEgoCar);
   }
 
   double secsDriven = numberOfProcessedPathElements * dt;
@@ -143,7 +142,7 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
   const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s();
   vehicle.setPos(
       FrenetCart(
-          vehicle.getPos().getFrenet(coordsConverter) + (vel_frenet * dt),
+          vehicle.getPos().getFrenet() + (vel_frenet * dt),
           coordsConverter));
 // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
@@ -157,7 +156,7 @@ void Simulator::assertNoIncidentsHappened() {
 
 void Simulator::drive2PointOfEgoCar(
     const Frenet& dst, function<void(void)> afterEachMovementOfEgoCar) {
-  const Frenet& src = egoCar.getPos().getFrenet(coordsConverter);
+  const Frenet& src = egoCar.getPos().getFrenet();
   egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
   egoCar.setPos(FrenetCart(dst, coordsConverter));
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());

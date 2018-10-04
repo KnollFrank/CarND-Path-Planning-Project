@@ -8,7 +8,6 @@
 #include "frenet.h"
 #include <experimental/optional>
 
-// TODO: jeder Konstruktor soll einen CoordsConverter haben. Vereinfachung der Methoden getFrenet() und getXY()
 class FrenetCart {
  public:
   FrenetCart();
@@ -16,7 +15,7 @@ class FrenetCart {
   FrenetCart(Frenet frenet, const CoordsConverter& _coordsConverter);
   FrenetCart(Point cart, const CoordsConverter& _coordsConverter);
 
-  Frenet getFrenet(const CoordsConverter& coordsConverter) const;
+  Frenet getFrenet() const;
   Point getXY(const CoordsConverter& coordsConverter) const;
 
   friend ostream& operator<<(ostream& os, const FrenetCart& frenetCart);
@@ -62,8 +61,8 @@ FrenetCart::FrenetCart(Point _cart, const CoordsConverter& _coordsConverter)
       coordsConverter(&_coordsConverter) {
 }
 
-Frenet FrenetCart::getFrenet(const CoordsConverter& coordsConverter) const {
-  return frenet ? *frenet : coordsConverter.getFrenet(*cart);
+Frenet FrenetCart::getFrenet() const {
+  return frenet ? *frenet : coordsConverter->getFrenet(*cart);
 }
 
 Point FrenetCart::getXY(const CoordsConverter& coordsConverter) const {

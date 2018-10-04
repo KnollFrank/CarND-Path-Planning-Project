@@ -111,12 +111,10 @@ vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
 
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Frenet::zero(), angle_rad);
-  vector<FrenetCart> origin2points =
-      map2<FrenetCart, FrenetCart>(
-          points,
-          [&](const FrenetCart& point) {
-            return FrenetCart(point.getFrenet(coordsConverter) - origin, coordsConverter);
-          });
+  vector<FrenetCart> origin2points = map2<FrenetCart, FrenetCart>(
+      points, [&](const FrenetCart& point) {
+        return FrenetCart(point.getFrenet() - origin, coordsConverter);
+      });
   return transform(coordinateSystem, origin2points);
 }
 
@@ -151,7 +149,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
       egoCar, vehicles, previousData.sizeOfPreviousPath());
   lane = getNewLane(too_close, lane);
   refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
-  refPoint.point = egoCar.getPos().getFrenet(coordsConverter);
+  refPoint.point = egoCar.getPos().getFrenet();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
   Path path;
@@ -189,7 +187,7 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
       (const Vehicle& vehicle) {
-        return isVehicleInLane(vehicle, lane, coordsConverter) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size);};
+        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, prev_size);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isEgoCarTooCloseToVehicleInLane);
@@ -198,11 +196,11 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
     const EgoCar& egoCar, const Vehicle& vehicle, const int prev_size) {
   double check_speed = vehicle.getVel_cart_m_per_s().len();
-  double check_vehicle_s = vehicle.getPos().getFrenet(coordsConverter).s
+  double check_vehicle_s = vehicle.getPos().getFrenet().s
       + prev_size * dt * check_speed;
   // TODO: replace magic number 30 with constant
-  return check_vehicle_s > egoCar.getPos().getFrenet(coordsConverter).s
-      && check_vehicle_s - egoCar.getPos().getFrenet(coordsConverter).s < 30;
+  return check_vehicle_s > egoCar.getPos().getFrenet().s
+      && check_vehicle_s - egoCar.getPos().getFrenet().s < 30;
 }
 
 double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
@@ -230,17 +228,15 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
 
   vector<FrenetCart> points;
   if (previousData.sizeOfPreviousPath() < 2) {
-    Frenet prev = egoCar.getPos().getFrenet(coordsConverter)
+    Frenet prev = egoCar.getPos().getFrenet()
         - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
     points.push_back(FrenetCart(prev, coordsConverter));
-    points.push_back(
-        FrenetCart(egoCar.getPos().getFrenet(coordsConverter),
-                   coordsConverter));
+    points.push_back(FrenetCart(egoCar.getPos().getFrenet(), coordsConverter));
   } else {
     refPoint.point = previousData.previous_path.points[previousData
-        .sizeOfPreviousPath() - 1].getFrenet(coordsConverter);
+        .sizeOfPreviousPath() - 1].getFrenet();
     Frenet prev = previousData.previous_path.points[previousData
-        .sizeOfPreviousPath() - 2].getFrenet(coordsConverter);
+        .sizeOfPreviousPath() - 2].getFrenet();
     refPoint.yaw_rad = (refPoint.point - prev).getHeading();
     points.push_back(FrenetCart(prev, coordsConverter));
     points.push_back(FrenetCart(refPoint.point, coordsConverter));
@@ -251,7 +247,7 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
 vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
   auto createNewPoint = [&](int s_offset) {
     return FrenetCart(
-        Frenet {egoCar.getPos().getFrenet(coordsConverter).s + s_offset,
+        Frenet {egoCar.getPos().getFrenet().s + s_offset,
           getMiddleOfLane(lane)},
         coordsConverter);
   };
@@ -273,12 +269,12 @@ void PathPlanner::sort_and_remove_duplicates(vector<FrenetCart>& points) {
   std::sort(
       points.begin(),
       points.end(),
-      [&](const FrenetCart& p1, const FrenetCart& p2) {return p1.getFrenet(coordsConverter).s < p2.getFrenet(coordsConverter).s;});
+      [&](const FrenetCart& p1, const FrenetCart& p2) {return p1.getFrenet().s < p2.getFrenet().s;});
   points.erase(
       unique(
           points.begin(),
           points.end(),
-          [&](const FrenetCart& p1, const FrenetCart& p2) {return p1.getFrenet(coordsConverter).s == p2.getFrenet(coordsConverter).s;}),
+          [&](const FrenetCart& p1, const FrenetCart& p2) {return p1.getFrenet().s == p2.getFrenet().s;}),
       points.end());
 }
 
@@ -289,13 +285,13 @@ vector<FrenetCart> PathPlanner::transform(
   return map2<FrenetCart, FrenetCart>(
       points,
       [&](const FrenetCart& point) {
-        return FrenetCart(coordinateSystem.transform(point.getFrenet(coordsConverter)), coordsConverter);});
+        return FrenetCart(coordinateSystem.transform(point.getFrenet()), coordsConverter);});
 }
 
 vector<double> PathPlanner::createSVals(const tk::spline& spline,
                                         const int num) {
   vector<double> s_vals;
-  Frenet target = createSplinePoint(30.0, spline).getFrenet(coordsConverter);
+  Frenet target = createSplinePoint(30.0, spline).getFrenet();
   double s_add_on = 0;
   double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
   for (int i = 0; i < num; i++) {

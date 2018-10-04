@@ -73,8 +73,8 @@ FrenetCart EgoCar::getPos() const {
 }
 
 Frenet EgoCar::getVelocity(const PositionHistory& positionHistory) const {
-  return (positions[positionHistory].getFrenet(coordsConverter)
-      - positions[positionHistory - 1].getFrenet(coordsConverter)) / dt;
+  return (positions[positionHistory].getFrenet()
+      - positions[positionHistory - 1].getFrenet()) / dt;
 }
 
 Frenet EgoCar::getAcceleration(const PositionHistory& positionHistory) const {
@@ -157,8 +157,8 @@ void Vehicle::setVel_frenet_m_per_s(const Frenet& vel) {
   vel_m_per_s = FrenetCart(
       vel,
       coordsConverter.createCartVectorFromStart2End(
-          getPos().getFrenet(coordsConverter),
-          getPos().getFrenet(coordsConverter) + vel),
+          getPos().getFrenet(),
+          getPos().getFrenet() + vel),
           coordsConverter);
 }
 
@@ -167,7 +167,7 @@ Point Vehicle::getVel_cart_m_per_s() const {
 }
 
 Frenet Vehicle::getVel_frenet_m_per_s() const {
-  return vel_m_per_s.getFrenet(coordsConverter);
+  return vel_m_per_s.getFrenet();
 }
 
 #endif /* CAR_H_ */
