@@ -90,7 +90,8 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
   // TODO: share 0.02 within EgoCar with Pathplanner
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) }, 0.02);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
+                               0.02);
   vector<Vehicle> vehicles;
 
   PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02);
@@ -106,7 +107,8 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) }, 0.02);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
+                               0.02);
   vector<Vehicle> vehicles;
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles,
@@ -125,7 +127,9 @@ TEST_F(PathPlannerTest, should_collide) {
   EgoCar egoCar = createEgoCar(
       Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) }, 0.02);
   Vehicle vehicle = createVehicle(
-      0, egoCar.getPos().getFrenet(*coordsConverter) + Frenet { EgoCar::carRadius() / 2, 0 },
+      0,
+      egoCar.getPos().getFrenet(*coordsConverter)
+          + Frenet { EgoCar::carRadius() / 2, 0 },
       Frenet::zero());
 
 // WHEN
@@ -137,10 +141,13 @@ TEST_F(PathPlannerTest, should_collide) {
 TEST_F(PathPlannerTest, should_not_collide) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) }, 0.02);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
+                               0.02);
   Vehicle vehicle = createVehicle(
-      0, egoCar.getPos().getFrenet(*coordsConverter) + Frenet { 10 * EgoCar::carSize(), 0 }, Frenet {
-          5, 0 });
+      0,
+      egoCar.getPos().getFrenet(*coordsConverter)
+          + Frenet { 10 * EgoCar::carSize(), 0 },
+      Frenet { 5, 0 });
   vector<Vehicle> vehicles = { vehicle };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles,
@@ -169,18 +176,21 @@ bool staysOvertaken(vector<bool>::const_iterator egoCarJustOvertakesVehicle,
 TEST_F(PathPlannerTest, should_overtake_vehicle) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) }, 0.02);
-  Vehicle vehicle = createVehicle(0, egoCar.getPos().getFrenet(*coordsConverter) + Frenet { 35, 0 },
-                                  Frenet { mph2meter_per_sec(5), 0 });
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
+                               0.02);
+  Vehicle vehicle = createVehicle(
+      0, egoCar.getPos().getFrenet(*coordsConverter) + Frenet { 35, 0 },
+      Frenet { mph2meter_per_sec(5), 0 });
   vector<Vehicle> vehicles = { vehicle };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
 
 // WHEN
   vector<bool> overtakens;
-  simulator.drive([&]() {
-    bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos_frenet().s;
-    overtakens.push_back(overtaken);});
+  simulator.drive(
+      [&]() {
+        bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos_frenet().s;
+        overtakens.push_back(overtaken);});
 
 // THEN
   auto egoCarJustOvertakesVehicle = getEgoCarJustOvertakesVehicleIterator(
@@ -192,10 +202,11 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
 TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) }, 0.02);
-  Vehicle vehicle2Overtake = createVehicle(0, egoCar.getPos().getFrenet(*coordsConverter) + Frenet {
-      35, 0 },
-                                           Frenet { mph2meter_per_sec(5), 0 });
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
+                               0.02);
+  Vehicle vehicle2Overtake = createVehicle(
+      0, egoCar.getPos().getFrenet(*coordsConverter) + Frenet { 35, 0 },
+      Frenet { mph2meter_per_sec(5), 0 });
   Vehicle vehicleInLeftLane =
       createVehicle(1, Frenet { vehicle2Overtake.getPos_frenet().s,
                         getMiddleOfLane(Lane::LEFT) },
@@ -206,13 +217,11 @@ TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
 
 // WHEN
   vector<bool> overtakens;
-  simulator.drive([&]() {
-    bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos_frenet().s;
-    overtakens.push_back(overtaken);
-    // TODO: die folgenden beiden Zeilen wieder entfernen.
-      ASSERT_NEAR(getMiddleOfLane(Lane::MIDDLE), vehicles[0].getPos_frenet().d, 0.001);
-      ASSERT_NEAR(getMiddleOfLane(Lane::LEFT), vehicles[1].getPos_frenet().d, 0.001);
-    });
+  simulator.drive(
+      [&]() {
+        bool overtaken = egoCar.getPos().getFrenet(*coordsConverter).s > vehicles[0].getPos_frenet().s;
+        overtakens.push_back(overtaken);
+      });
 
   // THEN
   auto egoCarJustOvertakesVehicle = getEgoCarJustOvertakesVehicleIterator(
