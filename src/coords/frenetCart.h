@@ -13,7 +13,7 @@ class FrenetCart {
   FrenetCart();
   FrenetCart(Frenet frenet, Point cart, const CoordsConverter& coordsConverter);
   FrenetCart(Frenet frenet, const CoordsConverter& _coordsConverter);
-  FrenetCart(Point cart, const CoordsConverter& _coordsConverter);
+  FrenetCart(Point cart, const CoordsConverter& coordsConverter);
 
   Frenet getFrenet() const;
   Point getXY() const;
