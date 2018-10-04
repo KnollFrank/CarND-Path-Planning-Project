@@ -141,7 +141,10 @@ void Simulator::driveVehicles() {
 
 void Simulator::driveVehicle(Vehicle& vehicle) {
   const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s();
-  vehicle.setPos(FrenetCart(vehicle.getPos().getFrenet(coordsConverter) + (vel_frenet * dt)));
+  vehicle.setPos(
+      FrenetCart(
+          vehicle.getPos().getFrenet(coordsConverter) + (vel_frenet * dt),
+          coordsConverter));
 // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
@@ -156,7 +159,7 @@ void Simulator::drive2PointOfEgoCar(
     const Frenet& dst, function<void(void)> afterEachMovementOfEgoCar) {
   const Frenet& src = egoCar.getPos().getFrenet(coordsConverter);
   egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
-  egoCar.setPos(FrenetCart(dst));
+  egoCar.setPos(FrenetCart(dst, coordsConverter));
   egoCar.yaw_deg = rad2deg((dst - src).getHeading());
 // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 

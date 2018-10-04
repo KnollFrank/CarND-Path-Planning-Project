@@ -111,10 +111,12 @@ vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
 
   CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
       Frenet::zero(), angle_rad);
-  vector<FrenetCart> origin2points = map2<FrenetCart, FrenetCart>(
-      points, [&](const FrenetCart& point) {
-        return FrenetCart(point.getFrenet(coordsConverter) - origin);
-      });
+  vector<FrenetCart> origin2points =
+      map2<FrenetCart, FrenetCart>(
+          points,
+          [&](const FrenetCart& point) {
+            return FrenetCart(point.getFrenet(coordsConverter) - origin, coordsConverter);
+          });
   return transform(coordinateSystem, origin2points);
 }
 
@@ -142,7 +144,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   // printInfo(egoCar, vehicles);
 
   if (previousData.sizeOfPreviousPath() > 0) {
-    egoCar.setPos(FrenetCart(previousData.end_path));
+    egoCar.setPos(FrenetCart(previousData.end_path, coordsConverter));
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(
@@ -230,16 +232,18 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
   if (previousData.sizeOfPreviousPath() < 2) {
     Frenet prev = egoCar.getPos().getFrenet(coordsConverter)
         - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
-    points.push_back(FrenetCart(prev));
-    points.push_back(FrenetCart(egoCar.getPos().getFrenet(coordsConverter)));
+    points.push_back(FrenetCart(prev, coordsConverter));
+    points.push_back(
+        FrenetCart(egoCar.getPos().getFrenet(coordsConverter),
+                   coordsConverter));
   } else {
     refPoint.point = previousData.previous_path.points[previousData
         .sizeOfPreviousPath() - 1].getFrenet(coordsConverter);
     Frenet prev = previousData.previous_path.points[previousData
         .sizeOfPreviousPath() - 2].getFrenet(coordsConverter);
     refPoint.yaw_rad = (refPoint.point - prev).getHeading();
-    points.push_back(FrenetCart(prev));
-    points.push_back(FrenetCart(refPoint.point));
+    points.push_back(FrenetCart(prev, coordsConverter));
+    points.push_back(FrenetCart(refPoint.point, coordsConverter));
   }
   return points;
 }
@@ -248,7 +252,8 @@ vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
   auto createNewPoint = [&](int s_offset) {
     return FrenetCart(
         Frenet {egoCar.getPos().getFrenet(coordsConverter).s + s_offset,
-          getMiddleOfLane(lane)});
+          getMiddleOfLane(lane)},
+        coordsConverter);
   };
 
   return {createNewPoint(30), createNewPoint(60), createNewPoint( 90)};
@@ -284,7 +289,7 @@ vector<FrenetCart> PathPlanner::transform(
   return map2<FrenetCart, FrenetCart>(
       points,
       [&](const FrenetCart& point) {
-        return FrenetCart(coordinateSystem.transform(point.getFrenet(coordsConverter)));});
+        return FrenetCart(coordinateSystem.transform(point.getFrenet(coordsConverter)), coordsConverter);});
 }
 
 vector<double> PathPlanner::createSVals(const tk::spline& spline,
@@ -318,7 +323,7 @@ CoordinateSystem PathPlanner::createRotatedCoordinateSystem(
 }
 
 FrenetCart PathPlanner::createSplinePoint(double x, const tk::spline& spline) {
-  return FrenetCart(Frenet { x, spline(x) });
+  return FrenetCart(Frenet { x, spline(x) }, coordsConverter);
 }
 
 #endif /* PATHPLANNER_H_ */
