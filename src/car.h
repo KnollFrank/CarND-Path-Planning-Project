@@ -112,11 +112,10 @@ class Vehicle {
   void setVel_frenet_m_per_s(const Frenet& vel);
   Frenet getVel_frenet_m_per_s() const;
 
-  int id;
-
   friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
 
  private:
+  int id;
   FrenetCart vel_m_per_s;
   FrenetCart pos;
   const CoordsConverter& coordsConverter;
