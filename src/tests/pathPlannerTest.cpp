@@ -161,7 +161,7 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
   // TODO: refactor
   Vehicle vehicleInMiddleLane = createVehicle(
       0, egoCar.getPos().getFrenet() + Frenet { 35, 0 }, Frenet {
-          mph2meter_per_sec(5), 0 });
+          mph2meter_per_sec(40), 0 });
   Vehicle vehicleInLeftLane = createVehicle(
       1,
       Frenet { vehicleInMiddleLane.getPos().getFrenet().s, getMiddleOfLane(

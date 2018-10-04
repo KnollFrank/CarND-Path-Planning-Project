@@ -165,7 +165,7 @@ void Simulator::drive2PointOfEgoCar(
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
-  return egoCar.getPos().getXY().distanceTo(vehicle.getPos().getXY())
+  return egoCar.getPos().getFrenet().distanceTo(vehicle.getPos().getFrenet())
       <= EgoCar::carSize();
 }
 

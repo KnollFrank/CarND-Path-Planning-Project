@@ -59,12 +59,16 @@ class PathPlanner {
  private:
   bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
                                           const vector<Vehicle>& vehicles,
-                                          const int prev_size);
+                                          const int prev_size,
+                                          const Lane& lane);
   bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
                                                 const Vehicle& vehicle,
                                                 const int prev_size);
   double getNewVelocity(bool too_close, double vel_mph);
-  Lane getNewLane(bool too_close, Lane lane);
+  Lane getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
+                  const vector<Vehicle>& vehicles, const int prev_size);
+  bool canSwitch2Lane(const EgoCar& egoCar, const Lane& lane,
+                      const vector<Vehicle>& vehicles, const int prev_size);
   CoordinateSystem createRotatedCoordinateSystem(const Frenet& origin,
                                                  double angle_rad);
   FrenetCart createSplinePoint(double x, const tk::spline& spline);
@@ -146,8 +150,9 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(
-      egoCar, vehicles, previousData.sizeOfPreviousPath());
-  lane = getNewLane(too_close, lane);
+      egoCar, vehicles, previousData.sizeOfPreviousPath(), lane);
+  lane = getNewLane(too_close, lane, egoCar, vehicles,
+                    previousData.sizeOfPreviousPath());
   refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
   refPoint.point = egoCar.getPos().getFrenet();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
@@ -182,8 +187,8 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
 }
 
 bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
-    const EgoCar& egoCar, const vector<Vehicle>& vehicles,
-    const int prev_size) {
+    const EgoCar& egoCar, const vector<Vehicle>& vehicles, const int prev_size,
+    const Lane& lane) {
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
       (const Vehicle& vehicle) {
@@ -191,6 +196,16 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isEgoCarTooCloseToVehicleInLane);
+}
+
+bool PathPlanner::canSwitch2Lane(const EgoCar& egoCar, const Lane& lane,
+                                 const vector<Vehicle>& vehicles,
+                                 const int prev_size) {
+  // TODO: refactor
+  bool too_close = isEgoCarTooCloseToAnyVehicleInLane(egoCar, vehicles,
+                                                      prev_size, lane);
+
+  return !too_close;
 }
 
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
@@ -213,11 +228,32 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
   return vel_mph;
 }
 
-Lane PathPlanner::getNewLane(bool too_close, Lane lane) {
-  if (too_close && lane > Lane::LEFT) {
+// TODO: refactor
+Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
+                             const vector<Vehicle>& vehicles,
+                             const int prev_size) {
+  if (!too_close) {
+    return lane;
+  }
+
+  if (lane == Lane::LEFT
+      && canSwitch2Lane(egoCar, Lane::MIDDLE, vehicles, prev_size)) {
+    lane = Lane::MIDDLE;
+  }
+
+  if (lane == Lane::MIDDLE
+      && canSwitch2Lane(egoCar, Lane::LEFT, vehicles, prev_size)) {
     lane = Lane::LEFT;
-  } else if (too_close && lane < Lane::RIGHT) {
+  }
+
+  if (lane == Lane::MIDDLE
+      && canSwitch2Lane(egoCar, Lane::RIGHT, vehicles, prev_size)) {
     lane = Lane::RIGHT;
+  }
+
+  if (lane == Lane::RIGHT
+      && canSwitch2Lane(egoCar, Lane::MIDDLE, vehicles, prev_size)) {
+    lane = Lane::MIDDLE;
   }
 
   return lane;
