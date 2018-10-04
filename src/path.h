@@ -37,7 +37,7 @@ ostream& operator<<(ostream& os, const Path& path) {
 
 vector<Point> Path::asPoints(const CoordsConverter& coordsConverter) const {
   return map2<FrenetCart, Point>(points, [&](const FrenetCart& point) {
-    return point.getXY(coordsConverter);
+    return point.getXY();
   });
 }
 

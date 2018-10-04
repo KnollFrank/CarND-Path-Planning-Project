@@ -16,7 +16,7 @@ class FrenetCart {
   FrenetCart(Point cart, const CoordsConverter& _coordsConverter);
 
   Frenet getFrenet() const;
-  Point getXY(const CoordsConverter& coordsConverter) const;
+  Point getXY() const;
 
   friend ostream& operator<<(ostream& os, const FrenetCart& frenetCart);
 
@@ -65,8 +65,8 @@ Frenet FrenetCart::getFrenet() const {
   return frenet ? *frenet : coordsConverter->getFrenet(*cart);
 }
 
-Point FrenetCart::getXY(const CoordsConverter& coordsConverter) const {
-  return cart ? *cart : coordsConverter.getXY(*frenet);
+Point FrenetCart::getXY() const {
+  return cart ? *cart : coordsConverter->getXY(*frenet);
 }
 
 #endif /* COORDS_FRENETCART_H_ */

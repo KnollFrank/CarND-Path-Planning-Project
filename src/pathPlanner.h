@@ -35,8 +35,8 @@ void printInfo(const EgoCar& egoCar, const vector<Vehicle>& vehicles,
                const CoordsConverter& coordsConverter) {
   auto isCloserToEgoCar =
       [&](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-        double distance1 = egoCar.getPos().getXY(coordsConverter).distanceTo(vehicle1.getPos().getXY(coordsConverter));
-        double distance2 = egoCar.getPos().getXY(coordsConverter).distanceTo(vehicle2.getPos().getXY(coordsConverter));
+        double distance1 = egoCar.getPos().getXY().distanceTo(vehicle1.getPos().getXY());
+        double distance2 = egoCar.getPos().getXY().distanceTo(vehicle2.getPos().getXY());
         return distance1 < distance2;
       };
 
