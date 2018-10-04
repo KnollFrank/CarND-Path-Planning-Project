@@ -149,7 +149,8 @@ void Vehicle::setVel_cart_m_per_s(const Point& vel) {
       coordsConverter.createFrenetVectorFromStart2End(
           getPos().getXY(coordsConverter),
           getPos().getXY(coordsConverter) + vel),
-      vel);
+      vel,
+      coordsConverter);
 }
 
 void Vehicle::setVel_frenet_m_per_s(const Frenet& vel) {
@@ -157,7 +158,8 @@ void Vehicle::setVel_frenet_m_per_s(const Frenet& vel) {
       vel,
       coordsConverter.createCartVectorFromStart2End(
           getPos().getFrenet(coordsConverter),
-          getPos().getFrenet(coordsConverter) + vel));
+          getPos().getFrenet(coordsConverter) + vel),
+          coordsConverter);
 }
 
 Point Vehicle::getVel_cart_m_per_s() const {

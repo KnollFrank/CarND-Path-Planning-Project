@@ -12,7 +12,7 @@
 class FrenetCart {
  public:
   FrenetCart();
-  FrenetCart(Frenet frenet, Point cart);
+  FrenetCart(Frenet frenet, Point cart, const CoordsConverter& coordsConverter);
   FrenetCart(Frenet frenet);
   FrenetCart(Point cart);
 
@@ -22,6 +22,7 @@ class FrenetCart {
   friend ostream& operator<<(ostream& os, const FrenetCart& frenetCart);
 
  private:
+  const CoordsConverter* coordsConverter;
   std::experimental::optional<Frenet> frenet;
   std::experimental::optional<Point> cart;
 };
@@ -37,9 +38,10 @@ ostream& operator<<(ostream& os, const FrenetCart& frenetCart) {
   return os;
 }
 
-FrenetCart::FrenetCart(Frenet _frenet, Point _cart)
+FrenetCart::FrenetCart(Frenet _frenet, Point _cart, const CoordsConverter& _coordsConverter)
     : frenet(_frenet),
-      cart(_cart) {
+      cart(_cart),
+      coordsConverter(&_coordsConverter){
 }
 
 FrenetCart::FrenetCart()

@@ -57,7 +57,8 @@ EgoCar createEgoCar(
     const CoordsConverter& coordsConverter) {
   EgoCar egoCar(coordsConverter, 0.02);
   egoCar.setPos(FrenetCart(Frenet { j[1]["s"], j[1]["d"] }, Point { j[1]["x"],
-                               j[1]["y"] }));
+                               j[1]["y"] },
+                           coordsConverter));
   egoCar.yaw_deg = j[1]["yaw"];
   egoCar.speed_mph = j[1]["speed"];
   return egoCar;
@@ -87,7 +88,8 @@ vector<Vehicle> createVehicles(
                                                          sensor_fusion[i][D] },
                                                      Point {
                                                          sensor_fusion[i][X],
-                                                         sensor_fusion[i][Y] }),
+                                                         sensor_fusion[i][Y] },
+                                                     coordsConverter),
                     coordsConverter);
     vehicle.setVel_cart_m_per_s(Point { sensor_fusion[i][VX],
         sensor_fusion[i][VY] });
