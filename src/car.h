@@ -52,9 +52,10 @@ class EgoCar {
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   os << "EgoCar:" << endl;
-  os << "  positions = " << egoCar.positions << endl;
+  os << "  position = " << egoCar.getPos();
   os << "  yaw = " << egoCar.yaw_deg << "°" << endl;
-  os << "  speed = " << egoCar.speed_mph << " mph" << endl;
+  os << "  speed = " << egoCar.speed_mph << " mph ("
+     << mph2meter_per_sec(egoCar.speed_mph) << " m/s)" << endl;
   return os;
 }
 
@@ -123,7 +124,7 @@ class Vehicle {
 
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
   os << "Vehicle(" << vehicle.id << "):" << endl;
-  os << "  pos = " << vehicle.pos << endl;
+  os << "  pos = " << vehicle.pos;
   os << "  vel_m_per_s = " << vehicle.vel_m_per_s << " m/s" << endl;
   return os;
 }
@@ -146,20 +147,17 @@ FrenetCart Vehicle::getPos() const {
 
 void Vehicle::setVel_cart_m_per_s(const Point& vel) {
   vel_m_per_s = FrenetCart(
-      coordsConverter.createFrenetVectorFromStart2End(
-          getPos().getXY(),
-          getPos().getXY() + vel),
-      vel,
-      coordsConverter);
+      coordsConverter.createFrenetVectorFromStart2End(getPos().getXY(),
+                                                      getPos().getXY() + vel),
+      vel, coordsConverter);
 }
 
 void Vehicle::setVel_frenet_m_per_s(const Frenet& vel) {
   vel_m_per_s = FrenetCart(
       vel,
-      coordsConverter.createCartVectorFromStart2End(
-          getPos().getFrenet(),
-          getPos().getFrenet() + vel),
-          coordsConverter);
+      coordsConverter.createCartVectorFromStart2End(getPos().getFrenet(),
+                                                    getPos().getFrenet() + vel),
+      coordsConverter);
 }
 
 Point Vehicle::getVel_cart_m_per_s() const {

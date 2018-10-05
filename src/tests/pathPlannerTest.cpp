@@ -150,7 +150,7 @@ TEST_F(PathPlannerTest, should_not_collide) {
 
 // WHEN
   simulator.drive([&]() {
-    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));});
+    ASSERT_FALSE(Simulator::getCollidingVehicle(egoCar, vehicles));});
 
 // THEN
 }
@@ -163,7 +163,7 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
   // TODO: refactor
   Vehicle vehicleInMiddleLane = createVehicle(
       0, egoCar.getPos().getFrenet() + Frenet { 35, 0 }, Frenet {
-          mph2meter_per_sec(40), 0 });
+          mph2meter_per_sec(35), 0 });
   Vehicle vehicleInLeftLane = createVehicle(
       1,
       Frenet { vehicleInMiddleLane.getPos().getFrenet().s, getMiddleOfLane(
@@ -182,7 +182,7 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
 
 // WHEN
   simulator.drive([&]() {
-    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));});
+    ASSERT_FALSE(Simulator::getCollidingVehicle(egoCar, vehicles));});
 
 // THEN
 }

@@ -30,8 +30,8 @@ class Simulator {
             std::experimental::optional<int> minSecs2Drive);
   void drive(function<void(void)> afterEachMovementOfEgoCar);
   static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
-  static bool isCollision(const EgoCar& egoCar,
-                          const vector<Vehicle>& vehicles);
+  static std::experimental::optional<Vehicle> getCollidingVehicle(
+      const EgoCar& egoCar, const vector<Vehicle>& vehicles);
   static bool oneRoundDriven(const EgoCar& egoCar,
                              const CoordsConverter& coordsConverter);
 
@@ -149,7 +149,8 @@ void Simulator::assertNoIncidentsHappened() {
   ASSERT_LE(egoCar.getAcceleration().len(), 10)<< egoCar;
 //  ASSERT_LE(egoCar.getJerk().len(), 10) << egoCar;
   ASSERT_LE(egoCar.speed_mph, 50);
-  ASSERT_FALSE(isCollision(egoCar, vehicles))<< "COLLISION between ego car and another vehicle:" << endl << egoCar << vehicles;
+  std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(egoCar, vehicles);
+  ASSERT_FALSE(collidingVehicle)<< "COLLISION between" << endl << egoCar << endl << " and " << endl << *collidingVehicle;
 }
 
 void Simulator::drive2PointOfEgoCar(
@@ -169,11 +170,16 @@ bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
       <= EgoCar::carSize();
 }
 
-bool Simulator::isCollision(const EgoCar& egoCar,
-                            const vector<Vehicle>& vehicles) {
-  return std::any_of(
+std::experimental::optional<Vehicle> Simulator::getCollidingVehicle(
+    const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
+
+  auto collidingVehicleIterator = std::find_if(
       vehicles.cbegin(), vehicles.cend(),
       [&](const Vehicle& vehicle) {return isCollision(egoCar, vehicle);});
+  return
+      collidingVehicleIterator != vehicles.cend() ?
+          std::experimental::make_optional(*collidingVehicleIterator) :
+          std::experimental::nullopt;
 }
 
 #endif /* TESTS_SIMULATOR_H_ */
