@@ -153,7 +153,7 @@ TEST_F(PathPlannerTest, should_not_collide) {
 
 // WHEN
   simulator.run([&]() {
-    ASSERT_FALSE(Simulator::getCollidingVehicle(egoCar, vehicles));});
+    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));});
 
 // THEN
 }
@@ -164,26 +164,23 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
 
   EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
 
-  Vehicle vehicleInMiddleLane = createVehicle(0, egoCarPlusMeters(egoCar, 35),
-                                              mph2meter_per_sec(35));
+  Vehicle middle = createVehicle(0, egoCarPlusMeters(egoCar, 35),
+                                 mph2meter_per_sec(35));
 
-  Vehicle vehicleInLeftLane = createVehicle(
-      1, parallelToVehicleInLane(vehicleInMiddleLane, Lane::LEFT),
-      vehicleInMiddleLane.getVel_frenet_m_per_s().s);
+  Vehicle left = createVehicle(1, parallelToVehicleInLane(middle, Lane::LEFT),
+                               middle.getVel_frenet_m_per_s().s);
 
-  Vehicle vehicleInRightLane = createVehicle(
-      2, parallelToVehicleInLane(vehicleInMiddleLane, Lane::RIGHT),
-      vehicleInMiddleLane.getVel_frenet_m_per_s().s);
+  Vehicle right = createVehicle(2, parallelToVehicleInLane(middle, Lane::RIGHT),
+                                middle.getVel_frenet_m_per_s().s);
 
-  vector<Vehicle> vehicles { vehicleInMiddleLane, vehicleInLeftLane,
-      vehicleInRightLane };
+  vector<Vehicle> vehicles { middle, left, right };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles,
                                         std::experimental::nullopt);
 
 // WHEN
   simulator.run([&]() {
-    ASSERT_FALSE(Simulator::getCollidingVehicle(egoCar, vehicles));});
+    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));});
 
 // THEN
 }

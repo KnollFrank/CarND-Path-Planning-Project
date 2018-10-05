@@ -30,6 +30,8 @@ class Simulator {
             std::experimental::optional<int> minSecs2Drive);
   void run(function<void(void)> afterEachMovementOfEgoCar);
   static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
+  static bool isCollision(const EgoCar& egoCar,
+                          const vector<Vehicle>& vehicles);
   static std::experimental::optional<Vehicle> getCollidingVehicle(
       const EgoCar& egoCar, const vector<Vehicle>& vehicles);
   static bool oneRoundDriven(const EgoCar& egoCar,
@@ -168,6 +170,11 @@ void Simulator::drive2PointOfEgoCar(
 bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
   return egoCar.getPos().getFrenet().distanceTo(vehicle.getPos().getFrenet())
       <= EgoCar::carSize();
+}
+
+bool Simulator::isCollision(const EgoCar& egoCar,
+                            const vector<Vehicle>& vehicles) {
+  return bool(getCollidingVehicle(egoCar, vehicles));
 }
 
 std::experimental::optional<Vehicle> Simulator::getCollidingVehicle(
