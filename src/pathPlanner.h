@@ -224,7 +224,6 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
   return vel_mph;
 }
 
-// TODO: refactor
 Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
                              const vector<Vehicle>& vehicles,
                              const int prev_size) {
@@ -237,16 +236,16 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
   };
 
   if (canSwitchFromLane2Lane(Lane::LEFT, Lane::MIDDLE)) {
-    lane = Lane::MIDDLE;
+    return Lane::MIDDLE;
   } else if (canSwitchFromLane2Lane(Lane::MIDDLE, Lane::LEFT)) {
-    lane = Lane::LEFT;
+    return Lane::LEFT;
   } else if (canSwitchFromLane2Lane(Lane::MIDDLE, Lane::RIGHT)) {
-    lane = Lane::RIGHT;
+    return Lane::RIGHT;
   } else if (canSwitchFromLane2Lane(Lane::RIGHT, Lane::MIDDLE)) {
-    lane = Lane::MIDDLE;
+    return Lane::MIDDLE;
+  } else {
+    return lane;
   }
-
-  return lane;
 }
 
 vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
