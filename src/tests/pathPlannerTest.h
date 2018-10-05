@@ -258,8 +258,9 @@ TEST_F(PathPlannerTest, should_not_overtake_two_parallel_vehicles_when_third_car
   Vehicle left = createVehicle(1, parallelToVehicleInLane(middle, Lane::LEFT),
                                middle.getVel_frenet_m_per_s().s);
 
-  Vehicle right = createVehicle(2, parallelToVehicleInLane(middle, Lane::RIGHT),
-                                middle.getVel_frenet_m_per_s().s);
+  Vehicle right = createVehicle(
+      2, parallelToVehicleInLane(middle, Lane::RIGHT) - Frenet { 10, 0 },
+      middle.getVel_frenet_m_per_s().s);
 
   vector<Vehicle> vehicles { middle, left, right };
 
