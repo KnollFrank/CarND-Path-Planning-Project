@@ -183,7 +183,8 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
 
 // WHEN
   simulator.run([&]() {
-    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));});
+    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));
+  });
 
 // THEN
 }
