@@ -27,7 +27,7 @@ double endOfLane(const Lane& lane) {
 }
 
 bool isInLane(float d, const Lane& lane) {
-  return startOfLane(lane) < d && d < endOfLane(lane);
+  return startOfLane(lane) <= d && d <= endOfLane(lane);
 }
 
 bool isVehicleInLane(const Vehicle &vehicle, const Lane& lane) {
