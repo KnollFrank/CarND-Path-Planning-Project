@@ -23,11 +23,11 @@
 #include "path.h"
 #include "pathPlanner.h"
 #include "previousData.h"
-#include "tests/coordsConverterTest.h"
-#include "tests/simulator.h"
 
-#include "tests/pathPlannerTest.cpp"
+#include "tests/simulator.h"
 #include "tests/parametricSplineTest.h"
+#include "tests/pathPlannerTest.h"
+#include "tests/coordsConverterTest.h"
 
 #define COLLECT_DATA_FOR_UNIT_TESTS false
 

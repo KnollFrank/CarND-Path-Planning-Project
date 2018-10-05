@@ -1,3 +1,6 @@
+#ifndef TESTS_PATHPLANNERTEST_H_
+#define TESTS_PATHPLANNERTEST_H_
+
 #include "../pathPlanner.h"
 
 #include <ext/type_traits.h>
@@ -243,3 +246,5 @@ TEST_F(PathPlannerTest,
     should_overtake_two_parallel_vehicles_middleLane_rightLane) {
   should_overtake_two_parallel_vehicles(Lane::RIGHT);
 }
+
+#endif

@@ -1,5 +1,5 @@
-#ifndef COORDSCONVERTERTEST_H_
-#define COORDSCONVERTERTEST_H_
+#ifndef TESTS_COORDSCONVERTERTEST_H_
+#define TESTS_COORDSCONVERTERTEST_H_
 
 #include "../coords/coordsConverter.h"
 
@@ -338,4 +338,4 @@ TEST(CoordsConverterTest, should_convert) {
   }
 }
 
-#endif /* COORDSCONVERTERTEST_H_ */
+#endif
