@@ -22,14 +22,14 @@ enum PositionHistory {
 class EgoCar {
 
  public:
-  EgoCar(const CoordsConverter& coordsConverter, double dt);
+  EgoCar(const CoordsConverter& coordsConverter);
   double yaw_deg;
   double speed_mph;
 
   void setPos(const FrenetCart& pos);
   FrenetCart getPos() const;
-  Frenet getAcceleration() const;
-  Frenet getJerk() const;
+  Frenet getAcceleration(double dt) const;
+  Frenet getJerk(double dt) const;
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
@@ -42,12 +42,12 @@ class EgoCar {
   }
 
  private:
-  Frenet getVelocity(const PositionHistory& positionHistory) const;
-  Frenet getAcceleration(const PositionHistory& positionHistory) const;
+  Frenet getVelocity(const PositionHistory& positionHistory, double dt) const;
+  Frenet getAcceleration(const PositionHistory& positionHistory,
+                         double dt) const;
 
   const CoordsConverter& coordsConverter;
   boost::circular_buffer<FrenetCart> positions;
-  double dt;
 };
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
@@ -59,10 +59,9 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   return os;
 }
 
-EgoCar::EgoCar(const CoordsConverter& _coordsConverter, double _dt)
+EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
     : coordsConverter(_coordsConverter),
-      positions(boost::circular_buffer<FrenetCart>(4)),
-      dt(_dt) {
+      positions(boost::circular_buffer<FrenetCart>(4)) {
 }
 
 void EgoCar::setPos(const FrenetCart& pos) {
@@ -73,26 +72,28 @@ FrenetCart EgoCar::getPos() const {
   return positions.back();
 }
 
-Frenet EgoCar::getVelocity(const PositionHistory& positionHistory) const {
+Frenet EgoCar::getVelocity(const PositionHistory& positionHistory,
+                           double dt) const {
   return (positions[positionHistory].getFrenet()
       - positions[positionHistory - 1].getFrenet()) / dt;
 }
 
-Frenet EgoCar::getAcceleration(const PositionHistory& positionHistory) const {
+Frenet EgoCar::getAcceleration(const PositionHistory& positionHistory,
+                               double dt) const {
   return
       positions.full() ?
-          (getVelocity(positionHistory)
-              - getVelocity(static_cast<PositionHistory>(positionHistory - 1)))
-              / dt :
+          (getVelocity(positionHistory, dt)
+              - getVelocity(static_cast<PositionHistory>(positionHistory - 1),
+                            dt)) / dt :
           Frenet::zero();
 }
 
 // TODO: when computing the acceleration in cartesian coordinates (which would be the correct way) we always exceed 10 m/s^2, so I shifted to the wrong way of using Frenet coordinates.
-Frenet EgoCar::getAcceleration() const {
-  return getAcceleration(PositionHistory::ACTUAL);
+Frenet EgoCar::getAcceleration(double dt) const {
+  return getAcceleration(PositionHistory::ACTUAL, dt);
 }
 
-Frenet EgoCar::getJerk() const {
+Frenet EgoCar::getJerk(double dt) const {
   return
       positions.full() ?
           (getAcceleration(PositionHistory::ACTUAL)

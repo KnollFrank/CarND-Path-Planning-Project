@@ -55,7 +55,7 @@ EgoCar createEgoCar(
             std::allocator<char> >, bool, long, unsigned long, double,
         std::allocator, nlohmann::adl_serializer> &j,
     const CoordsConverter& coordsConverter) {
-  EgoCar egoCar(coordsConverter, 0.02);
+  EgoCar egoCar(coordsConverter);
   egoCar.setPos(FrenetCart(Frenet { j[1]["s"], j[1]["d"] }, Point { j[1]["x"],
                                j[1]["y"] },
                            coordsConverter));

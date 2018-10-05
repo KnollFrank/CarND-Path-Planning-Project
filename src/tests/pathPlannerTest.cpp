@@ -44,8 +44,8 @@ class PathPlannerTest : public ::testing::Test {
                      vehicles, 0.02, minSecs2Drive);
   }
 
-  EgoCar createEgoCar(const Frenet& pos, double dt) {
-    EgoCar egoCar(*coordsConverter, dt);
+  EgoCar createEgoCar(const Frenet& pos) {
+    EgoCar egoCar(*coordsConverter);
     egoCar.setPos(FrenetCart(pos, *coordsConverter));
     egoCar.yaw_deg = 0;
     egoCar.speed_mph = 0;
@@ -90,8 +90,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
   // TODO: share 0.02 within EgoCar with Pathplanner
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
-                               0.02);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
   PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02);
@@ -107,8 +106,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
-                               0.02);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles,
@@ -124,7 +122,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
 TEST_F(PathPlannerTest, should_collide) {
 // GIVEN
   EgoCar egoCar = createEgoCar(
-      Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) }, 0.02);
+      Frenet { 124.8336, getMiddleOfLane(Lane::MIDDLE) });
   Vehicle vehicle = createVehicle(
       0, egoCar.getPos().getFrenet() + Frenet { EgoCar::carRadius() / 2, 0 },
       Frenet::zero());
@@ -138,8 +136,7 @@ TEST_F(PathPlannerTest, should_collide) {
 TEST_F(PathPlannerTest, should_not_collide) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
-                               0.02);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   Vehicle vehicle = createVehicle(
       0, egoCar.getPos().getFrenet() + Frenet { 10 * EgoCar::carSize(), 0 },
       Frenet { 5, 0 });
@@ -159,8 +156,7 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
   // GIVEN
   Lane lane = Lane::MIDDLE;
 
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
-                               0.02);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
 
   Vehicle vehicleInMiddleLane = createVehicle(
       0,
@@ -201,8 +197,7 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
 TEST_F(PathPlannerTest, should_overtake_vehicle) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
-                               0.02);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   Vehicle vehicle = createVehicle(0, egoCar.getPos().getFrenet() + Frenet { 35,
       0 },
                                   Frenet { mph2meter_per_sec(5), 0 });
@@ -226,8 +221,7 @@ void PathPlannerTest::should_overtake_two_parallel_vehicles(
     const Lane& anotherLane) {
   // GIVEN
   Lane lane = Lane::MIDDLE;
-  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
-                               0.02);
+  EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) });
   Vehicle vehicle2Overtake = createVehicle(
       0, egoCar.getPos().getFrenet() + Frenet { 35, 0 }, Frenet {
           mph2meter_per_sec(5), 0 });
