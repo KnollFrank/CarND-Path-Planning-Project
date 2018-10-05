@@ -215,8 +215,9 @@ bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
 }
 
 double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
-  double speed_limit_mph = 45;
-  if (too_close || vel_mph > speed_limit_mph) {
+  double speed_limit_mph = 49.5;
+
+  if (too_close) {
     vel_mph -= .224;
   } else if (vel_mph < speed_limit_mph) {
     vel_mph += .224;
