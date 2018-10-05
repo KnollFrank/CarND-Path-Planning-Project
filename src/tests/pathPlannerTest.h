@@ -248,4 +248,32 @@ TEST_F(PathPlannerTest,
   should_overtake_two_parallel_vehicles(Lane::RIGHT);
 }
 
+TEST_F(PathPlannerTest, should_not_overtake_two_parallel_vehicles_when_third_car_comes_from_behind_in_free_lane) {
+  Lane lane = Lane::MIDDLE;
+  EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
+
+  Vehicle middle = createVehicle(0, egoCarPlusMeters(egoCar, 35),
+                                 mph2meter_per_sec(35));
+
+  Vehicle left = createVehicle(1, parallelToVehicleInLane(middle, Lane::LEFT),
+                               middle.getVel_frenet_m_per_s().s);
+
+  Vehicle right = createVehicle(2, parallelToVehicleInLane(middle, Lane::RIGHT),
+                                middle.getVel_frenet_m_per_s().s);
+
+  vector<Vehicle> vehicles { middle, left, right };
+
+  Simulator simulator = createSimulator(lane, egoCar, vehicles,
+                                        std::experimental::nullopt);
+
+  // WHEN & THEN
+  bool egoCarOvertakesVehicle = false;
+  simulator.run(
+      [&]() {
+        bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
+        egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;});
+
+  ASSERT_FALSE(egoCarOvertakesVehicle)<< "egoCar should not overtake vehicle";
+}
+
 #endif
