@@ -78,6 +78,8 @@ class PathPlannerTest : public ::testing::Test {
         std::is_sorted(distancesAlongRoad.begin(), distancesAlongRoad.end()));
   }
 
+  void should_overtake_two_parallel_vehicles(const Lane& anotherLane);
+
   MapWaypoints mapWaypoints;
   CoordsConverter* coordsConverter;
   ReferencePoint refPoint;
@@ -172,8 +174,8 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
       Frenet { vehicleInMiddleLane.getPos().getFrenet().s, getMiddleOfLane(
           Lane::RIGHT) },
       vehicleInMiddleLane.getVel_frenet_m_per_s());
-  vector<Vehicle> vehicles { vehicleInMiddleLane, vehicleInLeftLane, vehicleInRightLane };
-
+  vector<Vehicle> vehicles { vehicleInMiddleLane, vehicleInLeftLane,
+      vehicleInRightLane };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles,
                                         std::experimental::nullopt);
@@ -209,24 +211,25 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
   ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
 }
 
-TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
-// GIVEN
+void PathPlannerTest::should_overtake_two_parallel_vehicles(
+    const Lane& anotherLane) {
+  // GIVEN
   Lane lane = Lane::MIDDLE;
   EgoCar egoCar = createEgoCar(Frenet { 124.8336, getMiddleOfLane(lane) },
                                0.02);
   Vehicle vehicle2Overtake = createVehicle(
       0, egoCar.getPos().getFrenet() + Frenet { 35, 0 }, Frenet {
           mph2meter_per_sec(5), 0 });
-  Vehicle vehicleInLeftLane = createVehicle(
+  Vehicle vehicleInAnotherLane = createVehicle(
       1,
       Frenet { vehicle2Overtake.getPos().getFrenet().s, getMiddleOfLane(
-          Lane::LEFT) },
+          anotherLane) },
       vehicle2Overtake.getVel_frenet_m_per_s());
-  vector<Vehicle> vehicles { vehicle2Overtake, vehicleInLeftLane };
+  vector<Vehicle> vehicles { vehicle2Overtake, vehicleInAnotherLane };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
 
-// WHEN
+  // WHEN
   bool egoCarOvertakesVehicle = false;
   simulator.drive(
       [&]() {
@@ -236,4 +239,12 @@ TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles) {
 
   // THEN
   ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
+}
+
+TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles_middleLane_leftLane) {
+  should_overtake_two_parallel_vehicles(Lane::LEFT);
+}
+
+TEST_F(PathPlannerTest, should_overtake_two_parallel_vehicles_middleLane_rightLane) {
+  should_overtake_two_parallel_vehicles(Lane::RIGHT);
 }
