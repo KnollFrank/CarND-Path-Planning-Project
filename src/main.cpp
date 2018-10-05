@@ -53,7 +53,7 @@ EgoCar createEgoCar(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &j,
+        std::allocator, nlohmann::adl_serializer>& j,
     const CoordsConverter& coordsConverter) {
   EgoCar egoCar(coordsConverter);
   egoCar.setPos(FrenetCart(Frenet { j[1]["s"], j[1]["d"] }, Point { j[1]["x"],
@@ -69,7 +69,7 @@ vector<Vehicle> createVehicles(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
             std::allocator<char> >, bool, long, unsigned long, double,
-        std::allocator, nlohmann::adl_serializer> &sensor_fusion,
+        std::allocator, nlohmann::adl_serializer>& sensor_fusion,
     const CoordsConverter& coordsConverter) {
   enum sensor_fusion_index {
     ID = 0,
