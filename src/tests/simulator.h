@@ -140,10 +140,10 @@ void Simulator::driveVehicles() {
 }
 
 void Simulator::driveVehicle(Vehicle& vehicle) {
-  const Frenet vel_frenet = vehicle.getVel_frenet_m_per_s();
   vehicle.setPos(
-      FrenetCart(vehicle.getPos().getFrenet() + (vel_frenet * dt),
-                 coordsConverter));
+      FrenetCart(
+          vehicle.getPos().getFrenet() + (vehicle.getVel_frenet_m_per_s() * dt),
+          coordsConverter));
 // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
