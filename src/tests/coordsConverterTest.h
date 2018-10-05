@@ -1,3 +1,6 @@
+#ifndef COORDSCONVERTERTEST_H_
+#define COORDSCONVERTERTEST_H_
+
 #include "../coords/coordsConverter.h"
 
 #include <gtest/gtest.h>
@@ -334,3 +337,5 @@ TEST(CoordsConverterTest, should_convert) {
     test_convert(point, frenet);
   }
 }
+
+#endif /* COORDSCONVERTERTEST_H_ */

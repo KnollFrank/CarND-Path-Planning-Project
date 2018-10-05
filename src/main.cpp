@@ -23,9 +23,9 @@
 #include "path.h"
 #include "pathPlanner.h"
 #include "previousData.h"
+#include "tests/coordsConverterTest.h"
 #include "tests/simulator.h"
 
-#include "tests/coordsConverterTest.cpp"
 #include "tests/pathPlannerTest.cpp"
 #include "tests/parametricSplineTest.h"
 
