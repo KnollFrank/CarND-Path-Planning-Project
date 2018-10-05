@@ -82,6 +82,10 @@ class PathPlannerTest : public ::testing::Test {
 
   void should_overtake_two_parallel_vehicles(const Lane& anotherLane);
 
+  Frenet getPosParallelToVehicleInLane(const Vehicle& vehicle, const Lane& lane) {
+    return Frenet { vehicle.getPos().getFrenet().s, getMiddleOfLane(lane) };
+  }
+
   MapWaypoints mapWaypoints;
   CoordsConverter* coordsConverter;
   ReferencePoint refPoint;
@@ -169,16 +173,14 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
   Vehicle vehicleInLeftLane = createVehicle(
       1,
 
-      Frenet { vehicleInMiddleLane.getPos().getFrenet().s, getMiddleOfLane(
-          Lane::LEFT) },
+      getPosParallelToVehicleInLane(vehicleInMiddleLane, Lane::LEFT),
 
       vehicleInMiddleLane.getVel_frenet_m_per_s());
 
   Vehicle vehicleInRightLane = createVehicle(
       2,
 
-      Frenet { vehicleInMiddleLane.getPos().getFrenet().s, getMiddleOfLane(
-          Lane::RIGHT) },
+      getPosParallelToVehicleInLane(vehicleInMiddleLane, Lane::RIGHT),
 
       vehicleInMiddleLane.getVel_frenet_m_per_s());
 
@@ -226,10 +228,9 @@ void PathPlannerTest::should_overtake_two_parallel_vehicles(
   Vehicle vehicle2Overtake = createVehicle(
       0, egoCar.getPos().getFrenet() + Frenet { 35, 0 }, Frenet {
           mph2meter_per_sec(5), 0 });
+
   Vehicle vehicleInAnotherLane = createVehicle(
-      1,
-      Frenet { vehicle2Overtake.getPos().getFrenet().s, getMiddleOfLane(
-          anotherLane) },
+      1, getPosParallelToVehicleInLane(vehicle2Overtake, anotherLane),
       vehicle2Overtake.getVel_frenet_m_per_s());
   vector<Vehicle> vehicles { vehicle2Overtake, vehicleInAnotherLane };
 
