@@ -18,19 +18,19 @@ double startOfLane(int lane) {
   return widthOfLane() * lane;
 }
 
-double getMiddleOfLane(Lane lane) {
+double getMiddleOfLane(const Lane& lane) {
   return startOfLane(lane) + widthOfLane() / 2;
 }
 
-double endOfLane(Lane lane) {
+double endOfLane(const Lane& lane) {
   return startOfLane(lane + 1);
 }
 
-bool isInLane(float d, Lane lane) {
+bool isInLane(float d, const Lane& lane) {
   return startOfLane(lane) < d && d < endOfLane(lane);
 }
 
-bool isVehicleInLane(const Vehicle &vehicle, Lane lane) {
+bool isVehicleInLane(const Vehicle &vehicle, const Lane& lane) {
   return isInLane(vehicle.getPos().getFrenet().d, lane);
 }
 
