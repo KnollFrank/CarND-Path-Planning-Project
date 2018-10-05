@@ -121,7 +121,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
                                         std::experimental::nullopt);
 
 // WHEN
-  simulator.drive([&]() {
+  simulator.run([&]() {
     ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos().getFrenet().d, 0.001);});
 
 // THEN
@@ -152,7 +152,7 @@ TEST_F(PathPlannerTest, should_not_collide) {
                                         std::experimental::nullopt);
 
 // WHEN
-  simulator.drive([&]() {
+  simulator.run([&]() {
     ASSERT_FALSE(Simulator::getCollidingVehicle(egoCar, vehicles));});
 
 // THEN
@@ -182,7 +182,7 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
                                         std::experimental::nullopt);
 
 // WHEN
-  simulator.drive([&]() {
+  simulator.run([&]() {
     ASSERT_FALSE(Simulator::getCollidingVehicle(egoCar, vehicles));});
 
 // THEN
@@ -200,7 +200,7 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
 
 // WHEN
   bool egoCarOvertakesVehicle = false;
-  simulator.drive(
+  simulator.run(
       [&]() {
         bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
         egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
@@ -227,7 +227,7 @@ void PathPlannerTest::should_overtake_two_parallel_vehicles(
 
   // WHEN
   bool egoCarOvertakesVehicle = false;
-  simulator.drive(
+  simulator.run(
       [&]() {
         bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
         egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;

@@ -28,7 +28,7 @@ class Simulator {
             const CoordsConverter& coordsConverter, EgoCar& egoCar,
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
             std::experimental::optional<int> minSecs2Drive);
-  void drive(function<void(void)> afterEachMovementOfEgoCar);
+  void run(function<void(void)> afterEachMovementOfEgoCar);
   static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
   static std::experimental::optional<Vehicle> getCollidingVehicle(
       const EgoCar& egoCar, const vector<Vehicle>& vehicles);
@@ -76,7 +76,7 @@ Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
       minSecs2Drive(_minSecs2Drive) {
 }
 
-void Simulator::drive(function<void(void)> afterEachMovementOfEgoCar) {
+void Simulator::run(function<void(void)> afterEachMovementOfEgoCar) {
   double secsDriven = 0;
   while ((!minSecs2Drive || secsDriven <= minSecs2Drive.value())
       && !oneRoundDriven()) {
