@@ -257,6 +257,32 @@ TEST_F(PathPlannerTest,
   should_overtake_two_parallel_vehicles(Lane::RIGHT);
 }
 
+class NonStandardVehicleDriver : public VehicleDriver {
+
+ public:
+  NonStandardVehicleDriver(const CoordsConverter& coordsConverter)
+      : VehicleDriver(coordsConverter) {
+    delegate = new StandardVehicleDriver(coordsConverter);
+  }
+
+  virtual ~NonStandardVehicleDriver() {
+    delete delegate;
+  }
+
+  void driveVehicle(Vehicle& vehicle, const EgoCar& egoCar, double dt) {
+    if (vehicle.id == 2) {
+      vehicle.setPos(
+          FrenetCart(egoCar.getPos().getFrenet() - Frenet { 1, 0 },
+                     coordsConverter));
+    } else {
+      delegate->driveVehicle(vehicle, egoCar, dt);
+    }
+  }
+
+ private:
+  VehicleDriver *delegate;
+};
+
 TEST_F(PathPlannerTest, should_not_overtake_two_parallel_vehicles_when_third_car_comes_from_behind_in_free_lane) {
   Lane lane = Lane::MIDDLE;
   EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
