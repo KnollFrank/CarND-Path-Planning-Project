@@ -8,34 +8,33 @@
 class VehicleDriver {
 
  public:
-  VehicleDriver(const CoordsConverter& coordsConverter, double dt);
-  virtual ~VehicleDriver() {};
-  virtual void driveVehicle(Vehicle& vehicle) = 0;
+  VehicleDriver(const CoordsConverter& coordsConverter);
+  virtual ~VehicleDriver() {
+  }
+  ;
+  virtual void driveVehicle(Vehicle& vehicle, double dt) = 0;
 
  protected:
   const CoordsConverter& coordsConverter;
-  double dt;
 };
 
-VehicleDriver::VehicleDriver(const CoordsConverter& _coordsConverter,
-                             double _dt)
-    : coordsConverter(_coordsConverter),
-      dt(_dt) {
+VehicleDriver::VehicleDriver(const CoordsConverter& _coordsConverter)
+    : coordsConverter(_coordsConverter) {
 }
 
 class StandardVehicleDriver : public VehicleDriver {
 
  public:
-  StandardVehicleDriver(const CoordsConverter& coordsConverter, double dt);
-  void driveVehicle(Vehicle& vehicle);
+  StandardVehicleDriver(const CoordsConverter& coordsConverter);
+  void driveVehicle(Vehicle& vehicle, double dt);
 };
 
 StandardVehicleDriver::StandardVehicleDriver(
-    const CoordsConverter& coordsConverter, double dt)
-    : VehicleDriver(coordsConverter, dt) {
+    const CoordsConverter& coordsConverter)
+    : VehicleDriver(coordsConverter) {
 }
 
-void StandardVehicleDriver::driveVehicle(Vehicle& vehicle) {
+void StandardVehicleDriver::driveVehicle(Vehicle& vehicle, double dt) {
   vehicle.setPos(
       FrenetCart(
           vehicle.getPos().getFrenet() + (vehicle.getVel_frenet_m_per_s() * dt),
