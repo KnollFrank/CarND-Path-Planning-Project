@@ -272,17 +272,17 @@ class VehicleDriverDrivingOneVehicleBehindEgoCar : public VehicleDriver {
     delete delegate;
   }
 
-  void driveVehicle(Vehicle& vehicle, const EgoCar& egoCar, double dt) {
-    if (vehicle.id == idOfVehicle2DriveBehindEgoCar) {
-      driveVehicleBehindEgoCar(vehicle, egoCar);
-    } else {
-      delegate->driveVehicle(vehicle, egoCar, dt);
-    }
+  FrenetCart getNewPos(const Vehicle& vehicle, const EgoCar& egoCar,
+                       double dt) {
+    return
+        vehicle.id == idOfVehicle2DriveBehindEgoCar ?
+            getPosBehindEgoCar(egoCar) :
+            delegate->getNewPos(vehicle, egoCar, dt);
   }
 
-  void driveVehicleBehindEgoCar(Vehicle& vehicle, const EgoCar& egoCar) {
+  FrenetCart getPosBehindEgoCar(const EgoCar& egoCar) {
     Frenet posBehindEgoCar = egoCar.getPos().getFrenet() - Frenet { 1, 0 };
-    vehicle.setPos(FrenetCart(posBehindEgoCar, coordsConverter));
+    return FrenetCart(posBehindEgoCar, coordsConverter);
   }
 
  private:
