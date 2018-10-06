@@ -46,7 +46,7 @@ class PathPlannerTest : public ::testing::Test {
                             vector<Vehicle>& vehicles,
                             std::experimental::optional<int> minSecs2Drive) {
     double dt = 0.02;
-    VehicleDriver* vehicleDriver = new VehicleDriver(*coordsConverter, dt);
+    VehicleDriver* vehicleDriver = new StandardVehicleDriver(*coordsConverter, dt);
     return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                      vehicles, dt, minSecs2Drive, vehicleDriver);
   }

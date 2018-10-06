@@ -9,9 +9,10 @@ class VehicleDriver {
 
  public:
   VehicleDriver(const CoordsConverter& coordsConverter, double dt);
-  void driveVehicle(Vehicle& vehicle);
+  virtual ~VehicleDriver() {};
+  virtual void driveVehicle(Vehicle& vehicle) = 0;
 
- private:
+ protected:
   const CoordsConverter& coordsConverter;
   double dt;
 };
@@ -22,7 +23,19 @@ VehicleDriver::VehicleDriver(const CoordsConverter& _coordsConverter,
       dt(_dt) {
 }
 
-void VehicleDriver::driveVehicle(Vehicle& vehicle) {
+class StandardVehicleDriver : public VehicleDriver {
+
+ public:
+  StandardVehicleDriver(const CoordsConverter& coordsConverter, double dt);
+  void driveVehicle(Vehicle& vehicle);
+};
+
+StandardVehicleDriver::StandardVehicleDriver(
+    const CoordsConverter& coordsConverter, double dt)
+    : VehicleDriver(coordsConverter, dt) {
+}
+
+void StandardVehicleDriver::driveVehicle(Vehicle& vehicle) {
   vehicle.setPos(
       FrenetCart(
           vehicle.getPos().getFrenet() + (vehicle.getVel_frenet_m_per_s() * dt),
