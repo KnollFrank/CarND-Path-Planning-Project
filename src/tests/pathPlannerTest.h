@@ -277,12 +277,4 @@ TEST_F(PathPlannerTest, should_not_overtake_two_parallel_vehicles_when_third_car
   ASSERT_FALSE(egoCarOvertakesVehicle)<< "egoCar should not overtake vehicle";
 }
 
-// TODO: vielleicht klappt folgende allgemeine Strategie:
-// 1. Gas geben bis Geschwindigkeitsgrenze
-// 2. vorausberechnen (via Simulator im Produktivcode) ob 1. zu einem Unfall führen würde
-// 3.a falls nein, dann gehe zu 1.
-// 3.b. Falls ja, dann versuche auf eine andere Spur auszuweichen
-// 4. falls das klappt, führe es aus, falls es nicht klappt versuche eine andere mögliche Spur oder, falls das auch nicht klappt, dann
-// 5. bremse
-
 #endif
