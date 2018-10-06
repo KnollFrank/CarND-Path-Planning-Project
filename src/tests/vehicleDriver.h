@@ -47,33 +47,27 @@ void StandardVehicleDriver::driveVehicle(Vehicle& vehicle, const EgoCar& egoCar,
 class NonStandardVehicleDriver : public VehicleDriver {
 
  public:
-  NonStandardVehicleDriver(const CoordsConverter& coordsConverter);
+  NonStandardVehicleDriver(const CoordsConverter& coordsConverter)
+      : VehicleDriver(coordsConverter) {
+    delegate = new StandardVehicleDriver(coordsConverter);
+  }
 
   virtual ~NonStandardVehicleDriver() {
     delete delegate;
   }
 
-  void driveVehicle(Vehicle& vehicle, const EgoCar& egoCar, double dt);
+  void driveVehicle(Vehicle& vehicle, const EgoCar& egoCar, double dt) {
+    if (vehicle.id == 2) {
+      vehicle.setPos(
+          FrenetCart(egoCar.getPos().getFrenet() - Frenet { 1, 0 },
+                     coordsConverter));
+    } else {
+      delegate->driveVehicle(vehicle, egoCar, dt);
+    }
+  }
 
  private:
   VehicleDriver *delegate;
 };
-
-NonStandardVehicleDriver::NonStandardVehicleDriver(
-    const CoordsConverter& coordsConverter)
-    : VehicleDriver(coordsConverter) {
-  delegate = new StandardVehicleDriver(coordsConverter);
-}
-
-void NonStandardVehicleDriver::driveVehicle(Vehicle& vehicle,
-                                            const EgoCar& egoCar, double dt) {
-  if (vehicle.id == 2) {
-    vehicle.setPos(
-        FrenetCart(egoCar.getPos().getFrenet() - Frenet { 1, 0 },
-                   coordsConverter));
-  } else {
-    delegate->driveVehicle(vehicle, egoCar, dt);
-  }
-}
 
 #endif /* TESTS_VEHICLEDRIVER_H_ */
