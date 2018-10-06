@@ -153,7 +153,7 @@ void Simulator::driveVehicles() {
 }
 
 void Simulator::driveVehicle(Vehicle& vehicle) {
-  vehicleDriver->driveVehicle(vehicle, dt);
+  vehicleDriver->driveVehicle(vehicle, egoCar, dt);
 }
 
 void Simulator::assertNoIncidentsHappened(double dt) {

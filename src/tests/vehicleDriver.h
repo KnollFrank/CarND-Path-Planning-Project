@@ -11,8 +11,9 @@ class VehicleDriver {
   VehicleDriver(const CoordsConverter& coordsConverter);
   virtual ~VehicleDriver() {
   }
-  ;
-  virtual void driveVehicle(Vehicle& vehicle, double dt) = 0;
+
+  virtual void driveVehicle(Vehicle& vehicle, const EgoCar& egoCar,
+                            double dt) = 0;
 
  protected:
   const CoordsConverter& coordsConverter;
@@ -26,7 +27,7 @@ class StandardVehicleDriver : public VehicleDriver {
 
  public:
   StandardVehicleDriver(const CoordsConverter& coordsConverter);
-  void driveVehicle(Vehicle& vehicle, double dt);
+  void driveVehicle(Vehicle& vehicle, const EgoCar& egoCar, double dt);
 };
 
 StandardVehicleDriver::StandardVehicleDriver(
@@ -34,11 +35,40 @@ StandardVehicleDriver::StandardVehicleDriver(
     : VehicleDriver(coordsConverter) {
 }
 
-void StandardVehicleDriver::driveVehicle(Vehicle& vehicle, double dt) {
+void StandardVehicleDriver::driveVehicle(Vehicle& vehicle, const EgoCar& egoCar,
+                                         double dt) {
   vehicle.setPos(
       FrenetCart(
           vehicle.getPos().getFrenet() + (vehicle.getVel_frenet_m_per_s() * dt),
           coordsConverter));
+// GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
+}
+
+class NonStandardVehicleDriver : public VehicleDriver {
+
+ public:
+  NonStandardVehicleDriver(const CoordsConverter& coordsConverter);
+  void driveVehicle(Vehicle& vehicle, const EgoCar& egoCar, double dt);
+};
+
+NonStandardVehicleDriver::NonStandardVehicleDriver(
+    const CoordsConverter& coordsConverter)
+    : VehicleDriver(coordsConverter) {
+}
+
+void NonStandardVehicleDriver::driveVehicle(Vehicle& vehicle,
+                                            const EgoCar& egoCar, double dt) {
+  if (vehicle.id == 2) {
+    vehicle.setPos(
+        FrenetCart(egoCar.getPos().getFrenet() - Frenet { 1, 0 },
+                   coordsConverter));
+  } else {
+    vehicle.setPos(
+        FrenetCart(
+            vehicle.getPos().getFrenet()
+                + (vehicle.getVel_frenet_m_per_s() * dt),
+            coordsConverter));
+  }
 // GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 

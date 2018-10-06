@@ -45,8 +45,15 @@ class PathPlannerTest : public ::testing::Test {
   Simulator createSimulator(Lane& lane, EgoCar& egoCar,
                             vector<Vehicle>& vehicles,
                             std::experimental::optional<int> minSecs2Drive) {
+    return createSimulator(lane, egoCar, vehicles, minSecs2Drive,
+                           new StandardVehicleDriver(*coordsConverter));
+  }
+
+  Simulator createSimulator(Lane& lane, EgoCar& egoCar,
+                            vector<Vehicle>& vehicles,
+                            std::experimental::optional<int> minSecs2Drive,
+                            VehicleDriver* vehicleDriver) {
     double dt = 0.02;
-    VehicleDriver* vehicleDriver = new StandardVehicleDriver(*coordsConverter);
     return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                      vehicles, dt, minSecs2Drive, vehicleDriver);
   }
@@ -260,23 +267,19 @@ TEST_F(PathPlannerTest, should_not_overtake_two_parallel_vehicles_when_third_car
   Vehicle left = createVehicle(1, parallelToVehicleInLane(middle, Lane::LEFT),
                                middle.getVel_frenet_m_per_s().s);
 
-  Vehicle right = createVehicle(
-      2, parallelToVehicleInLane(middle, Lane::RIGHT) - Frenet { 10, 0 },
-      middle.getVel_frenet_m_per_s().s);
+  Vehicle right = createVehicle(2, parallelToVehicleInLane(middle, Lane::RIGHT),
+                                middle.getVel_frenet_m_per_s().s);
 
   vector<Vehicle> vehicles { middle, left, right };
 
-  Simulator simulator = createSimulator(lane, egoCar, vehicles,
-                                        std::experimental::nullopt);
+  Simulator simulator = createSimulator(
+      lane, egoCar, vehicles, std::experimental::nullopt,
+      new NonStandardVehicleDriver(*coordsConverter));
 
   // WHEN & THEN
-  bool egoCarOvertakesVehicle = false;
-  simulator.run(
-      [&]() {
-        bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
-        egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;});
-
-  ASSERT_FALSE(egoCarOvertakesVehicle)<< "egoCar should not overtake vehicle";
+  simulator.run([&]() {
+    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));
+  });
 }
 
 #endif
