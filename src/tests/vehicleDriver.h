@@ -48,12 +48,21 @@ class NonStandardVehicleDriver : public VehicleDriver {
 
  public:
   NonStandardVehicleDriver(const CoordsConverter& coordsConverter);
+
+  virtual ~NonStandardVehicleDriver() {
+    delete delegate;
+  }
+
   void driveVehicle(Vehicle& vehicle, const EgoCar& egoCar, double dt);
+
+ private:
+  VehicleDriver *delegate;
 };
 
 NonStandardVehicleDriver::NonStandardVehicleDriver(
     const CoordsConverter& coordsConverter)
     : VehicleDriver(coordsConverter) {
+  delegate = new StandardVehicleDriver(coordsConverter);
 }
 
 void NonStandardVehicleDriver::driveVehicle(Vehicle& vehicle,
@@ -63,13 +72,8 @@ void NonStandardVehicleDriver::driveVehicle(Vehicle& vehicle,
         FrenetCart(egoCar.getPos().getFrenet() - Frenet { 1, 0 },
                    coordsConverter));
   } else {
-    vehicle.setPos(
-        FrenetCart(
-            vehicle.getPos().getFrenet()
-                + (vehicle.getVel_frenet_m_per_s() * dt),
-            coordsConverter));
+    delegate->driveVehicle(vehicle, egoCar, dt);
   }
-// GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
 }
 
 #endif /* TESTS_VEHICLEDRIVER_H_ */
