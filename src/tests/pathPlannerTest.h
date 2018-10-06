@@ -257,30 +257,38 @@ TEST_F(PathPlannerTest,
   should_overtake_two_parallel_vehicles(Lane::RIGHT);
 }
 
-class NonStandardVehicleDriver : public VehicleDriver {
+class VehicleDriverDrivingOneVehicleBehindEgoCar : public VehicleDriver {
 
  public:
-  NonStandardVehicleDriver(const CoordsConverter& coordsConverter)
-      : VehicleDriver(coordsConverter) {
+  VehicleDriverDrivingOneVehicleBehindEgoCar(
+      const CoordsConverter& coordsConverter,
+      int _idOfVehicle2DriveBehindEgoCar)
+      : VehicleDriver(coordsConverter),
+        idOfVehicle2DriveBehindEgoCar(_idOfVehicle2DriveBehindEgoCar) {
     delegate = new StandardVehicleDriver(coordsConverter);
   }
 
-  virtual ~NonStandardVehicleDriver() {
+  virtual ~VehicleDriverDrivingOneVehicleBehindEgoCar() {
     delete delegate;
   }
 
   void driveVehicle(Vehicle& vehicle, const EgoCar& egoCar, double dt) {
-    if (vehicle.id == 2) {
-      vehicle.setPos(
-          FrenetCart(egoCar.getPos().getFrenet() - Frenet { 1, 0 },
-                     coordsConverter));
+    if (vehicle.id == idOfVehicle2DriveBehindEgoCar) {
+      driveVehicleBehindEgoCar(vehicle, egoCar);
     } else {
       delegate->driveVehicle(vehicle, egoCar, dt);
     }
   }
 
+  void driveVehicleBehindEgoCar(Vehicle& vehicle, const EgoCar& egoCar) {
+    vehicle.setPos(
+        FrenetCart(egoCar.getPos().getFrenet() - Frenet { 1, 0 },
+                   coordsConverter));
+  }
+
  private:
   VehicleDriver *delegate;
+  int idOfVehicle2DriveBehindEgoCar;
 };
 
 TEST_F(PathPlannerTest, should_not_overtake_two_parallel_vehicles_when_third_car_comes_from_behind_in_free_lane) {
@@ -299,8 +307,12 @@ TEST_F(PathPlannerTest, should_not_overtake_two_parallel_vehicles_when_third_car
   vector<Vehicle> vehicles { middle, left, right };
 
   Simulator simulator = createSimulator(
-      lane, egoCar, vehicles, std::experimental::nullopt,
-      new NonStandardVehicleDriver(*coordsConverter));
+      lane,
+      egoCar,
+      vehicles,
+      std::experimental::nullopt,
+      new VehicleDriverDrivingOneVehicleBehindEgoCar(*coordsConverter,
+                                                     right.id));
 
   // WHEN & THEN
   simulator.run([&]() {
