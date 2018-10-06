@@ -281,9 +281,8 @@ class VehicleDriverDrivingOneVehicleBehindEgoCar : public VehicleDriver {
   }
 
   void driveVehicleBehindEgoCar(Vehicle& vehicle, const EgoCar& egoCar) {
-    vehicle.setPos(
-        FrenetCart(egoCar.getPos().getFrenet() - Frenet { 1, 0 },
-                   coordsConverter));
+    Frenet posBehindEgoCar = egoCar.getPos().getFrenet() - Frenet { 1, 0 };
+    vehicle.setPos(FrenetCart(posBehindEgoCar, coordsConverter));
   }
 
  private:
