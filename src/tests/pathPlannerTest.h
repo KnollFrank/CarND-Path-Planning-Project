@@ -3,12 +3,11 @@
 
 #include "../pathPlanner.h"
 
-#include <ext/type_traits.h>
 #include <gtest/gtest.h>
 #include <gtest/gtest-message.h>
 #include <gtest/internal/gtest-internal.h>
 #include <algorithm>
-#include <iterator>
+#include <experimental/optional>
 #include <vector>
 
 #include "../car.h"
@@ -21,6 +20,7 @@
 #include "../path.h"
 #include "../previousData.h"
 #include "simulator.h"
+#include "vehicleDriver.h"
 
 using namespace std;
 using namespace std::experimental;
@@ -45,8 +45,10 @@ class PathPlannerTest : public ::testing::Test {
   Simulator createSimulator(Lane& lane, EgoCar& egoCar,
                             vector<Vehicle>& vehicles,
                             std::experimental::optional<int> minSecs2Drive) {
+    double dt = 0.02;
+    VehicleDriver* vehicleDriver = new VehicleDriver(*coordsConverter, dt);
     return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
-                     vehicles, 0.02, minSecs2Drive);
+                     vehicles, dt, minSecs2Drive, vehicleDriver);
   }
 
   EgoCar createEgoCar(const Frenet& pos) {

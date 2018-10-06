@@ -3,11 +3,14 @@
 
 #include <gtest/gtest.h>
 #include <gtest/gtest-message.h>
+#include <algorithm>
+#include <experimental/optional>
+#include <functional>
 #include <iostream>
+#include <iterator>
 #include <vector>
 
 #include "../car.h"
-#include "../coords/cart.h"
 #include "../coords/coordsConverter.h"
 #include "../coords/frenet.h"
 #include "../coords/frenetCart.h"
@@ -16,6 +19,7 @@
 #include "../path.h"
 #include "../pathPlanner.h"
 #include "../previousData.h"
+#include "vehicleDriver.h"
 
 using namespace std;
 using namespace std::experimental;
@@ -27,7 +31,9 @@ class Simulator {
   Simulator(ReferencePoint& refPoint, Lane& lane,
             const CoordsConverter& coordsConverter, EgoCar& egoCar,
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
-            std::experimental::optional<int> minSecs2Drive);
+            std::experimental::optional<int> minSecs2Drive,
+            VehicleDriver* vehicleDriver);
+  ~Simulator();
   void run(function<void(void)> afterEachMovementOfEgoCar);
   static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
   static bool isCollision(const EgoCar& egoCar,
@@ -61,13 +67,15 @@ class Simulator {
   double dt;
   std::experimental::optional<int> minSecs2Drive;
   function<void(void)> afterEachMovementOfEgoCar;
+  VehicleDriver* vehicleDriver;
 };
 
 Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
                      const CoordsConverter& _coordsConverter, EgoCar& _egoCar,
                      PreviousData& _previousData, vector<Vehicle>& _vehicles,
                      double _dt,
-                     std::experimental::optional<int> _minSecs2Drive)
+                     std::experimental::optional<int> _minSecs2Drive,
+                     VehicleDriver* _vehicleDriver)
     : refPoint(_refPoint),
       lane(_lane),
       coordsConverter(_coordsConverter),
@@ -75,7 +83,12 @@ Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
       previousData(_previousData),
       vehicles(_vehicles),
       dt(_dt),
-      minSecs2Drive(_minSecs2Drive) {
+      minSecs2Drive(_minSecs2Drive),
+      vehicleDriver(_vehicleDriver) {
+}
+
+Simulator::~Simulator() {
+  delete vehicleDriver;
 }
 
 void Simulator::run(function<void(void)> afterEachMovementOfEgoCar) {
@@ -140,18 +153,15 @@ void Simulator::driveVehicles() {
 }
 
 void Simulator::driveVehicle(Vehicle& vehicle) {
-  vehicle.setPos(
-      FrenetCart(
-          vehicle.getPos().getFrenet() + (vehicle.getVel_frenet_m_per_s() * dt),
-          coordsConverter));
-// GTEST_COUT<< "vehicle: " << vehicle.getPos_frenet() << endl;
+  vehicleDriver->driveVehicle(vehicle);
 }
 
 void Simulator::assertNoIncidentsHappened(double dt) {
 //  ASSERT_LE(egoCar.getAcceleration(dt).len(), 10)<< egoCar;
 //  ASSERT_LE(egoCar.getJerk(dt).len(), 10) << egoCar;
   ASSERT_LE(egoCar.speed_mph, 50);
-  std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(egoCar, vehicles);
+  std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(
+      egoCar, vehicles);
   ASSERT_FALSE(collidingVehicle)<< "COLLISION between" << endl << egoCar << endl << " and " << endl << *collidingVehicle;
 }
 
