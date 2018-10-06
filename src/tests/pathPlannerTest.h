@@ -276,12 +276,13 @@ class VehicleDriverDrivingOneVehicleBehindEgoCar : public VehicleDriver {
                        double dt) {
     return
         vehicle.id == idOfVehicle2DriveBehindEgoCar ?
-            getPosBehindEgoCar(egoCar) :
+            getPosBehindEgoCar(vehicle, egoCar) :
             delegate->getNewPos(vehicle, egoCar, dt);
   }
 
-  FrenetCart getPosBehindEgoCar(const EgoCar& egoCar) {
-    Frenet posBehindEgoCar = egoCar.getPos().getFrenet() - Frenet { 1, 0 };
+  FrenetCart getPosBehindEgoCar(const Vehicle& vehicle, const EgoCar& egoCar) {
+    Frenet posBehindEgoCar = Frenet { egoCar.getPos().getFrenet().s - 10, vehicle
+        .getPos().getFrenet().d };
     return FrenetCart(posBehindEgoCar, coordsConverter);
   }
 
