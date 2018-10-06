@@ -281,7 +281,7 @@ class VehicleDriverDrivingOneVehicleBehindEgoCar : public VehicleDriver {
   }
 
   FrenetCart getPosBehindEgoCar(const Vehicle& vehicle, const EgoCar& egoCar) {
-    Frenet posBehindEgoCar = Frenet { egoCar.getPos().getFrenet().s - 10, vehicle
+    Frenet posBehindEgoCar = Frenet { egoCar.getPos().getFrenet().s - 1, vehicle
         .getPos().getFrenet().d };
     return FrenetCart(posBehindEgoCar, coordsConverter);
   }
