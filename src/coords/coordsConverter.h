@@ -26,13 +26,11 @@ class CoordsConverter {
 
   const MapWaypoints& map_waypoints;
   ParametricSpline* spline;
-  double splineLength;
 };
 
 CoordsConverter::CoordsConverter(const MapWaypoints& _map_waypoints)
     : map_waypoints(_map_waypoints) {
   spline = new ParametricSpline(map_waypoints.map_waypoints);
-  splineLength = spline->getLength();
 }
 
 CoordsConverter::~CoordsConverter() {
