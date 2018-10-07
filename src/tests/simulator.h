@@ -32,7 +32,7 @@ class Simulator {
             const CoordsConverter& coordsConverter, EgoCar& egoCar,
             PreviousData& previousData, vector<Vehicle>& vehicles, double dt,
             std::experimental::optional<int> minSecs2Drive,
-            VehicleDriver* vehicleDriver);
+            VehicleDriver* vehicleDriver, const double speed_limit_mph);
   ~Simulator();
   void run(function<void(void)> afterEachMovementOfEgoCar);
   static bool isCollision(const EgoCar& egoCar, const Vehicle& vehicle);
@@ -68,6 +68,8 @@ class Simulator {
   std::experimental::optional<int> minSecs2Drive;
   function<void(void)> afterEachMovementOfEgoCar;
   VehicleDriver* vehicleDriver;
+ public:
+  const double speed_limit_mph;
 };
 
 Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
@@ -75,7 +77,8 @@ Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
                      PreviousData& _previousData, vector<Vehicle>& _vehicles,
                      double _dt,
                      std::experimental::optional<int> _minSecs2Drive,
-                     VehicleDriver* _vehicleDriver)
+                     VehicleDriver* _vehicleDriver,
+                     const double _speed_limit_mph)
     : refPoint(_refPoint),
       lane(_lane),
       coordsConverter(_coordsConverter),
@@ -84,7 +87,8 @@ Simulator::Simulator(ReferencePoint& _refPoint, Lane& _lane,
       vehicles(_vehicles),
       dt(_dt),
       minSecs2Drive(_minSecs2Drive),
-      vehicleDriver(_vehicleDriver) {
+      vehicleDriver(_vehicleDriver),
+      speed_limit_mph(_speed_limit_mph) {
 }
 
 Simulator::~Simulator() {
@@ -110,7 +114,7 @@ bool Simulator::oneRoundDriven() {
 
 double Simulator::driveEgoCarAndVehicles(
     function<void(void)> afterEachMovementOfEgoCar) {
-  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
+  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt, speed_limit_mph);
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
   int numberOfUnprocessedPathElements = 10;
   double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(

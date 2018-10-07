@@ -54,9 +54,11 @@ class PathPlannerTest : public ::testing::Test {
                             vector<Vehicle>& vehicles,
                             std::experimental::optional<int> minSecs2Drive,
                             VehicleDriver* vehicleDriver) {
-    double dt = 0.02;
+    const double dt = 0.02;
+    const double speed_limit_mph = 49.5;
     return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
-                     vehicles, dt, minSecs2Drive, vehicleDriver);
+                     vehicles, dt, minSecs2Drive, vehicleDriver,
+                     speed_limit_mph);
   }
 
   EgoCar createEgoCar(const Frenet& pos) {
@@ -114,7 +116,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
   EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
-  PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02);
+  PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02, 49.5);
 
 // WHEN
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
@@ -157,8 +159,9 @@ TEST_F(PathPlannerTest, should_keep_speed_close_to_speed_limit) {
   });
 
 // THEN
-  auto isNearSpeedLimit =
-      [&](const double& velocity) {return areNear(velocity, 49.5, 0.00001);};
+  auto isNearSpeedLimit = [&](const double& velocity) {
+    return areNear(velocity, simulator.speed_limit_mph, 0.00001);
+  };
   auto speedLimitReached = find_if(begin(velocities), end(velocities),
                                    isNearSpeedLimit);
   ASSERT_NE(speedLimitReached, end(velocities))<< "should reach speed limit";

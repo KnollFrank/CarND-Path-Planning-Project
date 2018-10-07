@@ -51,7 +51,7 @@ class PathPlanner {
 
  public:
   PathPlanner(const CoordsConverter& coordsConverter, ReferencePoint& refPoint,
-              Lane& lane, double dt);
+              Lane& lane, double dt, double speed_limit_mph);
 
   Path createPath(EgoCar egoCar, const PreviousData& previousData,
                   const vector<Vehicle>& vehicles);
@@ -97,16 +97,19 @@ class PathPlanner {
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
   ReferencePoint& refPoint;
   Lane& lane;
-  double dt;
+  const double dt;
   const int path_size = 50;
+  const double speed_limit_mph;
 };
 
 PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
-                         ReferencePoint& _refPoint, Lane& _lane, double _dt)
+                         ReferencePoint& _refPoint, Lane& _lane, double _dt,
+                         double _speed_limit_mph)
     : coordsConverter(_coordsConverter),
       refPoint(_refPoint),
       lane(_lane),
-      dt(_dt) {
+      dt(_dt),
+      speed_limit_mph(_speed_limit_mph) {
 }
 
 vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
@@ -215,7 +218,6 @@ bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
 }
 
 double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
-  double speed_limit_mph = 49.5;
   double speed_delta_mph = 2;
 
   if (too_close) {

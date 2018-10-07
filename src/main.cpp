@@ -126,7 +126,8 @@ int main(int argc, char **argv) {
   Lane lane = Lane::MIDDLE;
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
-  double dt = 0.02;
+  const double dt = 0.02;
+  const double speed_limit_mph = 49.5;
   vector<tuple<Frenet, Point>> frenetPointTuples;
 
   h.onMessage([&](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
@@ -157,7 +158,7 @@ int main(int argc, char **argv) {
 #endif
       PreviousData previousData = PreviousData::fromJson(j, coordsConverter);
       vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"], coordsConverter);
-      PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt);
+      PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt, speed_limit_mph);
       Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles);
 
       json msgJson;
