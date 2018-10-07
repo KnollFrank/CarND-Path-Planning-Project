@@ -322,14 +322,9 @@ vector<FrenetCart> PathPlanner::transform(
 vector<double> PathPlanner::createSVals(const tk::spline& spline,
                                         const int num) {
   vector<double> s_vals;
-  const Frenet target = createSplinePoint(30.0, spline).getFrenet();
-  double s_add_on = 0;
-  double N = target.len() / (dt * mph2meter_per_sec(refPoint.vel_mph));
+  const double s_delta = dt * mph2meter_per_sec(refPoint.vel_mph);
   for (int i = 0; i < num; i++) {
-    // TODO: target.s / N als Konstante vor die for-Schleife ziehen.
-    // TODO: target.s == 30.0? stimmt das? Falls ja, dann vielleicht Konstante 30.0 verwenden.
-    s_add_on += target.s / N;
-    s_vals.push_back(s_add_on);
+    s_vals.push_back((i + 1) * s_delta);
   }
   return s_vals;
 }
