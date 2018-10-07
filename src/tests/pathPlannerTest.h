@@ -135,9 +135,37 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
 
 // WHEN
   simulator.run([&]() {
-    ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos().getFrenet().d, 0.001);});
+    ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos().getFrenet().d, 0.001);
+  });
 
 // THEN
+}
+
+TEST_F(PathPlannerTest, should_accelerate_and_then_drive_with_constant_speed) {
+// GIVEN
+  Lane lane = Lane::MIDDLE;
+  EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
+  vector<Vehicle> vehicles;
+
+  Simulator simulator = createSimulator(lane, egoCar, vehicles,
+                                        std::experimental::nullopt);
+
+// WHEN
+  vector<double> velocities;
+  simulator.run([&]() {
+    velocities.push_back(egoCar.speed_mph);
+  });
+
+// THEN
+//  for (const double velocity : velocities) {
+//    GTEST_COUT<< velocity << endl;
+//  }
+  auto isNearSpeedLimit =
+      [&](const double& velocity) {return areNear(velocity, 49.5, 0.1);};
+  auto speedLimitReached = find_if(begin(velocities), end(velocities),
+                                   isNearSpeedLimit);
+  ASSERT_NE(speedLimitReached, end(velocities))<< "should reach speed limit";
+  ASSERT_TRUE(all_of(speedLimitReached, end(velocities), isNearSpeedLimit))<< "should keep speed close to speed limit";
 }
 
 TEST_F(PathPlannerTest, should_collide) {
