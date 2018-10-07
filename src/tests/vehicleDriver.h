@@ -36,7 +36,8 @@ class StandardVehicleDriver : public VehicleDriver {
 
  public:
   StandardVehicleDriver(const CoordsConverter& coordsConverter);
-  FrenetCart getNewPos(const Vehicle& vehicle, const EgoCar& egoCar, double dt);
+  FrenetCart getNewPos(const Vehicle& vehicle, const EgoCar& egoCar, double dt)
+      override;
 };
 
 StandardVehicleDriver::StandardVehicleDriver(

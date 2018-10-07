@@ -272,8 +272,8 @@ class VehicleDriverDrivingOneVehicleBehindEgoCar : public VehicleDriver {
     delete delegate;
   }
 
-  FrenetCart getNewPos(const Vehicle& vehicle, const EgoCar& egoCar,
-                       double dt) {
+  FrenetCart getNewPos(const Vehicle& vehicle, const EgoCar& egoCar, double dt)
+      override {
     return
         vehicle.id == idOfVehicle2DriveBehindEgoCar ?
             getPosBehindEgoCar(vehicle, egoCar) :
