@@ -20,6 +20,7 @@ class Path {
   vector<double> asXVals(const CoordsConverter& coordsConverter) const;
   vector<double> asYVals(const CoordsConverter& coordsConverter) const;
   tk::spline asSpline(const CoordsConverter& coordsConverter) const;
+  double getCartLen(const CoordsConverter& coordsConverter) const;
   friend ostream& operator<<(ostream& os, const Path& path);
 
  private:
@@ -71,6 +72,15 @@ tk::spline Path::asSpline(const CoordsConverter& coordsConverter) const {
   tk::spline splines;
   splines.set_points(asSVals(coordsConverter), asDVals(coordsConverter));
   return splines;
+}
+
+double Path::getCartLen(const CoordsConverter& coordsConverter) const {
+  vector<Point> points = asPoints(coordsConverter);
+  double len = 0;
+  for (int i = 0; i < points.size() - 1; i++) {
+    len += points[i].distanceTo(points[i + 1]);
+  }
+  return len;
 }
 
 #endif /* PATH_H_ */

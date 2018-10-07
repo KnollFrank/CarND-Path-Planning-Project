@@ -159,8 +159,11 @@ TEST_F(PathPlannerTest, should_keep_speed_close_to_speed_limit) {
   });
 
 // THEN
+//  for (double velocity : velocities) {
+//    GTEST_COUT<< velocity << endl;
+//  }
   auto isNearSpeedLimit = [&](const double& velocity) {
-    return areNear(velocity, simulator.speed_limit_mph, 0.00001);
+    return areNear(velocity, simulator.speed_limit_mph, 0.1);
   };
   auto speedLimitReached = find_if(begin(velocities), end(velocities),
                                    isNearSpeedLimit);

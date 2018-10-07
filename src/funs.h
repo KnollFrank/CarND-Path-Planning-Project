@@ -80,6 +80,10 @@ double getMinimum(const vector<double>& v) {
   return *std::min_element(v.begin(), v.end());
 }
 
+double getMaximum(const vector<double>& v) {
+  return *std::max_element(v.begin(), v.end());
+}
+
 double getIndexOfMinimum(const vector<double>& v) {
   return std::distance(v.begin(), std::min_element(v.begin(), v.end()));
 }

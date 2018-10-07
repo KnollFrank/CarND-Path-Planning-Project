@@ -50,7 +50,7 @@ class Simulator {
       function<void(void)> afterEachMovementOfEgoCar);
   void driveVehicles();
   void driveVehicle(Vehicle& vehicle);
-  void drive2PointOfEgoCar(const Frenet& dst,
+  void drive2PointOfEgoCar(const FrenetCart& dst,
                            function<void(void)> afterEachMovementOfEgoCar);
   void updatePreviousData(const vector<FrenetCart>& points,
                           int numberOfUnprocessedPathElements,
@@ -143,7 +143,7 @@ double Simulator::drive2PointsOfEgoCarAndDriveVehicles(
       - numberOfUnprocessedPathElements;
   for (int i = 0; i < numberOfProcessedPathElements; i++) {
     driveVehicles();
-    drive2PointOfEgoCar(points[i].getFrenet(), afterEachMovementOfEgoCar);
+    drive2PointOfEgoCar(points[i], afterEachMovementOfEgoCar);
   }
 
   double secsDriven = numberOfProcessedPathElements * dt;
@@ -170,11 +170,11 @@ void Simulator::assertNoIncidentsHappened(double dt) {
 }
 
 void Simulator::drive2PointOfEgoCar(
-    const Frenet& dst, function<void(void)> afterEachMovementOfEgoCar) {
-  const Frenet& src = egoCar.getPos().getFrenet();
-  egoCar.speed_mph = meter_per_sec2mph(src.distanceTo(dst) / dt);
-  egoCar.setPos(FrenetCart(dst, coordsConverter));
-  egoCar.yaw_deg = rad2deg((dst - src).getHeading());
+    const FrenetCart& dst, function<void(void)> afterEachMovementOfEgoCar) {
+  const FrenetCart& src = egoCar.getPos();
+  egoCar.speed_mph = meter_per_sec2mph(src.getXY().distanceTo(dst.getXY()) / dt);
+  egoCar.setPos(dst);
+  egoCar.yaw_deg = rad2deg((dst.getFrenet() - src.getFrenet()).getHeading());
 // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
   assertNoIncidentsHappened(dt);
