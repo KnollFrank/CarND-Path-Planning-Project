@@ -141,7 +141,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
 // THEN
 }
 
-TEST_F(PathPlannerTest, should_accelerate_and_then_drive_with_constant_speed) {
+TEST_F(PathPlannerTest, should_keep_speed_close_to_speed_limit) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
   EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
