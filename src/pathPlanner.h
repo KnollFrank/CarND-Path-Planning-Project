@@ -220,8 +220,10 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
 
   if (too_close) {
     vel_mph -= speed_delta_mph;
-  } else if (vel_mph < speed_limit_mph - speed_delta_mph) {
+  } else if (vel_mph + speed_delta_mph < speed_limit_mph) {
     vel_mph += speed_delta_mph;
+  } else {
+    vel_mph = speed_limit_mph;
   }
 
   return vel_mph;
