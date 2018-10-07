@@ -238,18 +238,18 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
     return lane;
   }
 
-  auto canSwitchFromLane2Lane = [&](const Lane& from, const Lane& to) {
+  auto canSwitchFromLaneToLane = [&](const Lane& from, const Lane& to) {
     return lane == from && canSwitch2Lane(egoCar, to, vehicles, prev_size);
   };
 
   // TODO: Test dazufügen, um auf diejenige Spur zu wechseln, auf welcher der Abstand zum nachfolgenden Auto am größten ist.
-  if (canSwitchFromLane2Lane(Lane::LEFT, Lane::MIDDLE)) {
+  if (canSwitchFromLaneToLane(Lane::LEFT, Lane::MIDDLE)) {
     return Lane::MIDDLE;
-  } else if (canSwitchFromLane2Lane(Lane::MIDDLE, Lane::LEFT)) {
+  } else if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)) {
     return Lane::LEFT;
-  } else if (canSwitchFromLane2Lane(Lane::MIDDLE, Lane::RIGHT)) {
+  } else if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
     return Lane::RIGHT;
-  } else if (canSwitchFromLane2Lane(Lane::RIGHT, Lane::MIDDLE)) {
+  } else if (canSwitchFromLaneToLane(Lane::RIGHT, Lane::MIDDLE)) {
     return Lane::MIDDLE;
   } else {
     return lane;
