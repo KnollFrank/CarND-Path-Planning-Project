@@ -8,6 +8,7 @@
 #include <gtest/internal/gtest-internal.h>
 #include <algorithm>
 #include <experimental/optional>
+#include <functional>
 #include <vector>
 
 #include "../car.h"
