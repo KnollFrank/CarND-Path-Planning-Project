@@ -278,14 +278,14 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
 }
 
 vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
-  auto createNewPoint = [&](int s_offset) {
-    return FrenetCart(
-        Frenet {egoCar.getPos().getFrenet().s + s_offset,
-          getMiddleOfLane(lane)},
-        coordsConverter);
-  };
+  auto egoCarPlus =
+      [&](int s_offset) {
+        return FrenetCart(
+            Frenet {egoCar.getPos().getFrenet().s + s_offset, getMiddleOfLane(lane)},
+            coordsConverter);
+      };
 
-  return {createNewPoint(30), createNewPoint(60), createNewPoint( 90)};
+  return {egoCarPlus(30), egoCarPlus(60), egoCarPlus(90)};
 }
 
 void PathPlanner::addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
