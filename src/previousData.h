@@ -42,7 +42,6 @@ PreviousData PreviousData::fromJson(
     const CoordsConverter& coordsConverter) {
   PreviousData previousData;
   // Previous path data given to the Planner
-  // FIXME: previous_path_x und previous_path_y nach Frenet s und d konvertieren.
   vector<double> previous_path_x = j[1]["previous_path_x"];
   vector<double> previous_path_y = j[1]["previous_path_y"];
   for (int i = 0; i < previous_path_x.size(); i++) {

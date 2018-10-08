@@ -210,7 +210,7 @@ bool PathPlanner::canSwitch2Lane(const EgoCar& egoCar, const Lane& lane,
 
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
     const EgoCar& egoCar, const Vehicle& vehicle, const int prev_size) {
-  double check_speed = vehicle.getVel_cart_m_per_s().len();
+  double check_speed = vehicle.getVel_frenet_m_per_s().len();
   double check_vehicle_s = vehicle.getPos().getFrenet().s
       + prev_size * dt * check_speed;
   // TODO: replace magic number 30 with constant
