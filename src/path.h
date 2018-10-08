@@ -17,17 +17,17 @@ class Path {
  public:
   vector<FrenetCart> points;
 
-  vector<double> asXVals(const CoordsConverter& coordsConverter) const;
-  vector<double> asYVals(const CoordsConverter& coordsConverter) const;
-  tk::spline asSpline(const CoordsConverter& coordsConverter) const;
-  double getCartLen(const CoordsConverter& coordsConverter) const;
+  vector<double> asXVals() const;
+  vector<double> asYVals() const;
+  tk::spline asSpline() const;
+  double getCartLen() const;
   friend ostream& operator<<(ostream& os, const Path& path);
 
  private:
-  vector<Point> asPoints(const CoordsConverter& coordsConverter) const;
-  vector<Frenet> asFrenets(const CoordsConverter& coordsConverter) const;
-  vector<double> asSVals(const CoordsConverter& coordsConverter) const;
-  vector<double> asDVals(const CoordsConverter& coordsConverter) const;
+  vector<Point> asPoints() const;
+  vector<Frenet> asFrenets() const;
+  vector<double> asSVals() const;
+  vector<double> asDVals() const;
 };
 
 ostream& operator<<(ostream& os, const Path& path) {
@@ -36,46 +36,46 @@ ostream& operator<<(ostream& os, const Path& path) {
   return os;
 }
 
-vector<Point> Path::asPoints(const CoordsConverter& coordsConverter) const {
+vector<Point> Path::asPoints() const {
   return map2<FrenetCart, Point>(points, [&](const FrenetCart& point) {
     return point.getXY();
   });
 }
 
-vector<Frenet> Path::asFrenets(const CoordsConverter& coordsConverter) const {
+vector<Frenet> Path::asFrenets() const {
   return map2<FrenetCart, Frenet>(points, [&](const FrenetCart& point) {
     return point.getFrenet();
   });
 }
 
-vector<double> Path::asXVals(const CoordsConverter& coordsConverter) const {
-  return map2<Point, double>(asPoints(coordsConverter),
+vector<double> Path::asXVals() const {
+  return map2<Point, double>(asPoints(),
                              [](const Point& point) {return point.x;});
 }
 
-vector<double> Path::asYVals(const CoordsConverter& coordsConverter) const {
-  return map2<Point, double>(asPoints(coordsConverter),
+vector<double> Path::asYVals() const {
+  return map2<Point, double>(asPoints(),
                              [](const Point& point) {return point.y;});
 }
 
-vector<double> Path::asSVals(const CoordsConverter& coordsConverter) const {
-  return map2<Frenet, double>(asFrenets(coordsConverter),
+vector<double> Path::asSVals() const {
+  return map2<Frenet, double>(asFrenets(),
                               [](const Frenet& point) {return point.s;});
 }
 
-vector<double> Path::asDVals(const CoordsConverter& coordsConverter) const {
-  return map2<Frenet, double>(asFrenets(coordsConverter),
+vector<double> Path::asDVals() const {
+  return map2<Frenet, double>(asFrenets(),
                               [](const Frenet& point) {return point.d;});
 }
 
-tk::spline Path::asSpline(const CoordsConverter& coordsConverter) const {
+tk::spline Path::asSpline() const {
   tk::spline splines;
-  splines.set_points(asSVals(coordsConverter), asDVals(coordsConverter));
+  splines.set_points(asSVals(), asDVals());
   return splines;
 }
 
-double Path::getCartLen(const CoordsConverter& coordsConverter) const {
-  vector<Point> points = asPoints(coordsConverter);
+double Path::getCartLen() const {
+  vector<Point> points = asPoints();
   double len = 0;
   for (int i = 0; i < points.size() - 1; i++) {
     len += points[i].distanceTo(points[i + 1]);

@@ -168,7 +168,7 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData,
       workWithPathInCarsCoordinateSystem(
           path,
           [&](const Path& carsPath) {
-            return createSplinePoints(carsPath.asSpline(coordsConverter), path_size - previousData.sizeOfPreviousPath());
+            return createSplinePoints(carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
           });
 
   Path next_vals;

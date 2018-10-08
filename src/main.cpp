@@ -162,13 +162,13 @@ int main(int argc, char **argv) {
       Path next_vals = pathPlanner.createPath(egoCar, previousData, vehicles);
 
 //      {
-//        double speed_mph = meter_per_sec2mph(next_vals.getCartLen(coordsConverter)/(dt*next_vals.points.size()));
+//        double speed_mph = meter_per_sec2mph(next_vals.getCartLen()/(dt*next_vals.points.size()));
 //        cout << "speed_mph: " << speed_mph << endl;
 //      }
 
       json msgJson;
-      msgJson["next_x"] = next_vals.asXVals(coordsConverter);
-      msgJson["next_y"] = next_vals.asYVals(coordsConverter);
+      msgJson["next_x"] = next_vals.asXVals();
+      msgJson["next_y"] = next_vals.asYVals();
 
       auto msg = "42[\"control\","+ msgJson.dump()+"]";
 
