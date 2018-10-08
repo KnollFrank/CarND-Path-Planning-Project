@@ -172,7 +172,10 @@ void Simulator::assertNoIncidentsHappened(double dt) {
 void Simulator::drive2PointOfEgoCar(
     const FrenetCart& dst, function<void(void)> afterEachMovementOfEgoCar) {
   const FrenetCart& src = egoCar.getPos();
-  egoCar.speed_mph = meter_per_sec2mph(src.getXY().distanceTo(dst.getXY()) / dt);
+  egoCar.speed_mph = meter_per_sec2mph(
+      src.getFrenet().distanceTo(dst.getFrenet()) / dt);
+  // FIXME: nächste Zeile wieeder einführen
+  //  egoCar.speed_mph = meter_per_sec2mph(src.getXY().distanceTo(dst.getXY()) / dt);
   egoCar.setPos(dst);
   egoCar.yaw_deg = rad2deg((dst.getFrenet() - src.getFrenet()).getHeading());
 // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
