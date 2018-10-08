@@ -162,7 +162,7 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
 
 void Simulator::assertNoIncidentsHappened(double dt) {
 //  ASSERT_LE(egoCar.getAcceleration(dt).len(), 10)<< egoCar;
-//  ASSERT_LE(egoCar.getJerk(dt).len(), 10) << egoCar;
+  ASSERT_LE(egoCar.getJerk(dt).len(), 10)<< egoCar;
   ASSERT_LE(egoCar.speed_mph, speed_limit_mph);
   std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(
       egoCar, vehicles);
