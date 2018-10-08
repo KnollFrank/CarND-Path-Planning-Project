@@ -163,7 +163,7 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
 void Simulator::assertNoIncidentsHappened(double dt) {
 //  ASSERT_LE(egoCar.getAcceleration(dt).len(), 10)<< egoCar;
 //  ASSERT_LE(egoCar.getJerk(dt).len(), 10) << egoCar;
-  ASSERT_LE(egoCar.speed_mph, 50);
+  ASSERT_LE(egoCar.speed_mph, speed_limit_mph);
   std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(
       egoCar, vehicles);
   ASSERT_FALSE(collidingVehicle)<< "COLLISION between" << endl << egoCar << endl << " and " << endl << *collidingVehicle;
@@ -172,7 +172,8 @@ void Simulator::assertNoIncidentsHappened(double dt) {
 void Simulator::drive2PointOfEgoCar(
     const FrenetCart& dst, function<void(void)> afterEachMovementOfEgoCar) {
   const FrenetCart& src = egoCar.getPos();
-  egoCar.speed_mph = meter_per_sec2mph(src.getXY().distanceTo(dst.getXY()) / dt);
+  egoCar.speed_mph = meter_per_sec2mph(
+      src.getXY().distanceTo(dst.getXY()) / dt);
   egoCar.setPos(dst);
   egoCar.yaw_deg = rad2deg((dst.getFrenet() - src.getFrenet()).getHeading());
 // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
