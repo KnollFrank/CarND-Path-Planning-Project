@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 
+#include "alglib/interpolation.h"
 #include "coords/cart.h"
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
@@ -20,7 +21,7 @@ class Path {
 
   vector<double> asXVals() const;
   vector<double> asYVals() const;
-  tk::spline asSpline() const;
+  spline1dinterpolant asSpline() const;
   double getCartLen() const;
   friend ostream& operator<<(ostream& os, const Path& path);
 
@@ -69,10 +70,24 @@ vector<double> Path::asDVals() const {
                               [](const Frenet& point) {return point.d;});
 }
 
-tk::spline Path::asSpline() const {
-  tk::spline splines;
-  splines.set_points(asSVals(), asDVals());
-  return splines;
+spline1dinterpolant Path::asSpline() const {
+  spline1dinterpolant spline;
+  real_1d_array x;
+  vector<double> svals = asSVals();
+  x.setlength(svals.size());
+  for (int i = 0; i < svals.size(); i++) {
+    x[i] = svals[i];
+  }
+
+  real_1d_array y;
+  vector<double> dvals = asDVals();
+  y.setlength(dvals.size());
+  for (int i = 0; i < dvals.size(); i++) {
+    y[i] = dvals[i];
+  }
+
+  spline1dbuildcubic(x, y, spline);
+  return spline;
 }
 
 double Path::getCartLen() const {
