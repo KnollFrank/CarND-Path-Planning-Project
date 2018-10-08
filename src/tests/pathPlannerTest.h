@@ -96,6 +96,10 @@ class PathPlannerTest : public ::testing::Test {
 
   void should_overtake_two_parallel_vehicles(const Lane& anotherVehiclesLane);
 
+  void should_overtake_vehicle_by_switching_to_more_free_lane(
+      double leftVehiclesSOffset2EgoCar, double rightVehiclesSOffset2EgoCar,
+      const Lane& expectedlaneOfEgoCarWhileOvertakingVehicle);
+
   Frenet parallelToVehicleInLane(const Vehicle& vehicle, const Lane& lane) {
     return Frenet { vehicle.getPos().getFrenet().s, getMiddleOfLane(lane) };
   }
@@ -357,8 +361,10 @@ TEST_F(PathPlannerTest, should_not_overtake_two_parallel_vehicles_when_third_car
   });
 }
 
-TEST_F(PathPlannerTest,
-    should_overtake_vehicle_by_switching_to_more_free_right_lane) {
+void PathPlannerTest::should_overtake_vehicle_by_switching_to_more_free_lane(
+    double leftVehiclesSOffset2EgoCar, double rightVehiclesSOffset2EgoCar,
+    const Lane& expectedlaneOfEgoCarWhileOvertakingVehicle) {
+
   // GIVEN
   Lane lane = Lane::MIDDLE;
 
@@ -366,14 +372,15 @@ TEST_F(PathPlannerTest,
 
   Vehicle middle = createVehicle(0, egoCarPlusMeters(egoCar, 35),
                                  mph2meter_per_sec(35));
+  Vehicle left = createVehicle(
+      1, parallelToVehicleInLane(middle, Lane::LEFT) + Frenet {
+          leftVehiclesSOffset2EgoCar, 0 },
+      middle.getVel_frenet_m_per_s().s);
 
-  Vehicle left = createVehicle(1, Frenet { middle.getPos().getFrenet().s + 100,
-                                   getMiddleOfLane(Lane::LEFT) },
-                               middle.getVel_frenet_m_per_s().s);
-
-  Vehicle right = createVehicle(1, Frenet { middle.getPos().getFrenet().s + 200,
-                                    getMiddleOfLane(Lane::RIGHT) },
-                                middle.getVel_frenet_m_per_s().s);
+  Vehicle right = createVehicle(
+      2, parallelToVehicleInLane(middle, Lane::RIGHT) + Frenet {
+          rightVehiclesSOffset2EgoCar, 0 },
+      middle.getVel_frenet_m_per_s().s);
 
   vector<Vehicle> vehicles { middle, left, right };
 
@@ -395,49 +402,20 @@ TEST_F(PathPlannerTest,
 
   // THEN
   ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
-  ASSERT_EQ(Lane::RIGHT, *laneOfEgoCarWhileOvertakingVehicle);
+  ASSERT_EQ(expectedlaneOfEgoCarWhileOvertakingVehicle,
+            *laneOfEgoCarWhileOvertakingVehicle);
 }
 
-// TODO: DRY with should_overtake_vehicle_by_switching_to_more_free_right_lane
+TEST_F(PathPlannerTest,
+    should_overtake_vehicle_by_switching_to_more_free_right_lane) {
+
+  should_overtake_vehicle_by_switching_to_more_free_lane(100, 200, Lane::RIGHT);
+}
+
 TEST_F(PathPlannerTest,
     should_overtake_vehicle_by_switching_to_more_free_left_lane) {
-  // GIVEN
-  Lane lane = Lane::MIDDLE;
 
-  EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
-
-  Vehicle middle = createVehicle(0, egoCarPlusMeters(egoCar, 35),
-                                 mph2meter_per_sec(35));
-
-  Vehicle left = createVehicle(1, Frenet { middle.getPos().getFrenet().s + 200,
-                                   getMiddleOfLane(Lane::LEFT) },
-                               middle.getVel_frenet_m_per_s().s);
-
-  Vehicle right = createVehicle(1, Frenet { middle.getPos().getFrenet().s + 100,
-                                    getMiddleOfLane(Lane::RIGHT) },
-                                middle.getVel_frenet_m_per_s().s);
-
-  vector<Vehicle> vehicles { middle, left, right };
-
-  Simulator simulator = createSimulator(lane, egoCar, vehicles,
-                                        std::experimental::nullopt);
-
-  // WHEN
-  bool egoCarOvertakesVehicle = false;
-  std::experimental::optional<Lane> laneOfEgoCarWhileOvertakingVehicle =
-      std::experimental::nullopt;
-  simulator.run(
-      [&]() {
-        bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
-        if(overtaken && !laneOfEgoCarWhileOvertakingVehicle) {
-          laneOfEgoCarWhileOvertakingVehicle = getLane(egoCar.getPos().getFrenet().d);
-        }
-        egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
-      });
-
-  // THEN
-  ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
-  ASSERT_EQ(Lane::LEFT, *laneOfEgoCarWhileOvertakingVehicle);
+  should_overtake_vehicle_by_switching_to_more_free_lane(200, 100, Lane::LEFT);
 }
 
 #endif
