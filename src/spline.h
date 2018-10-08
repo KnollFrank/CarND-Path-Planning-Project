@@ -35,17 +35,10 @@ class Spline {
 
 Spline::Spline(const vector<double> &xs, const vector<double> &ys) {
   real_1d_array x;
-  x.setlength(xs.size());
-  for (int i = 0; i < xs.size(); i++) {
-    x[i] = xs[i];
-  }
+  x.setcontent(xs.size(), &(xs[0]));
 
-  // TODO: DRY with above
   real_1d_array y;
-  y.setlength(ys.size());
-  for (int i = 0; i < ys.size(); i++) {
-    y[i] = ys[i];
-  }
+  y.setcontent(ys.size(), &(ys[0]));
 
   spline1dbuildcubic(x, y, spline);
 }
