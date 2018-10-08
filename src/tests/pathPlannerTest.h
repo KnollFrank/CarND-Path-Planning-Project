@@ -55,7 +55,7 @@ class PathPlannerTest : public ::testing::Test {
                             std::experimental::optional<int> minSecs2Drive,
                             VehicleDriver* vehicleDriver) {
     const double dt = 0.02;
-    const double speed_limit_mph = 49.5;
+    const double speed_limit_mph = 50;
     return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                      vehicles, dt, minSecs2Drive, vehicleDriver,
                      speed_limit_mph);
@@ -116,7 +116,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
   EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
-  PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02, 49.5);
+  PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02, 50);
 
 // WHEN
   Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
