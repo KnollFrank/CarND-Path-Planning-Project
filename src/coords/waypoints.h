@@ -25,13 +25,19 @@ struct MapWaypoints {
   LineSegment getLineSegment(int start, int end) const;
 };
 
+double getLenOfTraverse(const vector<Point>& points) {
+  double len = 0;
+  for (int i = 0; i < points.size(); i++) {
+    len += points[i].distanceTo(points[i + 1]);
+  }
+  return len;
+}
+
 double MapWaypoints::getDistanceFromWaypointZeroToWaypoint(
     int waypointIndex) const {
-  double dist = 0;
-  for (int i = 0; i < waypointIndex; i++) {
-    dist += map_waypoints[i].distanceTo(map_waypoints[i + 1]);
-  }
-  return dist;
+  vector<Point> newVec(map_waypoints.begin(),
+                       map_waypoints.begin() + waypointIndex + 1);
+  return getLenOfTraverse(newVec);
 }
 
 LineSegment MapWaypoints::getLineSegment(int start, int end) const {

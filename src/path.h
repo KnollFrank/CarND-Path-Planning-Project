@@ -1,12 +1,13 @@
 #ifndef PATH_H_
 #define PATH_H_
 
+#include <iostream>
 #include <vector>
 
 #include "coords/cart.h"
-#include "coords/coordsConverter.h"
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
+#include "coords/waypoints.h"
 #include "funs.h"
 #include "spline.h"
 
@@ -75,12 +76,7 @@ tk::spline Path::asSpline() const {
 }
 
 double Path::getCartLen() const {
-  vector<Point> points = asPoints();
-  double len = 0;
-  for (int i = 0; i < points.size() - 1; i++) {
-    len += points[i].distanceTo(points[i + 1]);
-  }
-  return len;
+  return getLenOfTraverse(asPoints());
 }
 
 #endif /* PATH_H_ */
