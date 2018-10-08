@@ -162,17 +162,18 @@ TEST_F(PathPlannerTest, should_keep_speed_close_to_speed_limit) {
 //  for (double velocity : velocities) {
 //    GTEST_COUT<< velocity << endl;
 //  }
-  double real_speed_limit_mph = 0.9*simulator.speed_limit_mph;
-  auto isNearSpeedLimit = [&](const double& velocity) {
-    return areNear(velocity, real_speed_limit_mph, 1);
-  };
-  auto isNearSpeedLimit2 = [&](const double& velocity) {
-    return areNear(velocity, real_speed_limit_mph, 3);
-  };
-  auto speedLimitReached = find_if(begin(velocities), end(velocities),
-                                   isNearSpeedLimit);
+  double real_speed_limit_mph = 0.9 * simulator.speed_limit_mph;
+  auto speedLimitReached = find_if(
+      begin(velocities), end(velocities), [&](const double& velocity) {
+        return areNear(velocity, real_speed_limit_mph, 1);
+      });
   ASSERT_NE(speedLimitReached, end(velocities))<< "should reach speed limit";
-  ASSERT_TRUE(all_of(speedLimitReached, end(velocities), isNearSpeedLimit2))<< "should keep speed close to speed limit";
+  ASSERT_TRUE(all_of(
+          speedLimitReached,
+          end(velocities),
+          [&](const double& velocity) {
+            return areNear(velocity, real_speed_limit_mph, 3);
+          }))<< "should keep speed close to speed limit";
 }
 
 TEST_F(PathPlannerTest, should_collide) {

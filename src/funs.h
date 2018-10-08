@@ -88,8 +88,8 @@ double getIndexOfMinimum(const vector<double>& v) {
   return std::distance(v.begin(), std::min_element(v.begin(), v.end()));
 }
 
-bool areNear(double a, double b, double EPSILON) {
-  return fabs(a - b) < EPSILON;
+bool areNear(double a, double b, double abs_error) {
+  return fabs(a - b) < abs_error;
 }
 
 #endif /* FUNS_H_ */
