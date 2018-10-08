@@ -10,7 +10,6 @@
 #include "coords/frenetCart.h"
 #include "coords/waypoints.h"
 #include "funs.h"
-#include "spline.h"
 
 using namespace std;
 using namespace std::experimental;

@@ -20,7 +20,6 @@
 #include "lane.h"
 #include "path.h"
 #include "previousData.h"
-#include "spline.h"
 
 using namespace std;
 
