@@ -72,7 +72,7 @@ class PathPlanner {
                       const vector<Vehicle>& vehicles, const int prev_size);
   CoordinateSystem createRotatedCoordinateSystem(const Frenet& origin,
                                                  double angle_rad);
-  FrenetCart createSplinePoint(double x, const spline1dinterpolant& spline);
+  FrenetCart createSplinePoint(double x, const Spline& spline);
   void sort_and_remove_duplicates(vector<FrenetCart>& points);
   std::vector<FrenetCart> createPointsFromPreviousData(
       const EgoCar& egoCar, const PreviousData& previousData);
@@ -85,12 +85,11 @@ class PathPlanner {
       const vector<FrenetCart>& points);
   vector<FrenetCart> leaveCarsCoordinateSystem(
       const Frenet& origin, double angle_rad, const vector<FrenetCart>& points);
-  std::vector<FrenetCart> createSplinePoints(const spline1dinterpolant& spline,
+  std::vector<FrenetCart> createSplinePoints(const Spline& spline,
                                              const int num);
   vector<FrenetCart> transform(const CoordinateSystem& coordinateSystem,
                                const vector<FrenetCart>& points) const;
-  std::vector<double> createSVals(const spline1dinterpolant& spline,
-                                  const int num);
+  std::vector<double> createSVals(const Spline& spline, const int num);
   void addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
                                  const PreviousData& previousData);
   void addNewPoints(Path& path, const EgoCar& egoCar);
@@ -323,9 +322,7 @@ vector<FrenetCart> PathPlanner::transform(
         return FrenetCart(coordinateSystem.transform(point.getFrenet()), coordsConverter);});
 }
 
-// TODO: FIXME: nimm lieber spline von alglib statt tk::spline um die PathPlannerTests wideder grün zu machen
-vector<double> PathPlanner::createSVals(const spline1dinterpolant& spline,
-                                        const int num) {
+vector<double> PathPlanner::createSVals(const Spline& spline, const int num) {
   vector<double> s_vals;
   const double s_delta = dt * mph2meter_per_sec(refPoint.vel_mph);
   for (int i = 0; i < num; i++) {
@@ -334,8 +331,8 @@ vector<double> PathPlanner::createSVals(const spline1dinterpolant& spline,
   return s_vals;
 }
 
-vector<FrenetCart> PathPlanner::createSplinePoints(
-    const spline1dinterpolant& spline, const int num) {
+vector<FrenetCart> PathPlanner::createSplinePoints(const Spline& spline,
+                                                   const int num) {
 
   vector<double> s_vals = createSVals(spline, num);
   vector<FrenetCart> points = map2<double, FrenetCart>(
@@ -351,9 +348,8 @@ CoordinateSystem PathPlanner::createRotatedCoordinateSystem(
   return CoordinateSystem { origin, e1, e2 };
 }
 
-FrenetCart PathPlanner::createSplinePoint(double x,
-                                          const spline1dinterpolant& spline) {
-  return FrenetCart(Frenet { x, spline1dcalc(spline, x) }, coordsConverter);
+FrenetCart PathPlanner::createSplinePoint(double x, const Spline& spline) {
+  return FrenetCart(Frenet { x, spline(x) }, coordsConverter);
 }
 
 #endif /* PATHPLANNER_H_ */
