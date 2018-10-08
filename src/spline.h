@@ -24,7 +24,7 @@ using namespace boost::math::tools;
 class Spline {
 
  public:
-  Spline(const vector<double> &xs, const vector<double> &ys);
+  Spline(const vector<double> &x, const vector<double> &y);
 
   double operator()(double x) const;
   double toSplineParameter(double s) const;
@@ -33,12 +33,12 @@ class Spline {
   spline1dinterpolant spline;
 };
 
-Spline::Spline(const vector<double> &xs, const vector<double> &ys) {
+Spline::Spline(const vector<double> &_x, const vector<double> &_y) {
   real_1d_array x;
-  x.setcontent(xs.size(), &(xs[0]));
+  x.setcontent(_x.size(), &(_x[0]));
 
   real_1d_array y;
-  y.setcontent(ys.size(), &(ys[0]));
+  y.setcontent(_y.size(), &(_y[0]));
 
   spline1dbuildcubic(x, y, spline);
 }
