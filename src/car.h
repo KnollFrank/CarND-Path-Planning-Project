@@ -65,12 +65,8 @@ class Rectangle {
   }
 
   bool overlaps(const Rectangle& other) const {
-    // If one rectangle is on left side of other
-    if (other.isOnLeftSideOf(*this) || this->isOnLeftSideOf(other))
-      return false;
-
-    // If one rectangle is above other
-    if (other.isAbove(*this) || this->isAbove(other))
+    if (other.isOnLeftSideOf(*this) || this->isOnLeftSideOf(other)
+        || other.isAbove(*this) || this->isAbove(other))
       return false;
 
     return true;
