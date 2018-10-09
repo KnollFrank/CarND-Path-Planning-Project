@@ -72,6 +72,8 @@ class PathPlanner {
                   const vector<Vehicle>& vehicles, const int numTimeSteps);
   optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
       const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles);
+  vector<Vehicle> getVehiclesInLaneInFrontOfEgoCar(
+      const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles);
   bool canSwitch2Lane(const EgoCar& egoCar, const Lane& lane,
                       const vector<Vehicle>& vehicles, const int numTimeSteps);
   CoordinateSystem createRotatedCoordinateSystem(const Frenet& origin,
@@ -246,7 +248,7 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
   return vel_mph;
 }
 
-optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
+vector<Vehicle> PathPlanner::getVehiclesInLaneInFrontOfEgoCar(
     const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
 
   auto isInLaneInFrontOfEgoCar =
@@ -254,8 +256,14 @@ optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
         return isInLane(vehicle.getPos().getFrenet().d, lane) && vehicle.getPos().getFrenet().s > egoCar.getPos().getFrenet().s;
       };
 
-  vector<Vehicle> vehiclesInLaneInFrontOfEgoCar = filter<Vehicle>(
-      vehicles, isInLaneInFrontOfEgoCar);
+  return filter<Vehicle>(vehicles, isInLaneInFrontOfEgoCar);;
+}
+
+optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
+    const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
+
+  vector<Vehicle> vehiclesInLaneInFrontOfEgoCar =
+      getVehiclesInLaneInFrontOfEgoCar(lane, egoCar, vehicles);
 
   vector<Vehicle>::iterator nearestVehicleInLaneInFrontOfEgoCar =
       std::min_element(
