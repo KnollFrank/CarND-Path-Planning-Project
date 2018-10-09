@@ -35,9 +35,10 @@ class PathPlanner {
  public:
   PathPlanner(const CoordsConverter& coordsConverter, ReferencePoint& refPoint,
               Lane& lane, double dt, double speed_limit_mph,
-              const vector<Vehicle>& vehicles, const EgoCar& _egoCar);
+              const vector<Vehicle>& vehicles, const EgoCar& _egoCar,
+              const PreviousData& previousData);
 
-  Path createPath(const PreviousData& previousData);
+  Path createPath();
 
  private:
   bool isEgoCarTooCloseToAnyVehicleInLane(const int numTimeSteps,
@@ -55,8 +56,7 @@ class PathPlanner {
                                                  double angle_rad);
   FrenetCart createSplinePoint(double x, const Spline& spline);
   void sort_and_remove_duplicates(vector<FrenetCart>& points);
-  std::vector<FrenetCart> createPointsFromPreviousData(
-      const PreviousData& previousData);
+  std::vector<FrenetCart> createPointsFromPreviousData();
   std::vector<FrenetCart> createNewPoints();
   vector<FrenetCart> workWithPathInCarsCoordinateSystem(
       const Path& path,
@@ -71,7 +71,7 @@ class PathPlanner {
   vector<FrenetCart> transform(const CoordinateSystem& coordinateSystem,
                                const vector<FrenetCart>& points) const;
   std::vector<double> createSVals(const Spline& spline, const int num);
-  void addPointsFromPreviousData(Path& path, const PreviousData& previousData);
+  void addPointsFromPreviousData(Path& path);
   void addNewPoints(Path& path);
   double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle,
                                                const int numTimeSteps);
@@ -85,20 +85,23 @@ class PathPlanner {
   const double speed_limit_mph;
   const vector<Vehicle>& vehicles;
   EgoCar egoCar;
+  const PreviousData& previousData;
 };
 
 PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
                          ReferencePoint& _refPoint, Lane& _lane, double _dt,
                          double _speed_limit_mph,
                          const vector<Vehicle>& _vehicles,
-                         const EgoCar& _egoCar)
+                         const EgoCar& _egoCar,
+                         const PreviousData& _previousData)
     : coordsConverter(_coordsConverter),
       refPoint(_refPoint),
       lane(_lane),
       dt(_dt),
       speed_limit_mph(_speed_limit_mph),
       vehicles(_vehicles),
-      egoCar(_egoCar) {
+      egoCar(_egoCar),
+      previousData(_previousData) {
 }
 
 vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
@@ -132,7 +135,7 @@ vector<FrenetCart> PathPlanner::workWithPathInCarsCoordinateSystem(
   return leaveCarsCoordinateSystem(refPoint.point, refPoint.yaw_rad, points);
 }
 
-Path PathPlanner::createPath(const PreviousData& previousData) {
+Path PathPlanner::createPath() {
 
   // printInfo(egoCar, vehicles);
 
@@ -148,7 +151,7 @@ Path PathPlanner::createPath(const PreviousData& previousData) {
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
   Path path;
-  addPointsFromPreviousData(path, previousData);
+  addPointsFromPreviousData(path);
   addNewPoints(path);
 
   vector<FrenetCart> points =
@@ -312,8 +315,7 @@ Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,
   return lane;
 }
 
-vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
-    const PreviousData& previousData) {
+vector<FrenetCart> PathPlanner::createPointsFromPreviousData() {
 
   vector<FrenetCart> points;
   if (previousData.sizeOfPreviousPath() < 2) {
@@ -344,9 +346,8 @@ vector<FrenetCart> PathPlanner::createNewPoints() {
   return {egoCarPlus(30), egoCarPlus(60), egoCarPlus(90)};
 }
 
-void PathPlanner::addPointsFromPreviousData(Path& path,
-                                            const PreviousData& previousData) {
-  appendSnd2Fst(path.points, createPointsFromPreviousData(previousData));
+void PathPlanner::addPointsFromPreviousData(Path& path) {
+  appendSnd2Fst(path.points, createPointsFromPreviousData());
 }
 
 void PathPlanner::addNewPoints(Path& path) {

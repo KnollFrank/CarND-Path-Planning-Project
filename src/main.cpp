@@ -158,8 +158,8 @@ int main(int argc, char **argv) {
 #endif
       PreviousData previousData = PreviousData::fromJson(j, coordsConverter);
       vector<Vehicle> vehicles = createVehicles(j[1]["sensor_fusion"], coordsConverter);
-      PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt, speed_limit_mph, vehicles, egoCar);
-      Path next_vals = pathPlanner.createPath(previousData);
+      PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt, speed_limit_mph, vehicles, egoCar, previousData);
+      Path next_vals = pathPlanner.createPath();
 
 //      {
 //        double speed_mph = meter_per_sec2mph(next_vals.getCartLen()/(dt*next_vals.points.size()));
