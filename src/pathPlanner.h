@@ -53,6 +53,9 @@ class PathPlanner {
   CoordinateSystem createRotatedCoordinateSystem(const Frenet& origin,
                                                  double angle_rad);
   FrenetCart createSplinePoint(double x, const Spline& spline);
+  std::vector<FrenetCart> createSplinePoints(const Spline& spline,
+                                             const int num);
+  vector<FrenetCart> createSplinePoints(const Path& path);
   void sort_and_remove_duplicates(vector<FrenetCart>& points);
   std::vector<FrenetCart> createPointsFromPreviousData();
   std::vector<FrenetCart> createNewPoints();
@@ -64,8 +67,6 @@ class PathPlanner {
       const vector<FrenetCart>& points);
   vector<FrenetCart> leaveCarsCoordinateSystem(
       const Frenet& origin, double angle_rad, const vector<FrenetCart>& points);
-  std::vector<FrenetCart> createSplinePoints(const Spline& spline,
-                                             const int num);
   vector<FrenetCart> transform(const CoordinateSystem& coordinateSystem,
                                const vector<FrenetCart>& points) const;
   std::vector<double> createSVals(const Spline& spline, const int num);
@@ -137,6 +138,14 @@ vector<FrenetCart> PathPlanner::workWithPathInCarsCoordinateSystem(
   return leaveCarsCoordinateSystem(refPoint.point, refPoint.yaw_rad, points);
 }
 
+vector<FrenetCart> PathPlanner::createSplinePoints(const Path& path) {
+  return workWithPathInCarsCoordinateSystem(
+      path,
+      [&](const Path& carsPath) {
+        return createSplinePoints(carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
+      });
+}
+
 Path PathPlanner::createPath() {
   if (previousData.sizeOfPreviousPath() > 0) {
     egoCar.setPos(createFrenetCart(previousData.end_path));
@@ -152,12 +161,7 @@ Path PathPlanner::createPath() {
   addPointsFromPreviousData(path);
   addNewPoints(path);
 
-  vector<FrenetCart> splinePoints =
-      workWithPathInCarsCoordinateSystem(
-          path,
-          [&](const Path& carsPath) {
-            return createSplinePoints(carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
-          });
+  vector<FrenetCart> splinePoints = createSplinePoints(path);
 
   Path next_vals;
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
