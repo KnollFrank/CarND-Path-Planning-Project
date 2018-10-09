@@ -88,6 +88,15 @@ double getIndexOfMinimum(const vector<double>& v) {
   return std::distance(v.begin(), std::min_element(v.begin(), v.end()));
 }
 
+// adapted from: https://stackoverflow.com/questions/21204676/modern-way-to-filter-stl-container
+template<typename T>
+vector<T> filter(const vector<T>& v, function<bool(const T&)> predicate)
+{
+  vector<T> result;
+  copy_if(v.cbegin(), v.cend(), back_inserter(result), predicate);
+  return result;
+}
+
 bool areNear(double a, double b, double abs_error) {
   return fabs(a - b) < abs_error;
 }

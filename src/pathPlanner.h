@@ -255,15 +255,69 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
 
   if (canSwitchFromLaneToLane(Lane::LEFT, Lane::MIDDLE)) {
     return Lane::MIDDLE;
-  } else if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)) {
-    return Lane::LEFT;
-  } else if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
-    return Lane::RIGHT;
-  } else if (canSwitchFromLaneToLane(Lane::RIGHT, Lane::MIDDLE)) {
-    return Lane::MIDDLE;
-  } else {
-    return lane;
   }
+
+  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)
+      && canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
+
+    // TODO: es fehlt noch die Überprüfung, ob das Vehicle auch VOR dem EgoCar ist. Schreibe dafür einen neuen Test!
+    vector<Vehicle> leftVehicles = filter<Vehicle>(
+        vehicles, [&](const Vehicle& vehicle) {
+          return isInLane(vehicle.getPos().getFrenet().d, Lane::LEFT);
+        });
+
+    vector<Vehicle>::iterator leftIt =
+        std::min_element(
+            leftVehicles.begin(),
+            leftVehicles.end(),
+            [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
+              return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
+
+    // TODO: es fehlt noch die ÜBerprüfung, ob überhaupt irgendein Vehicle vor dem EgoCar ist. Schreibe dafür einen neuen Test!
+    Vehicle left = *leftIt;
+
+    vector<Vehicle> rightVehicles = filter<Vehicle>(
+        vehicles, [&](const Vehicle& vehicle) {
+          return isInLane(vehicle.getPos().getFrenet().d, Lane::RIGHT);
+        });
+
+    vector<Vehicle>::iterator rightIt =
+        std::min_element(
+            rightVehicles.begin(),
+            rightVehicles.end(),
+            [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
+              return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
+
+    Vehicle right = *rightIt;
+
+    if (left.getPos().getFrenet().s > right.getPos().getFrenet().s) {
+      return Lane::LEFT;
+    } else {
+      return Lane::RIGHT;
+    }
+  }
+
+  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)) {
+    return Lane::LEFT;
+  }
+
+  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
+    return Lane::RIGHT;
+  }
+
+  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)) {
+    return Lane::LEFT;
+  }
+
+  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
+    return Lane::RIGHT;
+  }
+
+  if (canSwitchFromLaneToLane(Lane::RIGHT, Lane::MIDDLE)) {
+    return Lane::MIDDLE;
+  }
+
+  return lane;
 }
 
 vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
