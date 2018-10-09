@@ -108,7 +108,9 @@ EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
       shapeTemplate(Rectangle(Point::zero(), 2.5, 2.5)) {
 }
 
+// TODO: DRY with Vehicle.getShape()
 Rectangle EgoCar::getShape() const {
+  // TODO: neuer Konstruktor mit center und width und height
   return Rectangle(
       getPos().getXY()
           + Point { -shapeTemplate.width / 2, shapeTemplate.height / 2 },
