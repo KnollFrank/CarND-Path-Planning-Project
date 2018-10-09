@@ -11,16 +11,50 @@
 
 using namespace std;
 
+class Dimension {
+ public:
+  static Dimension fromWidthAndHeight(double width, double height);
+  double getWidth() const;
+  double getHeight() const;
+
+ private:
+  Dimension(double width, double height);
+  double width;
+  double height;
+};
+
+Dimension::Dimension(double _width, double _height)
+    : width(_width),
+      height(_height) {
+}
+
+Dimension Dimension::fromWidthAndHeight(double width, double height) {
+  return Dimension(width, height);
+}
+
+double Dimension::getWidth() const {
+  return width;
+}
+
+double Dimension::getHeight() const {
+  return height;
+}
+
 class Rectangle {
 
  public:
-  Rectangle(const Frenet& topLeft, double width, double height);
-  Frenet topLeft;
-  double width;
-  double height;
+  Rectangle(const Frenet& topLeft, const Dimension& dimension);
 
   Frenet bottomRight() const {
-    return topLeft + Frenet { -height, width };
+    return topLeft + Frenet { -dimension.getHeight(), dimension.getWidth() };
+  }
+
+  double getWidth() const {
+    return dimension.getWidth();
+  }
+
+  double getHeight() const {
+    return dimension.getHeight();
   }
 
   // TODO: refactor
@@ -40,13 +74,16 @@ class Rectangle {
 
     return true;
   }
+
+ private:
+  Frenet topLeft;
+  Dimension dimension;
+
 };
 
-// TODO: für die Kombination widht, height eine Klasse einführen, z.B. Dimension. Diese Klasse kann dann auch in EgoCar und Vehicle statt dem shapeTemplate verwendet werden.
-Rectangle::Rectangle(const Frenet& _topLeft, double _width, double _height)
+Rectangle::Rectangle(const Frenet& _topLeft, const Dimension& _dimension)
     : topLeft(_topLeft),
-      width(_width),
-      height(_height) {
+      dimension(_dimension) {
 }
 
 class Circle {
@@ -91,7 +128,7 @@ class EgoCar {
 
   const CoordsConverter& coordsConverter;
   boost::circular_buffer<FrenetCart> positions;
-  const Rectangle shapeTemplate;
+  const Dimension shapeTemplate;
 };
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
@@ -106,7 +143,7 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
 EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
     : coordsConverter(_coordsConverter),
       positions(boost::circular_buffer<FrenetCart>(4)),
-      shapeTemplate(Rectangle(Frenet::zero(), 2.5, 2.5)) {
+      shapeTemplate(Dimension::fromWidthAndHeight(2.5, 2.5)) {
 }
 
 // TODO: DRY with Vehicle.getShape()
@@ -114,8 +151,9 @@ Rectangle EgoCar::getShape() const {
   // TODO: neuer Konstruktor mit center und width und height
   return Rectangle(
       getPos().getFrenet()
-          + Frenet { shapeTemplate.height / 2, -shapeTemplate.width / 2 },
-      shapeTemplate.width, shapeTemplate.height);
+          + Frenet { shapeTemplate.getHeight() / 2, -shapeTemplate.getWidth()
+              / 2 },
+      shapeTemplate);
 }
 
 void EgoCar::setPos(const FrenetCart& pos) {
@@ -176,7 +214,7 @@ class Vehicle {
   FrenetCart vel_m_per_s;
   FrenetCart pos;
   const CoordsConverter& coordsConverter;
-  const Rectangle shapeTemplate;
+  const Dimension shapeTemplate;
 };
 
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
@@ -192,7 +230,7 @@ Vehicle::Vehicle(int _id, FrenetCart _pos,
       pos(_pos),
       vel_m_per_s(FrenetCart(Point::zero(), _coordsConverter)),
       coordsConverter(_coordsConverter),
-      shapeTemplate(Rectangle(Frenet::zero(), 2.5, 2.5)) {
+      shapeTemplate(Dimension::fromWidthAndHeight(2.5, 2.5)) {
 }
 
 void Vehicle::setPos(const FrenetCart& pos) {
@@ -206,8 +244,9 @@ FrenetCart Vehicle::getPos() const {
 Rectangle Vehicle::getShape() const {
   return Rectangle(
       getPos().getFrenet()
-          + Frenet { shapeTemplate.height / 2, -shapeTemplate.width / 2 },
-      shapeTemplate.width, shapeTemplate.height);
+          + Frenet { shapeTemplate.getHeight() / 2, -shapeTemplate.getWidth()
+              / 2 },
+      shapeTemplate);
 }
 
 void Vehicle::setVel_cart_m_per_s(const Point& vel) {
