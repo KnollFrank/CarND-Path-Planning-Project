@@ -188,11 +188,13 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
 }
 
 bool PathPlanner::canSwitch2Lane(const Lane& lane) {
+  // TODO: hier den Pfad zur lane berechnen und simulieren, ob es mit irgendeinem Vehicle kracht.
   return !isEgoCarTooCloseToAnyVehicleInLane(lane);
 }
 
 double PathPlanner::getVehiclesSPositionAfterNumTimeSteps(
     const Vehicle& vehicle) {
+  // TODO: hier sollte man jeden einzelnen der numTimeSteps Schritte simulieren und bei jedem Schritt schauen, ob es kracht.
   const int numTimeSteps = previousData.sizeOfPreviousPath();
   const double speed = vehicle.getVel_frenet_m_per_s().len();
   return vehicle.getPos().getFrenet().s + numTimeSteps * dt * speed;
