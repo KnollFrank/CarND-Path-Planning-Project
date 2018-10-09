@@ -74,7 +74,7 @@ class PathPlanner {
   void addNewPoints(Path& path);
   double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle);
   FrenetCart createFrenetCart(Frenet frenet) const;
-  vector<FrenetCart> createSplinePoints();
+  vector<FrenetCart> createNewSplinePoints();
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -147,7 +147,7 @@ vector<FrenetCart> PathPlanner::createSplinePoints(const Path& path) {
       });
 }
 
-vector<FrenetCart> PathPlanner::createSplinePoints() {
+vector<FrenetCart> PathPlanner::createNewSplinePoints() {
   Path path;
   addPointsFromPreviousData(path);
   addNewPoints(path);
@@ -165,7 +165,7 @@ Path PathPlanner::createPath() {
   refPoint.point = egoCar.getPos().getFrenet();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
-  vector<FrenetCart> splinePoints = createSplinePoints();
+  vector<FrenetCart> splinePoints = createNewSplinePoints();
   Path next_vals;
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
   appendSnd2Fst(next_vals.points, splinePoints);
@@ -307,11 +307,12 @@ Lane PathPlanner::getNewLane(bool too_close, const Lane& lane) {
 }
 
 vector<FrenetCart> PathPlanner::createPointsFromPreviousData() {
-
   vector<FrenetCart> points;
+
   if (previousData.sizeOfPreviousPath() < 2) {
     Frenet prev = egoCar.getPos().getFrenet()
         - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
+
     points.push_back(createFrenetCart(prev));
     points.push_back(createFrenetCart(egoCar.getPos().getFrenet()));
   } else {
@@ -320,9 +321,11 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData() {
     Frenet prev = previousData.previous_path.points[previousData
         .sizeOfPreviousPath() - 2].getFrenet();
     refPoint.yaw_rad = (refPoint.point - prev).getHeading();
+
     points.push_back(createFrenetCart(prev));
     points.push_back(createFrenetCart(refPoint.point));
   }
+
   return points;
 }
 
