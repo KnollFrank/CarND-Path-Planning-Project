@@ -70,7 +70,7 @@ class Rectangle {
       return false;
 
     // If one rectangle is above other
-    if (getTopLeft().s < other.getBottomRight().s || this->isAbove(other))
+    if (other.isAbove(*this) || this->isAbove(other))
       return false;
 
     return true;
