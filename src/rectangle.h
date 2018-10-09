@@ -29,8 +29,8 @@ class Rectangle {
   }
 
   bool overlaps(const Rectangle& other) const {
-    return !other.isOnLeftSideOf(*this) && !this->isOnLeftSideOf(other)
-        && !other.isAbove(*this) && !this->isAbove(other);
+    return !this->isOnLeftSideOf(other) && !other.isOnLeftSideOf(*this)
+        && !this->isAbove(other) && !other.isAbove(*this);
   }
 
  private:

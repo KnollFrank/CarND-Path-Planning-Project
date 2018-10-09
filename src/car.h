@@ -12,7 +12,6 @@
 #include "rectangle.h"
 #include <boost/circular_buffer.hpp>
 
-
 using namespace std;
 
 class Circle {
