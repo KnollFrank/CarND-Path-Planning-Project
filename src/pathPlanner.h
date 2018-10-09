@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iterator>
 #include <vector>
+#include <experimental/optional>
 
 #include "alglib/interpolation.h"
 #include "car.h"
@@ -275,6 +276,11 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
             [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
               return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
 
+    std::experimental::optional < Vehicle > left =
+        leftIt != leftVehicles.end() ?
+            std::experimental::make_optional(*leftIt) :
+            std::experimental::nullopt;
+
     vector<Vehicle> rightVehicles =
         filter<Vehicle>(
             vehicles,
@@ -289,17 +295,19 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
             [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
               return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
 
-    if (leftIt == leftVehicles.end() && rightIt == rightVehicles.end()) {
-      return Lane::LEFT;
-    } else if (leftIt != leftVehicles.end() && rightIt == rightVehicles.end()) {
-      return Lane::RIGHT;
-    } else if (leftIt == leftVehicles.end() && rightIt != rightVehicles.end()) {
-      return Lane::LEFT;
-    } else if (leftIt != leftVehicles.end() && rightIt != rightVehicles.end()) {
-      Vehicle left = *leftIt;
-      Vehicle right = *rightIt;
+    std::experimental::optional < Vehicle > right =
+        rightIt != rightVehicles.end() ?
+            std::experimental::make_optional(*rightIt) :
+            std::experimental::nullopt;
 
-      if (left.getPos().getFrenet().s > right.getPos().getFrenet().s) {
+    if (!left && !right) {
+      return Lane::LEFT;
+    } else if (left && !right) {
+      return Lane::RIGHT;
+    } else if (!left && right) {
+      return Lane::LEFT;
+    } else if (left && right) {
+      if ((*left).getPos().getFrenet().s > (*right).getPos().getFrenet().s) {
         return Lane::LEFT;
       } else {
         return Lane::RIGHT;
