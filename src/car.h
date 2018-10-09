@@ -70,8 +70,7 @@ class Rectangle {
       return false;
 
     // If one rectangle is above other
-    if (getTopLeft().s < other.getBottomRight().s
-        || other.getTopLeft().s < getBottomRight().s)
+    if (getTopLeft().s < other.getBottomRight().s || this->isAbove(other))
       return false;
 
     return true;
@@ -82,6 +81,10 @@ class Rectangle {
 
   bool isOnLeftSideOf(const Rectangle& other) const {
     return other.getTopLeft().d > getBottomRight().d;
+  }
+
+  bool isAbove(const Rectangle& other) const {
+    return other.getTopLeft().s < getBottomRight().s;
   }
 
   Frenet topLeft;
