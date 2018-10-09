@@ -120,10 +120,10 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
   EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
-  PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02, 50);
+  PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02, 50, vehicles);
 
 // WHEN
-  Path path = pathPlanner.createPath(egoCar, previousData, vehicles);
+  Path path = pathPlanner.createPath(egoCar, previousData);
 
 // THEN
   assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE);
