@@ -170,11 +170,11 @@ void PathPlanner::updateEgoCarAndLaneAndRefPoint() {
 Path PathPlanner::createPath() {
   updateEgoCarAndLaneAndRefPoint();
 
-  Path next_vals;
-  appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-  appendSnd2Fst(next_vals.points, createNewPathPoints());
+  Path path;
+  appendSnd2Fst(path.points, previousData.previous_path.points);
+  appendSnd2Fst(path.points, createNewPathPoints());
 
-  return next_vals;
+  return path;
 }
 
 bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
