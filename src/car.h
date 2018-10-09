@@ -60,19 +60,13 @@ class Rectangle {
     return dimension.getHeight();
   }
 
-  // TODO: refactor
   bool overlaps(const Rectangle& other) {
-    const Frenet l1 = topLeft;
-    const Frenet r1 = bottomRight();
-    const Frenet l2 = other.topLeft;
-    const Frenet r2 = other.bottomRight();
-
     // If one rectangle is on left side of other
-    if (l1.d > r2.d || l2.d > r1.d)
+    if (topLeft.d > other.bottomRight().d || other.topLeft.d > bottomRight().d)
       return false;
 
     // If one rectangle is above other
-    if (l1.s < r2.s || l2.s < r1.s)
+    if (topLeft.s < other.bottomRight().s || other.topLeft.s < bottomRight().s)
       return false;
 
     return true;
