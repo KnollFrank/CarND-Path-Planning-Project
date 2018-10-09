@@ -64,10 +64,9 @@ class Rectangle {
     return dimension.getHeight();
   }
 
-  bool overlaps(const Rectangle& other) {
+  bool overlaps(const Rectangle& other) const {
     // If one rectangle is on left side of other
-    if (getTopLeft().d > other.getBottomRight().d
-        || other.getTopLeft().d > getBottomRight().d)
+    if (other.isOnLeftSideOf(*this) || this->isOnLeftSideOf(other))
       return false;
 
     // If one rectangle is above other
@@ -80,6 +79,10 @@ class Rectangle {
 
  private:
   Rectangle(const Frenet& topLeft, const Dimension& dimension);
+
+  bool isOnLeftSideOf(const Rectangle& other) const {
+    return other.getTopLeft().d > getBottomRight().d;
+  }
 
   Frenet topLeft;
   Dimension dimension;
