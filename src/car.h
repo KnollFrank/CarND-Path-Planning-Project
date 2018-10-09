@@ -14,17 +14,6 @@
 
 using namespace std;
 
-class Circle {
-
- public:
-  Point center;
-  double radius;
-
-  bool overlaps(const Circle& other) {
-    return center.distanceTo(other.center) <= radius + other.radius;
-  }
-};
-
 enum PositionHistory {
   ACTUAL = 3,
   PREVIOUS = 2,
