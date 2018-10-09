@@ -270,17 +270,10 @@ optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
   vector<Vehicle> vehiclesInLaneInFrontOfEgoCar =
       getVehiclesInLaneInFrontOfEgoCar(lane, egoCar, vehicles);
 
-  vector<Vehicle>::iterator nearestVehicleInLaneInFrontOfEgoCar =
-      std::min_element(
-          vehiclesInLaneInFrontOfEgoCar.begin(),
-          vehiclesInLaneInFrontOfEgoCar.end(),
-          [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-            return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
+  auto isNearer = [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
+    return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;};
 
-  return
-      nearestVehicleInLaneInFrontOfEgoCar
-          != vehiclesInLaneInFrontOfEgoCar.end() ?
-          make_optional(*nearestVehicleInLaneInFrontOfEgoCar) : nullopt;
+  return getMinimum<Vehicle>(vehiclesInLaneInFrontOfEgoCar, isNearer);
 }
 
 Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,

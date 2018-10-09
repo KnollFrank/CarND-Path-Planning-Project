@@ -5,9 +5,12 @@
 #include <iostream>
 #include <iterator>
 #include <vector>
+#include <functional>
 #include <boost/circular_buffer.hpp>
+#include <experimental/optional>
 
 using namespace std;
+using namespace std::experimental;
 
 // For converting back and forth between radians and degrees.
 constexpr double pi() {
@@ -62,7 +65,8 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
 
 // TODO: DRY with std::ostream& operator<<(std::ostream& out, const std::vector<T>& v)
 template<typename T>
-std::ostream& operator<<(std::ostream& out, const boost::circular_buffer<T>& v) {
+std::ostream& operator<<(std::ostream& out,
+                         const boost::circular_buffer<T>& v) {
   if (!v.empty()) {
     out << '[';
     std::copy(std::begin(v), std::end(v), std::ostream_iterator<T>(out, ", "));
@@ -80,6 +84,13 @@ double getMinimum(const vector<double>& v) {
   return *std::min_element(v.begin(), v.end());
 }
 
+template<typename T>
+inline optional<T> getMinimum(const vector<T>& v,
+                              function<bool(const T&, const T&)> comp) {
+  auto it = std::min_element(v.begin(), v.end(), comp);
+  return it != v.end() ? make_optional(*it) : nullopt;
+}
+
 double getMaximum(const vector<double>& v) {
   return *std::max_element(v.begin(), v.end());
 }
@@ -90,8 +101,7 @@ double getIndexOfMinimum(const vector<double>& v) {
 
 // adapted from: https://stackoverflow.com/questions/21204676/modern-way-to-filter-stl-container
 template<typename T>
-vector<T> filter(const vector<T>& v, function<bool(const T&)> predicate)
-{
+vector<T> filter(const vector<T>& v, function<bool(const T&)> predicate) {
   vector<T> result;
   copy_if(v.cbegin(), v.cend(), back_inserter(result), predicate);
   return result;
