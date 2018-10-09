@@ -45,6 +45,8 @@ class Rectangle {
  public:
   static Rectangle fromTopLeftAndDimension(const Frenet& topLeft,
                                            const Dimension& dimension);
+  static Rectangle fromCenterAndDimension(const Frenet& center,
+                                          const Dimension& dimension);
 
   Frenet bottomRight() const {
     return topLeft + Frenet { -dimension.getHeight(), dimension.getWidth() };
@@ -87,6 +89,13 @@ class Rectangle {
 Rectangle Rectangle::fromTopLeftAndDimension(const Frenet& topLeft,
                                              const Dimension& dimension) {
   return Rectangle(topLeft, dimension);
+}
+
+Rectangle Rectangle::fromCenterAndDimension(const Frenet& center,
+                                            const Dimension& dimension) {
+  return fromTopLeftAndDimension(
+      center + Frenet { dimension.getHeight() / 2, -dimension.getWidth() / 2 },
+      dimension);
 }
 
 Rectangle::Rectangle(const Frenet& _topLeft, const Dimension& _dimension)
@@ -156,12 +165,7 @@ EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
 
 // TODO: DRY with Vehicle.getShape()
 Rectangle EgoCar::getShape() const {
-  // TODO: neuer Konstruktor mit center und width und height
-  return Rectangle::fromTopLeftAndDimension(
-      getPos().getFrenet()
-          + Frenet { shapeTemplate.getHeight() / 2, -shapeTemplate.getWidth()
-              / 2 },
-      shapeTemplate);
+  return Rectangle::fromCenterAndDimension(getPos().getFrenet(), shapeTemplate);
 }
 
 void EgoCar::setPos(const FrenetCart& pos) {
@@ -250,11 +254,7 @@ FrenetCart Vehicle::getPos() const {
 }
 
 Rectangle Vehicle::getShape() const {
-  return Rectangle::fromTopLeftAndDimension(
-      getPos().getFrenet()
-          + Frenet { shapeTemplate.getHeight() / 2, -shapeTemplate.getWidth()
-              / 2 },
-      shapeTemplate);
+  return Rectangle::fromCenterAndDimension(getPos().getFrenet(), shapeTemplate);
 }
 
 void Vehicle::setVel_cart_m_per_s(const Point& vel) {
