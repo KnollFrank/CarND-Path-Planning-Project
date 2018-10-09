@@ -35,35 +35,29 @@ class PathPlanner {
  public:
   PathPlanner(const CoordsConverter& coordsConverter, ReferencePoint& refPoint,
               Lane& lane, double dt, double speed_limit_mph,
-              const vector<Vehicle>& vehicles);
+              const vector<Vehicle>& vehicles, const EgoCar& _egoCar);
 
-  // TODO: EgoCar in den Konstruktor übernehmen
-  Path createPath(EgoCar egoCar, const PreviousData& previousData);
+  Path createPath(const PreviousData& previousData);
 
  private:
-  bool isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
-                                          const int numTimeSteps,
+  bool isEgoCarTooCloseToAnyVehicleInLane(const int numTimeSteps,
                                           const Lane& lane);
-  bool willVehicleBeWithin30MetersAheadOfEgoCar(const EgoCar& egoCar,
-                                                const Vehicle& vehicle,
+  bool willVehicleBeWithin30MetersAheadOfEgoCar(const Vehicle& vehicle,
                                                 const int numTimeSteps);
   double getNewVelocity(bool too_close, double vel_mph);
-  Lane getNewLane(bool too_close, const Lane& lane, const EgoCar& egoCar,
-                  const int numTimeSteps);
-  Lane getMoreFreeLeftOrRightLane(const EgoCar& egoCar);
+  Lane getNewLane(bool too_close, const Lane& lane, const int numTimeSteps);
+  Lane getMoreFreeLeftOrRightLane();
   std::experimental::optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
-      const Lane& lane, const EgoCar& egoCar);
-  vector<Vehicle> getVehiclesInLaneInFrontOfEgoCar(const Lane& lane,
-                                                   const EgoCar& egoCar);
-  bool canSwitch2Lane(const EgoCar& egoCar, const Lane& lane,
-                      const int numTimeSteps);
+      const Lane& lane);
+  vector<Vehicle> getVehiclesInLaneInFrontOfEgoCar(const Lane& lane);
+  bool canSwitch2Lane(const Lane& lane, const int numTimeSteps);
   CoordinateSystem createRotatedCoordinateSystem(const Frenet& origin,
                                                  double angle_rad);
   FrenetCart createSplinePoint(double x, const Spline& spline);
   void sort_and_remove_duplicates(vector<FrenetCart>& points);
   std::vector<FrenetCart> createPointsFromPreviousData(
-      const EgoCar& egoCar, const PreviousData& previousData);
-  std::vector<FrenetCart> createNewPoints(const EgoCar& egoCar);
+      const PreviousData& previousData);
+  std::vector<FrenetCart> createNewPoints();
   vector<FrenetCart> workWithPathInCarsCoordinateSystem(
       const Path& path,
       const function<vector<FrenetCart>(const Path& carsPath)>& transformCarsPath2Points);
@@ -77,9 +71,8 @@ class PathPlanner {
   vector<FrenetCart> transform(const CoordinateSystem& coordinateSystem,
                                const vector<FrenetCart>& points) const;
   std::vector<double> createSVals(const Spline& spline, const int num);
-  void addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
-                                 const PreviousData& previousData);
-  void addNewPoints(Path& path, const EgoCar& egoCar);
+  void addPointsFromPreviousData(Path& path, const PreviousData& previousData);
+  void addNewPoints(Path& path);
   double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle,
                                                const int numTimeSteps);
 
@@ -91,18 +84,21 @@ class PathPlanner {
   const int path_size = 50;
   const double speed_limit_mph;
   const vector<Vehicle>& vehicles;
+  EgoCar egoCar;
 };
 
 PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
                          ReferencePoint& _refPoint, Lane& _lane, double _dt,
                          double _speed_limit_mph,
-                         const vector<Vehicle>& _vehicles)
+                         const vector<Vehicle>& _vehicles,
+                         const EgoCar& _egoCar)
     : coordsConverter(_coordsConverter),
       refPoint(_refPoint),
       lane(_lane),
       dt(_dt),
       speed_limit_mph(_speed_limit_mph),
-      vehicles(_vehicles) {
+      vehicles(_vehicles),
+      egoCar(_egoCar) {
 }
 
 vector<FrenetCart> PathPlanner::enterCarsCoordinateSystem(
@@ -136,7 +132,7 @@ vector<FrenetCart> PathPlanner::workWithPathInCarsCoordinateSystem(
   return leaveCarsCoordinateSystem(refPoint.point, refPoint.yaw_rad, points);
 }
 
-Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData) {
+Path PathPlanner::createPath(const PreviousData& previousData) {
 
   // printInfo(egoCar, vehicles);
 
@@ -145,15 +141,15 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData) {
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(
-      egoCar, previousData.sizeOfPreviousPath(), lane);
-  lane = getNewLane(too_close, lane, egoCar, previousData.sizeOfPreviousPath());
+      previousData.sizeOfPreviousPath(), lane);
+  lane = getNewLane(too_close, lane, previousData.sizeOfPreviousPath());
   refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
   refPoint.point = egoCar.getPos().getFrenet();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
   Path path;
-  addPointsFromPreviousData(path, egoCar, previousData);
-  addNewPoints(path, egoCar);
+  addPointsFromPreviousData(path, previousData);
+  addNewPoints(path);
 
   vector<FrenetCart> points =
       workWithPathInCarsCoordinateSystem(
@@ -180,22 +176,20 @@ Path PathPlanner::createPath(EgoCar egoCar, const PreviousData& previousData) {
 //  }
 }
 
-bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const EgoCar& egoCar,
-                                                     const int numTimeSteps,
+bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const int numTimeSteps,
                                                      const Lane& lane) {
 
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
       (const Vehicle& vehicle) {
-        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(egoCar, vehicle, numTimeSteps);};
+        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(vehicle, numTimeSteps);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isEgoCarTooCloseToVehicleInLane);
 }
 
-bool PathPlanner::canSwitch2Lane(const EgoCar& egoCar, const Lane& lane,
-                                 const int numTimeSteps) {
-  return !isEgoCarTooCloseToAnyVehicleInLane(egoCar, numTimeSteps, lane);
+bool PathPlanner::canSwitch2Lane(const Lane& lane, const int numTimeSteps) {
+  return !isEgoCarTooCloseToAnyVehicleInLane(numTimeSteps, lane);
 }
 
 double PathPlanner::getVehiclesSPositionAfterNumTimeSteps(
@@ -206,7 +200,7 @@ double PathPlanner::getVehiclesSPositionAfterNumTimeSteps(
 }
 
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
-    const EgoCar& egoCar, const Vehicle& vehicle, const int numTimeSteps) {
+    const Vehicle& vehicle, const int numTimeSteps) {
   double check_vehicle_s = getVehiclesSPositionAfterNumTimeSteps(vehicle,
                                                                  numTimeSteps);
   // TODO: replace magic number 30 with constant
@@ -229,7 +223,7 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
 }
 
 vector<Vehicle> PathPlanner::getVehiclesInLaneInFrontOfEgoCar(
-    const Lane& lane, const EgoCar& egoCar) {
+    const Lane& lane) {
 
   auto isInLane = [&](const Vehicle& vehicle) {
     return ::isInLane(vehicle.getPos().getFrenet().d, lane);
@@ -245,10 +239,10 @@ vector<Vehicle> PathPlanner::getVehiclesInLaneInFrontOfEgoCar(
 }
 
 std::experimental::optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
-    const Lane& lane, const EgoCar& egoCar) {
+    const Lane& lane) {
 
   vector<Vehicle> vehiclesInLaneInFrontOfEgoCar =
-      getVehiclesInLaneInFrontOfEgoCar(lane, egoCar);
+      getVehiclesInLaneInFrontOfEgoCar(lane);
 
   auto isNearer = [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
     return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;};
@@ -256,13 +250,13 @@ std::experimental::optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFront
   return getMinimum<Vehicle>(vehiclesInLaneInFrontOfEgoCar, isNearer);
 }
 
-Lane PathPlanner::getMoreFreeLeftOrRightLane(const EgoCar& egoCar) {
+Lane PathPlanner::getMoreFreeLeftOrRightLane() {
 
   std::experimental::optional<Vehicle> leftVehicleInEgoCarsWay =
-      getNearestVehicleInLaneInFrontOfEgoCar(Lane::LEFT, egoCar);
+      getNearestVehicleInLaneInFrontOfEgoCar(Lane::LEFT);
 
   std::experimental::optional<Vehicle> rightVehicleInEgoCarsWay =
-      getNearestVehicleInLaneInFrontOfEgoCar(Lane::RIGHT, egoCar);
+      getNearestVehicleInLaneInFrontOfEgoCar(Lane::RIGHT);
 
   if (leftVehicleInEgoCarsWay && rightVehicleInEgoCarsWay) {
     bool isLeftLaneMoreFree = (*leftVehicleInEgoCarsWay).getPos().getFrenet().s
@@ -284,13 +278,13 @@ Lane PathPlanner::getMoreFreeLeftOrRightLane(const EgoCar& egoCar) {
 }
 
 Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,
-                             const EgoCar& egoCar, const int numTimeSteps) {
+                             const int numTimeSteps) {
   if (!too_close) {
     return lane;
   }
 
   auto canSwitchFromLaneToLane = [&](const Lane& from, const Lane& to) {
-    return lane == from && canSwitch2Lane(egoCar, to, numTimeSteps);
+    return lane == from && canSwitch2Lane(to, numTimeSteps);
   };
 
   if (canSwitchFromLaneToLane(Lane::LEFT, Lane::MIDDLE)) {
@@ -300,7 +294,7 @@ Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,
   if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)
       && canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
 
-    return getMoreFreeLeftOrRightLane(egoCar);
+    return getMoreFreeLeftOrRightLane();
   }
 
   if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)) {
@@ -319,7 +313,7 @@ Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,
 }
 
 vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
-    const EgoCar& egoCar, const PreviousData& previousData) {
+    const PreviousData& previousData) {
 
   vector<FrenetCart> points;
   if (previousData.sizeOfPreviousPath() < 2) {
@@ -339,7 +333,7 @@ vector<FrenetCart> PathPlanner::createPointsFromPreviousData(
   return points;
 }
 
-vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
+vector<FrenetCart> PathPlanner::createNewPoints() {
   auto egoCarPlus =
       [&](int s_offset) {
         return FrenetCart(
@@ -350,14 +344,13 @@ vector<FrenetCart> PathPlanner::createNewPoints(const EgoCar& egoCar) {
   return {egoCarPlus(30), egoCarPlus(60), egoCarPlus(90)};
 }
 
-void PathPlanner::addPointsFromPreviousData(Path& path, const EgoCar& egoCar,
+void PathPlanner::addPointsFromPreviousData(Path& path,
                                             const PreviousData& previousData) {
-  appendSnd2Fst(path.points,
-                createPointsFromPreviousData(egoCar, previousData));
+  appendSnd2Fst(path.points, createPointsFromPreviousData(previousData));
 }
 
-void PathPlanner::addNewPoints(Path& path, const EgoCar& egoCar) {
-  appendSnd2Fst(path.points, createNewPoints(egoCar));
+void PathPlanner::addNewPoints(Path& path) {
+  appendSnd2Fst(path.points, createNewPoints());
 }
 
 void PathPlanner::sort_and_remove_duplicates(vector<FrenetCart>& points) {

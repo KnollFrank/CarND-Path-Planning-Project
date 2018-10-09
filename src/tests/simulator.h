@@ -116,8 +116,8 @@ bool Simulator::oneRoundDriven() {
 
 double Simulator::driveEgoCarAndVehicles(
     function<void(void)> afterEachMovementOfEgoCar) {
-  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt, speed_limit_mph, vehicles);
-  Path path = pathPlanner.createPath(egoCar, previousData);
+  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt, speed_limit_mph, vehicles, egoCar);
+  Path path = pathPlanner.createPath(previousData);
   int numberOfUnprocessedPathElements = 10;
   double secsDriven = drive2PointsOfEgoCarAndDriveVehicles(
       path.points, numberOfUnprocessedPathElements, afterEachMovementOfEgoCar);
