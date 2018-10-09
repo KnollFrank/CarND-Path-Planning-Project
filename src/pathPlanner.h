@@ -281,23 +281,27 @@ optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
 Lane PathPlanner::getMoreFreeLeftOrRightLane(const EgoCar& egoCar,
                                              const vector<Vehicle>& vehicles) {
 
-  optional < Vehicle > left = getNearestVehicleInLaneInFrontOfEgoCar(Lane::LEFT,
-                                                                     egoCar,
-                                                                     vehicles);
-  optional < Vehicle > right = getNearestVehicleInLaneInFrontOfEgoCar(
-      Lane::RIGHT, egoCar, vehicles);
+  optional<Vehicle> leftVehicleInEgoCarsWay =
+      getNearestVehicleInLaneInFrontOfEgoCar(Lane::LEFT, egoCar, vehicles);
 
-  if (left && right) {
-    if ((*left).getPos().getFrenet().s > (*right).getPos().getFrenet().s) {
-      return Lane::LEFT;
-    } else {
-      return Lane::RIGHT;
-    }
-  } else if (!left && !right) {
-    return Lane::LEFT;
-  } else if (left && !right) {
+  optional<Vehicle> rightVehicleInEgoCarsWay =
+      getNearestVehicleInLaneInFrontOfEgoCar(Lane::RIGHT, egoCar, vehicles);
+
+  if (leftVehicleInEgoCarsWay && rightVehicleInEgoCarsWay) {
+    bool isLeftLaneMoreFree = (*leftVehicleInEgoCarsWay).getPos().getFrenet().s
+        > (*rightVehicleInEgoCarsWay).getPos().getFrenet().s;
+    return isLeftLaneMoreFree ? Lane::LEFT : Lane::RIGHT;
+  }
+
+  if (leftVehicleInEgoCarsWay && !rightVehicleInEgoCarsWay) {
     return Lane::RIGHT;
-  } else if (!left && right) {
+  }
+
+  if (!leftVehicleInEgoCarsWay && rightVehicleInEgoCarsWay) {
+    return Lane::LEFT;
+  }
+
+  if (!leftVehicleInEgoCarsWay && !rightVehicleInEgoCarsWay) {
     return Lane::LEFT;
   }
 }
