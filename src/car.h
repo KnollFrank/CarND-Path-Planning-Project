@@ -48,8 +48,12 @@ class Rectangle {
   static Rectangle fromCenterAndDimension(const Frenet& center,
                                           const Dimension& dimension);
 
-  Frenet bottomRight() const {
+  Frenet getBottomRight() const {
     return topLeft + Frenet { -dimension.getHeight(), dimension.getWidth() };
+  }
+
+  Frenet getTopLeft() const {
+    return topLeft;
   }
 
   double getWidth() const {
@@ -62,11 +66,13 @@ class Rectangle {
 
   bool overlaps(const Rectangle& other) {
     // If one rectangle is on left side of other
-    if (topLeft.d > other.bottomRight().d || other.topLeft.d > bottomRight().d)
+    if (getTopLeft().d > other.getBottomRight().d
+        || other.getTopLeft().d > getBottomRight().d)
       return false;
 
     // If one rectangle is above other
-    if (topLeft.s < other.bottomRight().s || other.topLeft.s < bottomRight().s)
+    if (getTopLeft().s < other.getBottomRight().s
+        || other.getTopLeft().s < getBottomRight().s)
       return false;
 
     return true;
