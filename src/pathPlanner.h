@@ -273,9 +273,6 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
             [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
               return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
 
-    // TODO: es fehlt noch die ÜBerprüfung, ob überhaupt irgendein Vehicle vor dem EgoCar ist. Schreibe dafür einen neuen Test!
-    Vehicle left = *leftIt;
-
     vector<Vehicle> rightVehicles = filter<Vehicle>(
         vehicles, [&](const Vehicle& vehicle) {
           return isInLane(vehicle.getPos().getFrenet().d, Lane::RIGHT);
@@ -288,12 +285,21 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
             [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
               return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
 
-    Vehicle right = *rightIt;
-
-    if (left.getPos().getFrenet().s > right.getPos().getFrenet().s) {
+    if (leftIt == leftVehicles.end() && rightIt == rightVehicles.end()) {
       return Lane::LEFT;
-    } else {
+    } else if (leftIt != leftVehicles.end() && rightIt == rightVehicles.end()) {
+      return Lane::LEFT;
+    } else if (leftIt == leftVehicles.end() && rightIt != rightVehicles.end()) {
       return Lane::RIGHT;
+    } else if (leftIt != leftVehicles.end() && rightIt != rightVehicles.end()) {
+      Vehicle left = *leftIt;
+      Vehicle right = *rightIt;
+
+      if (left.getPos().getFrenet().s > right.getPos().getFrenet().s) {
+        return Lane::LEFT;
+      } else {
+        return Lane::RIGHT;
+      }
     }
   }
 
