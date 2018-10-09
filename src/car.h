@@ -43,7 +43,8 @@ double Dimension::getHeight() const {
 class Rectangle {
 
  public:
-  Rectangle(const Frenet& topLeft, const Dimension& dimension);
+  static Rectangle fromTopLeftAndDimension(const Frenet& topLeft,
+                                           const Dimension& dimension);
 
   Frenet bottomRight() const {
     return topLeft + Frenet { -dimension.getHeight(), dimension.getWidth() };
@@ -76,10 +77,17 @@ class Rectangle {
   }
 
  private:
+  Rectangle(const Frenet& topLeft, const Dimension& dimension);
+
   Frenet topLeft;
   Dimension dimension;
 
 };
+
+Rectangle Rectangle::fromTopLeftAndDimension(const Frenet& topLeft,
+                                             const Dimension& dimension) {
+  return Rectangle(topLeft, dimension);
+}
 
 Rectangle::Rectangle(const Frenet& _topLeft, const Dimension& _dimension)
     : topLeft(_topLeft),
@@ -149,7 +157,7 @@ EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
 // TODO: DRY with Vehicle.getShape()
 Rectangle EgoCar::getShape() const {
   // TODO: neuer Konstruktor mit center und width und height
-  return Rectangle(
+  return Rectangle::fromTopLeftAndDimension(
       getPos().getFrenet()
           + Frenet { shapeTemplate.getHeight() / 2, -shapeTemplate.getWidth()
               / 2 },
@@ -242,7 +250,7 @@ FrenetCart Vehicle::getPos() const {
 }
 
 Rectangle Vehicle::getShape() const {
-  return Rectangle(
+  return Rectangle::fromTopLeftAndDimension(
       getPos().getFrenet()
           + Frenet { shapeTemplate.getHeight() / 2, -shapeTemplate.getWidth()
               / 2 },
