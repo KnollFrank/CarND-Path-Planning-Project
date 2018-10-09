@@ -68,8 +68,10 @@ class PathPlanner {
                                                 const Vehicle& vehicle,
                                                 const int numTimeSteps);
   double getNewVelocity(bool too_close, double vel_mph);
-  Lane getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
+  Lane getNewLane(bool too_close, const Lane& lane, const EgoCar& egoCar,
                   const vector<Vehicle>& vehicles, const int numTimeSteps);
+  optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
+      const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles);
   bool canSwitch2Lane(const EgoCar& egoCar, const Lane& lane,
                       const vector<Vehicle>& vehicles, const int numTimeSteps);
   CoordinateSystem createRotatedCoordinateSystem(const Frenet& origin,
@@ -244,7 +246,32 @@ double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
   return vel_mph;
 }
 
-Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
+optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
+    const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
+
+  auto isInLaneInFrontOfEgoCar =
+      [&](const Vehicle& vehicle) {
+        return isInLane(vehicle.getPos().getFrenet().d, lane) && vehicle.getPos().getFrenet().s > egoCar.getPos().getFrenet().s;
+      };
+
+  vector<Vehicle> vehiclesInLaneInFrontOfEgoCar = filter<Vehicle>(
+      vehicles, isInLaneInFrontOfEgoCar);
+
+  vector<Vehicle>::iterator nearestVehicleInLaneInFrontOfEgoCar =
+      std::min_element(
+          vehiclesInLaneInFrontOfEgoCar.begin(),
+          vehiclesInLaneInFrontOfEgoCar.end(),
+          [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
+            return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
+
+  return
+      nearestVehicleInLaneInFrontOfEgoCar
+          != vehiclesInLaneInFrontOfEgoCar.end() ?
+          make_optional(*nearestVehicleInLaneInFrontOfEgoCar) : nullopt;
+}
+
+Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,
+                             const EgoCar& egoCar,
                              const vector<Vehicle>& vehicles,
                              const int numTimeSteps) {
   if (!too_close) {
@@ -262,40 +289,10 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
   if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)
       && canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
 
-    // TODO: es fehlt noch die Überprüfung, ob das Vehicle auch VOR dem EgoCar ist. Schreibe dafür einen neuen Test!
-    vector<Vehicle> leftVehicles =
-        filter<Vehicle>(
-            vehicles,
-            [&](const Vehicle& vehicle) {
-              return vehicle.getPos().getFrenet().s > egoCar.getPos().getFrenet().s && isInLane(vehicle.getPos().getFrenet().d, Lane::LEFT);
-            });
-
-    vector<Vehicle>::iterator leftIt =
-        std::min_element(
-            leftVehicles.begin(),
-            leftVehicles.end(),
-            [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-              return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
-
-    optional < Vehicle > left =
-        leftIt != leftVehicles.end() ? make_optional(*leftIt) : nullopt;
-
-    vector<Vehicle> rightVehicles =
-        filter<Vehicle>(
-            vehicles,
-            [&](const Vehicle& vehicle) {
-              return vehicle.getPos().getFrenet().s > egoCar.getPos().getFrenet().s && isInLane(vehicle.getPos().getFrenet().d, Lane::RIGHT);
-            });
-
-    vector<Vehicle>::iterator rightIt =
-        std::min_element(
-            rightVehicles.begin(),
-            rightVehicles.end(),
-            [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
-              return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
-
-    optional < Vehicle > right =
-        rightIt != rightVehicles.end() ? make_optional(*rightIt) : nullopt;
+    optional < Vehicle > left = getNearestVehicleInLaneInFrontOfEgoCar(
+        Lane::LEFT, egoCar, vehicles);
+    optional < Vehicle > right = getNearestVehicleInLaneInFrontOfEgoCar(
+        Lane::RIGHT, egoCar, vehicles);
 
     if (!left && !right) {
       return Lane::LEFT;
