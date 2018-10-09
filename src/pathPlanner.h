@@ -17,16 +17,12 @@
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
 #include "funs.h"
-#include "json.hpp"
 #include "lane.h"
 #include "path.h"
 #include "previousData.h"
 
 using namespace std;
 using namespace std::experimental;
-
-// for convenience
-using json = nlohmann::json;
 
 struct ReferencePoint {
   Frenet point;
