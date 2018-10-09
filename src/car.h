@@ -14,6 +14,7 @@ using namespace std;
 class Rectangle {
 
  public:
+  Rectangle(const Point& topLeft, double width, double height);
   Point topLeft;
   double width;
   double height;
@@ -40,6 +41,12 @@ class Rectangle {
     return true;
   }
 };
+
+Rectangle::Rectangle(const Point& _topLeft, double _width, double _height)
+    : topLeft(_topLeft),
+      width(_width),
+      height(_height) {
+}
 
 class Circle {
 
@@ -72,7 +79,7 @@ class EgoCar {
   FrenetCart getPos() const;
   Point getAcceleration(double dt) const;
   Point getJerk(double dt) const;
-  Circle getShape() const;
+  Rectangle getShape() const;
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
@@ -83,6 +90,7 @@ class EgoCar {
 
   const CoordsConverter& coordsConverter;
   boost::circular_buffer<FrenetCart> positions;
+  const Rectangle shapeTemplate;
 };
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {
@@ -96,11 +104,15 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
 
 EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
     : coordsConverter(_coordsConverter),
-      positions(boost::circular_buffer<FrenetCart>(4)) {
+      positions(boost::circular_buffer<FrenetCart>(4)),
+      shapeTemplate(Rectangle(Point::zero(), 2.5, 2.5)) {
 }
 
-Circle EgoCar::getShape() const {
-  return Circle { getPos().getXY(), 1.25 };
+Rectangle EgoCar::getShape() const {
+  return Rectangle(
+      getPos().getXY()
+          + Point { -shapeTemplate.width / 2, shapeTemplate.height / 2 },
+      shapeTemplate.width, shapeTemplate.height);
 }
 
 void EgoCar::setPos(const FrenetCart& pos) {
@@ -152,7 +164,7 @@ class Vehicle {
   void setVel_frenet_m_per_s(const Frenet& vel);
   Frenet getVel_frenet_m_per_s() const;
 
-  Circle getShape() const;
+  Rectangle getShape() const;
 
   friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
   int id;
@@ -161,6 +173,7 @@ class Vehicle {
   FrenetCart vel_m_per_s;
   FrenetCart pos;
   const CoordsConverter& coordsConverter;
+  const Rectangle shapeTemplate;
 };
 
 ostream& operator<<(ostream& os, const Vehicle& vehicle) {
@@ -175,7 +188,8 @@ Vehicle::Vehicle(int _id, FrenetCart _pos,
     : id(_id),
       pos(_pos),
       vel_m_per_s(FrenetCart(Point::zero(), _coordsConverter)),
-      coordsConverter(_coordsConverter) {
+      coordsConverter(_coordsConverter),
+      shapeTemplate(Rectangle(Point::zero(), 2.5, 2.5)) {
 }
 
 void Vehicle::setPos(const FrenetCart& pos) {
@@ -186,8 +200,11 @@ FrenetCart Vehicle::getPos() const {
   return pos;
 }
 
-Circle Vehicle::getShape() const {
-  return Circle { getPos().getXY(), 1.25 };
+Rectangle Vehicle::getShape() const {
+  return Rectangle(
+      getPos().getXY()
+          + Point { -shapeTemplate.width / 2, shapeTemplate.height / 2 },
+      shapeTemplate.width, shapeTemplate.height);
 }
 
 void Vehicle::setVel_cart_m_per_s(const Point& vel) {
