@@ -261,10 +261,12 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
       && canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
 
     // TODO: es fehlt noch die Überprüfung, ob das Vehicle auch VOR dem EgoCar ist. Schreibe dafür einen neuen Test!
-    vector<Vehicle> leftVehicles = filter<Vehicle>(
-        vehicles, [&](const Vehicle& vehicle) {
-          return isInLane(vehicle.getPos().getFrenet().d, Lane::LEFT);
-        });
+    vector<Vehicle> leftVehicles =
+        filter<Vehicle>(
+            vehicles,
+            [&](const Vehicle& vehicle) {
+              return vehicle.getPos().getFrenet().s > egoCar.getPos().getFrenet().s && isInLane(vehicle.getPos().getFrenet().d, Lane::LEFT);
+            });
 
     vector<Vehicle>::iterator leftIt =
         std::min_element(
@@ -273,10 +275,12 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
             [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
               return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
 
-    vector<Vehicle> rightVehicles = filter<Vehicle>(
-        vehicles, [&](const Vehicle& vehicle) {
-          return isInLane(vehicle.getPos().getFrenet().d, Lane::RIGHT);
-        });
+    vector<Vehicle> rightVehicles =
+        filter<Vehicle>(
+            vehicles,
+            [&](const Vehicle& vehicle) {
+              return vehicle.getPos().getFrenet().s > egoCar.getPos().getFrenet().s && isInLane(vehicle.getPos().getFrenet().d, Lane::RIGHT);
+            });
 
     vector<Vehicle>::iterator rightIt =
         std::min_element(
@@ -288,9 +292,9 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
     if (leftIt == leftVehicles.end() && rightIt == rightVehicles.end()) {
       return Lane::LEFT;
     } else if (leftIt != leftVehicles.end() && rightIt == rightVehicles.end()) {
-      return Lane::LEFT;
-    } else if (leftIt == leftVehicles.end() && rightIt != rightVehicles.end()) {
       return Lane::RIGHT;
+    } else if (leftIt == leftVehicles.end() && rightIt != rightVehicles.end()) {
+      return Lane::LEFT;
     } else if (leftIt != leftVehicles.end() && rightIt != rightVehicles.end()) {
       Vehicle left = *leftIt;
       Vehicle right = *rightIt;
@@ -394,7 +398,7 @@ vector<FrenetCart> PathPlanner::transform(
 // TODO: hier sollen s_vals erzeugt werden, die einen Abstand nach der Bogenlänge s_delta der Splinekurve spline haben.
 vector<double> PathPlanner::createSVals(const Spline& spline, const int num) {
   vector<double> s_vals;
-  const double s_delta = dt * mph2meter_per_sec(0.9 * refPoint.vel_mph);
+  const double s_delta = dt * mph2meter_per_sec(0.89 * refPoint.vel_mph);
   for (int i = 0; i < num; i++) {
     s_vals.push_back((i + 1) * s_delta);
   }

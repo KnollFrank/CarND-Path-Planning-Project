@@ -166,7 +166,7 @@ TEST_F(PathPlannerTest, should_keep_speed_close_to_speed_limit) {
 //  for (double velocity : velocities) {
 //    GTEST_COUT<< velocity << endl;
 //  }
-  double real_speed_limit_mph = 0.9 * simulator.speed_limit_mph;
+  double real_speed_limit_mph = 0.89 * simulator.speed_limit_mph;
   auto speedLimitReached = find_if(
       begin(velocities), end(velocities), [&](const double& velocity) {
         return areNear(velocity, real_speed_limit_mph, 1);
@@ -416,6 +416,48 @@ TEST_F(PathPlannerTest,
     should_overtake_vehicle_by_switching_to_more_free_left_lane) {
 
   should_overtake_vehicle_by_switching_to_more_free_lane(200, 100, Lane::LEFT);
+}
+
+TEST_F(PathPlannerTest,
+    should_overtake_vehicle_by_switching_to_more_free_right_lane2) {
+
+  // GIVEN
+  Lane lane = Lane::MIDDLE;
+
+  EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
+
+  Vehicle middle = createVehicle(0, egoCarPlusMeters(egoCar, 35),
+                                 mph2meter_per_sec(35));
+  Vehicle left = createVehicle(
+      1, parallelToVehicleInLane(middle, Lane::LEFT) + Frenet { 100, 0 },
+      middle.getVel_frenet_m_per_s().s);
+
+  Vehicle right = createVehicle(
+      2, parallelToVehicleInLane(middle, Lane::RIGHT) + Frenet { -100, 0 },
+      0);
+
+  vector<Vehicle> vehicles { middle, left, right };
+
+  Simulator simulator = createSimulator(lane, egoCar, vehicles,
+                                        std::experimental::nullopt);
+
+  // WHEN
+  bool egoCarOvertakesVehicle = false;
+  std::experimental::optional<Lane> laneOfEgoCarWhileOvertakingVehicle =
+      std::experimental::nullopt;
+  simulator.run(
+      [&]() {
+        bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
+        if(overtaken && !laneOfEgoCarWhileOvertakingVehicle) {
+          laneOfEgoCarWhileOvertakingVehicle = getLane(egoCar.getPos().getFrenet().d);
+        }
+        egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
+      });
+
+  // THEN
+  ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
+  ASSERT_EQ(Lane::RIGHT,
+            *laneOfEgoCarWhileOvertakingVehicle);
 }
 
 #endif
