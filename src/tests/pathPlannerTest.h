@@ -185,7 +185,7 @@ TEST_F(PathPlannerTest, should_collide) {
   EgoCar egoCar = createEgoCar(
       Frenet { START_S_COORD, getMiddleOfLane(Lane::MIDDLE) });
   Vehicle vehicle = createVehicle(
-      0, egoCarPlusMeters(egoCar, EgoCar::carRadius() / 2), 0);
+      0, egoCarPlusMeters(egoCar, egoCar.getShape().radius / 2), 0);
 
 // WHEN
 
@@ -198,7 +198,7 @@ TEST_F(PathPlannerTest, should_not_collide) {
   Lane lane = Lane::MIDDLE;
   EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
   Vehicle vehicle = createVehicle(
-      0, egoCarPlusMeters(egoCar, 10 * EgoCar::carSize()), 5);
+      0, egoCarPlusMeters(egoCar, 10 * egoCar.getShape().radius * 2), 5);
   vector<Vehicle> vehicles = { vehicle };
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles,
@@ -433,8 +433,7 @@ TEST_F(PathPlannerTest,
       middle.getVel_frenet_m_per_s().s);
 
   Vehicle right = createVehicle(
-      2, parallelToVehicleInLane(middle, Lane::RIGHT) + Frenet { -100, 0 },
-      0);
+      2, parallelToVehicleInLane(middle, Lane::RIGHT) + Frenet { -100, 0 }, 0);
 
   vector<Vehicle> vehicles { middle, left, right };
 
@@ -456,8 +455,7 @@ TEST_F(PathPlannerTest,
 
   // THEN
   ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
-  ASSERT_EQ(Lane::RIGHT,
-            *laneOfEgoCarWhileOvertakingVehicle);
+  ASSERT_EQ(Lane::RIGHT, *laneOfEgoCarWhileOvertakingVehicle);
 }
 
 #endif

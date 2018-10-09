@@ -162,7 +162,7 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
 
 void Simulator::assertNoIncidentsHappened(double dt) {
 //  ASSERT_LE(egoCar.getAcceleration(dt).len(), 10)<< egoCar;
-  ASSERT_LE(egoCar.getJerk(dt).len(), 10) << egoCar;
+  ASSERT_LE(egoCar.getJerk(dt).len(), 10)<< egoCar;
   ASSERT_LE(egoCar.speed_mph, speed_limit_mph) << egoCar;
   std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(
       egoCar, vehicles);
@@ -183,8 +183,7 @@ void Simulator::drive2PointOfEgoCar(
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar, const Vehicle& vehicle) {
-  return egoCar.getPos().getFrenet().distanceTo(vehicle.getPos().getFrenet())
-      <= EgoCar::carSize();
+  return egoCar.getShape().overlaps(vehicle.getShape());
 }
 
 bool Simulator::isCollision(const EgoCar& egoCar,

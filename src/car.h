@@ -11,6 +11,47 @@
 
 using namespace std;
 
+class Rectangle {
+
+ public:
+  Point topLeft;
+  double width;
+  double height;
+
+  Point bottomRight() const {
+    return topLeft + Point { width, -height };
+  }
+
+  // TODO: refactor
+  bool overlaps(const Rectangle& other) {
+    const Point l1 = topLeft;
+    const Point r1 = bottomRight();
+    const Point l2 = other.topLeft;
+    const Point r2 = other.bottomRight();
+
+    // If one rectangle is on left side of other
+    if (l1.x > r2.x || l2.x > r1.x)
+      return false;
+
+    // If one rectangle is above other
+    if (l1.y < r2.y || l2.y < r1.y)
+      return false;
+
+    return true;
+  }
+};
+
+class Circle {
+
+ public:
+  Point center;
+  double radius;
+
+  bool overlaps(const Circle& other) {
+    return center.distanceTo(other.center) <= radius + other.radius;
+  }
+};
+
 enum PositionHistory {
   ACTUAL = 3,
   PREVIOUS = 2,
@@ -30,16 +71,9 @@ class EgoCar {
   FrenetCart getPos() const;
   Point getAcceleration(double dt) const;
   Point getJerk(double dt) const;
+  Circle getShape() const;
 
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
-
-  static double carRadius() {
-    return 1.25;
-  }
-
-  static double carSize() {
-    return 2 * carRadius();
-  }
 
  private:
   Point getVelocity(const PositionHistory& positionHistory, double dt) const;
@@ -62,6 +96,10 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
 EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
     : coordsConverter(_coordsConverter),
       positions(boost::circular_buffer<FrenetCart>(4)) {
+}
+
+Circle EgoCar::getShape() const {
+  return Circle { getPos().getXY(), 1.25 };
 }
 
 void EgoCar::setPos(const FrenetCart& pos) {
@@ -113,6 +151,8 @@ class Vehicle {
   void setVel_frenet_m_per_s(const Frenet& vel);
   Frenet getVel_frenet_m_per_s() const;
 
+  Circle getShape() const;
+
   friend ostream& operator<<(ostream& os, const Vehicle& vehicle);
   int id;
 
@@ -143,6 +183,10 @@ void Vehicle::setPos(const FrenetCart& pos) {
 
 FrenetCart Vehicle::getPos() const {
   return pos;
+}
+
+Circle Vehicle::getShape() const {
+  return Circle { getPos().getXY(), 1.25 };
 }
 
 void Vehicle::setVel_cart_m_per_s(const Point& vel) {
