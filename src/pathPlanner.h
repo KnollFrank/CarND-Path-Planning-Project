@@ -41,17 +41,15 @@ class PathPlanner {
   Path createPath();
 
  private:
-  bool isEgoCarTooCloseToAnyVehicleInLane(const int numTimeSteps,
-                                          const Lane& lane);
-  bool willVehicleBeWithin30MetersAheadOfEgoCar(const Vehicle& vehicle,
-                                                const int numTimeSteps);
+  bool isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane);
+  bool willVehicleBeWithin30MetersAheadOfEgoCar(const Vehicle& vehicle);
   double getNewVelocity(bool too_close, double vel_mph);
-  Lane getNewLane(bool too_close, const Lane& lane, const int numTimeSteps);
+  Lane getNewLane(bool too_close, const Lane& lane);
   Lane getMoreFreeLeftOrRightLane();
   std::experimental::optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
       const Lane& lane);
   vector<Vehicle> getVehiclesInLaneInFrontOfEgoCar(const Lane& lane);
-  bool canSwitch2Lane(const Lane& lane, const int numTimeSteps);
+  bool canSwitch2Lane(const Lane& lane);
   CoordinateSystem createRotatedCoordinateSystem(const Frenet& origin,
                                                  double angle_rad);
   FrenetCart createSplinePoint(double x, const Spline& spline);
@@ -73,8 +71,7 @@ class PathPlanner {
   std::vector<double> createSVals(const Spline& spline, const int num);
   void addPointsFromPreviousData(Path& path);
   void addNewPoints(Path& path);
-  double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle,
-                                               const int numTimeSteps);
+  double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -140,9 +137,8 @@ Path PathPlanner::createPath() {
     egoCar.setPos(FrenetCart(previousData.end_path, coordsConverter));
   }
 
-  bool too_close = isEgoCarTooCloseToAnyVehicleInLane(
-      previousData.sizeOfPreviousPath(), lane);
-  lane = getNewLane(too_close, lane, previousData.sizeOfPreviousPath());
+  bool too_close = isEgoCarTooCloseToAnyVehicleInLane(lane);
+  lane = getNewLane(too_close, lane);
   refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
   refPoint.point = egoCar.getPos().getFrenet();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
@@ -165,33 +161,31 @@ Path PathPlanner::createPath() {
   return next_vals;
 }
 
-bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const int numTimeSteps,
-                                                     const Lane& lane) {
+bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
 
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
       (const Vehicle& vehicle) {
-        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(vehicle, numTimeSteps);};
+        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(vehicle);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isEgoCarTooCloseToVehicleInLane);
 }
 
-bool PathPlanner::canSwitch2Lane(const Lane& lane, const int numTimeSteps) {
-  return !isEgoCarTooCloseToAnyVehicleInLane(numTimeSteps, lane);
+bool PathPlanner::canSwitch2Lane(const Lane& lane) {
+  return !isEgoCarTooCloseToAnyVehicleInLane(lane);
 }
 
 double PathPlanner::getVehiclesSPositionAfterNumTimeSteps(
-    const Vehicle& vehicle, const int numTimeSteps) {
-
-  double speed = vehicle.getVel_frenet_m_per_s().len();
+    const Vehicle& vehicle) {
+  const int numTimeSteps = previousData.sizeOfPreviousPath();
+  const double speed = vehicle.getVel_frenet_m_per_s().len();
   return vehicle.getPos().getFrenet().s + numTimeSteps * dt * speed;
 }
 
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
-    const Vehicle& vehicle, const int numTimeSteps) {
-  double check_vehicle_s = getVehiclesSPositionAfterNumTimeSteps(vehicle,
-                                                                 numTimeSteps);
+    const Vehicle& vehicle) {
+  double check_vehicle_s = getVehiclesSPositionAfterNumTimeSteps(vehicle);
   // TODO: replace magic number 30 with constant
   return check_vehicle_s > egoCar.getPos().getFrenet().s
       && check_vehicle_s - egoCar.getPos().getFrenet().s < 30;
@@ -266,14 +260,13 @@ Lane PathPlanner::getMoreFreeLeftOrRightLane() {
   }
 }
 
-Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,
-                             const int numTimeSteps) {
+Lane PathPlanner::getNewLane(bool too_close, const Lane& lane) {
   if (!too_close) {
     return lane;
   }
 
   auto canSwitchFromLaneToLane = [&](const Lane& from, const Lane& to) {
-    return lane == from && canSwitch2Lane(to, numTimeSteps);
+    return lane == from && canSwitch2Lane(to);
   };
 
   if (canSwitchFromLaneToLane(Lane::LEFT, Lane::MIDDLE)) {
