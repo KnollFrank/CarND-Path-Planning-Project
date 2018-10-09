@@ -147,7 +147,7 @@ Path PathPlanner::createPath() {
   addPointsFromPreviousData(path);
   addNewPoints(path);
 
-  vector<FrenetCart> points =
+  vector<FrenetCart> splinePoints =
       workWithPathInCarsCoordinateSystem(
           path,
           [&](const Path& carsPath) {
@@ -156,7 +156,7 @@ Path PathPlanner::createPath() {
 
   Path next_vals;
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-  appendSnd2Fst(next_vals.points, points);
+  appendSnd2Fst(next_vals.points, splinePoints);
 
   return next_vals;
 }
