@@ -178,7 +178,6 @@ Path PathPlanner::createPath() {
 }
 
 bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
-
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
       (const Vehicle& vehicle) {
