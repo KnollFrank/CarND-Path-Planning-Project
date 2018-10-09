@@ -72,7 +72,7 @@ class PathPlanner {
                   const vector<Vehicle>& vehicles, const int numTimeSteps);
   Lane getMoreFreeLeftOrRightLane(const EgoCar& egoCar,
                                   const vector<Vehicle>& vehicles);
-  optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
+  std::experimental::optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
       const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles);
   vector<Vehicle> getVehiclesInLaneInFrontOfEgoCar(
       const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles);
@@ -266,7 +266,7 @@ vector<Vehicle> PathPlanner::getVehiclesInLaneInFrontOfEgoCar(
   });
 }
 
-optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
+std::experimental::optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
     const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles) {
 
   vector<Vehicle> vehiclesInLaneInFrontOfEgoCar =
@@ -281,10 +281,10 @@ optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
 Lane PathPlanner::getMoreFreeLeftOrRightLane(const EgoCar& egoCar,
                                              const vector<Vehicle>& vehicles) {
 
-  optional<Vehicle> leftVehicleInEgoCarsWay =
+  std::experimental::optional<Vehicle> leftVehicleInEgoCarsWay =
       getNearestVehicleInLaneInFrontOfEgoCar(Lane::LEFT, egoCar, vehicles);
 
-  optional<Vehicle> rightVehicleInEgoCarsWay =
+  std::experimental::optional<Vehicle> rightVehicleInEgoCarsWay =
       getNearestVehicleInLaneInFrontOfEgoCar(Lane::RIGHT, egoCar, vehicles);
 
   if (leftVehicleInEgoCarsWay && rightVehicleInEgoCarsWay) {

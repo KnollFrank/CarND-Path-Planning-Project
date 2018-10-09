@@ -10,7 +10,6 @@
 #include <experimental/optional>
 
 using namespace std;
-using namespace std::experimental;
 
 // For converting back and forth between radians and degrees.
 constexpr double pi() {
@@ -85,10 +84,13 @@ double getMinimum(const vector<double>& v) {
 }
 
 template<typename T>
-inline optional<T> getMinimum(const vector<T>& v,
-                              function<bool(const T&, const T&)> comp) {
+inline std::experimental::optional<T> getMinimum(
+    const vector<T>& v, function<bool(const T&, const T&)> comp) {
+
   auto it = std::min_element(v.begin(), v.end(), comp);
-  return it != v.end() ? make_optional(*it) : nullopt;
+  return
+      it != v.end() ?
+          std::experimental::make_optional(*it) : std::experimental::nullopt;
 }
 
 double getMaximum(const vector<double>& v) {
