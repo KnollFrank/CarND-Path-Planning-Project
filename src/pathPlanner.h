@@ -70,6 +70,8 @@ class PathPlanner {
   double getNewVelocity(bool too_close, double vel_mph);
   Lane getNewLane(bool too_close, const Lane& lane, const EgoCar& egoCar,
                   const vector<Vehicle>& vehicles, const int numTimeSteps);
+  Lane getMoreFreeLeftOrRightLane(const EgoCar& egoCar,
+                                  const vector<Vehicle>& vehicles);
   optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
       const Lane& lane, const EgoCar& egoCar, const vector<Vehicle>& vehicles);
   vector<Vehicle> getVehiclesInLaneInFrontOfEgoCar(
@@ -276,6 +278,30 @@ optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFrontOfEgoCar(
   return getMinimum<Vehicle>(vehiclesInLaneInFrontOfEgoCar, isNearer);
 }
 
+Lane PathPlanner::getMoreFreeLeftOrRightLane(const EgoCar& egoCar,
+                                             const vector<Vehicle>& vehicles) {
+
+  optional < Vehicle > left = getNearestVehicleInLaneInFrontOfEgoCar(Lane::LEFT,
+                                                                     egoCar,
+                                                                     vehicles);
+  optional < Vehicle > right = getNearestVehicleInLaneInFrontOfEgoCar(
+      Lane::RIGHT, egoCar, vehicles);
+
+  if (left && right) {
+    if ((*left).getPos().getFrenet().s > (*right).getPos().getFrenet().s) {
+      return Lane::LEFT;
+    } else {
+      return Lane::RIGHT;
+    }
+  } else if (!left && !right) {
+    return Lane::LEFT;
+  } else if (left && !right) {
+    return Lane::RIGHT;
+  } else if (!left && right) {
+    return Lane::LEFT;
+  }
+}
+
 Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,
                              const EgoCar& egoCar,
                              const vector<Vehicle>& vehicles,
@@ -295,24 +321,7 @@ Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,
   if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)
       && canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
 
-    optional < Vehicle > left = getNearestVehicleInLaneInFrontOfEgoCar(
-        Lane::LEFT, egoCar, vehicles);
-    optional < Vehicle > right = getNearestVehicleInLaneInFrontOfEgoCar(
-        Lane::RIGHT, egoCar, vehicles);
-
-    if (!left && !right) {
-      return Lane::LEFT;
-    } else if (left && !right) {
-      return Lane::RIGHT;
-    } else if (!left && right) {
-      return Lane::LEFT;
-    } else if (left && right) {
-      if ((*left).getPos().getFrenet().s > (*right).getPos().getFrenet().s) {
-        return Lane::LEFT;
-      } else {
-        return Lane::RIGHT;
-      }
-    }
+    return getMoreFreeLeftOrRightLane(egoCar, vehicles);
   }
 
   if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)) {
