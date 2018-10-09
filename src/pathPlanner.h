@@ -165,10 +165,9 @@ Path PathPlanner::createPath() {
   refPoint.point = egoCar.getPos().getFrenet();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
 
-  vector<FrenetCart> splinePoints = createNewSplinePoints();
   Path next_vals;
   appendSnd2Fst(next_vals.points, previousData.previous_path.points);
-  appendSnd2Fst(next_vals.points, splinePoints);
+  appendSnd2Fst(next_vals.points, createNewSplinePoints());
 
   return next_vals;
 }
