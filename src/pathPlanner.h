@@ -23,6 +23,7 @@
 #include "previousData.h"
 
 using namespace std;
+using namespace std::experimental;
 
 // for convenience
 using json = nlohmann::json;
@@ -276,10 +277,8 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
             [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
               return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
 
-    std::experimental::optional < Vehicle > left =
-        leftIt != leftVehicles.end() ?
-            std::experimental::make_optional(*leftIt) :
-            std::experimental::nullopt;
+    optional < Vehicle > left =
+        leftIt != leftVehicles.end() ? make_optional(*leftIt) : nullopt;
 
     vector<Vehicle> rightVehicles =
         filter<Vehicle>(
@@ -295,10 +294,8 @@ Lane PathPlanner::getNewLane(bool too_close, Lane lane, const EgoCar& egoCar,
             [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
               return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;});
 
-    std::experimental::optional < Vehicle > right =
-        rightIt != rightVehicles.end() ?
-            std::experimental::make_optional(*rightIt) :
-            std::experimental::nullopt;
+    optional < Vehicle > right =
+        rightIt != rightVehicles.end() ? make_optional(*rightIt) : nullopt;
 
     if (!left && !right) {
       return Lane::LEFT;
