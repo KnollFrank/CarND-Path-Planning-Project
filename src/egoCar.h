@@ -1,5 +1,5 @@
-#ifndef CAR_H_
-#define CAR_H_
+#ifndef EGOCAR_H_
+#define EGOCAR_H_
 
 #include <iostream>
 
@@ -104,4 +104,4 @@ Point EgoCar::getJerk(double dt) const {
           Point::zero();
 }
 
-#endif /* CAR_H_ */
+#endif /* EGOCAR_H_ */

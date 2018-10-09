@@ -11,7 +11,7 @@
 #include <functional>
 #include <vector>
 
-#include "../car.h"
+#include "../egoCar.h"
 #include "../coords/coordsConverter.h"
 #include "../coords/frenet.h"
 #include "../coords/frenetCart.h"

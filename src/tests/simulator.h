@@ -9,11 +9,11 @@
 #include <iostream>
 #include <vector>
 
-#include "../car.h"
 #include "../coords/cart.h"
 #include "../coords/coordsConverter.h"
 #include "../coords/frenet.h"
 #include "../coords/frenetCart.h"
+#include "../egoCar.h"
 #include "../funs.h"
 #include "../lane.h"
 #include "../path.h"

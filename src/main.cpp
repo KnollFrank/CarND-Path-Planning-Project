@@ -13,7 +13,7 @@
 #include <vector>
 #include <tuple>
 
-#include "car.h"
+#include "egoCar.h"
 #include "coords/cart.h"
 #include "coords/coordsConverter.h"
 #include "coords/frenet.h"

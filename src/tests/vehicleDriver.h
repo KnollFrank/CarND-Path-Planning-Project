@@ -1,7 +1,7 @@
 #ifndef TESTS_VEHICLEDRIVER_H_
 #define TESTS_VEHICLEDRIVER_H_
 
-#include "../car.h"
+#include "../egoCar.h"
 #include "../coords/frenet.h"
 #include "../coords/frenetCart.h"
 
