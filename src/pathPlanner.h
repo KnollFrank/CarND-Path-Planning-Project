@@ -336,14 +336,6 @@ Lane PathPlanner::getNewLane(bool too_close, const Lane& lane,
     return Lane::RIGHT;
   }
 
-  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)) {
-    return Lane::LEFT;
-  }
-
-  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
-    return Lane::RIGHT;
-  }
-
   if (canSwitchFromLaneToLane(Lane::RIGHT, Lane::MIDDLE)) {
     return Lane::MIDDLE;
   }
