@@ -7,10 +7,10 @@
 #include <experimental/optional>
 #include <functional>
 #include <iostream>
-#include <iterator>
 #include <vector>
 
 #include "../car.h"
+#include "../coords/cart.h"
 #include "../coords/coordsConverter.h"
 #include "../coords/frenet.h"
 #include "../coords/frenetCart.h"
@@ -19,6 +19,8 @@
 #include "../path.h"
 #include "../pathPlanner.h"
 #include "../previousData.h"
+#include "../rectangle.h"
+#include "../vehicle.h"
 #include "vehicleDriver.h"
 
 using namespace std;

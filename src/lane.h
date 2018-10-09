@@ -1,10 +1,11 @@
 #ifndef LANE_H_
 #define LANE_H_
 
-#include "car.h"
+#include <experimental/optional>
+
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
-#include <experimental/optional>
+#include "vehicle.h"
 
 enum Lane {
   LEFT = 0,
