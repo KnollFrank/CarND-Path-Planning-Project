@@ -59,6 +59,7 @@ enum PositionHistory {
   PREVIOUS_PREVIOUS_PREVIOUS = 0
 };
 
+// TODO: each class within this file shall be placed into it's own file
 // TODO: merge EgoCar and Vehicle, because they are essentially the same thing.
 class EgoCar {
 
