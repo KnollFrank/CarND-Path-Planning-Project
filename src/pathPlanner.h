@@ -136,9 +136,6 @@ vector<FrenetCart> PathPlanner::workWithPathInCarsCoordinateSystem(
 }
 
 Path PathPlanner::createPath() {
-
-  // printInfo(egoCar, vehicles);
-
   if (previousData.sizeOfPreviousPath() > 0) {
     egoCar.setPos(FrenetCart(previousData.end_path, coordsConverter));
   }
