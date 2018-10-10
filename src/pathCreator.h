@@ -37,17 +37,23 @@ class PathCreator {
   Path createPath(ReferencePoint& refPoint) {
     Path path;
     appendSnd2Fst(path.points, previousData.previous_path.points);
-    appendSnd2Fst(path.points, createNewPathPoints(refPoint));
+    vector<FrenetCart> points;
+    ReferencePoint refPointNew;
+    tie(points, refPointNew) = createNewPathPoints(refPoint);
+    refPoint = refPointNew;
+    appendSnd2Fst(path.points, points);
     return path;
   }
 
  private:
-  vector<FrenetCart> createNewPathPoints(ReferencePoint& refPoint) {
+  tuple<vector<FrenetCart>, ReferencePoint> createNewPathPoints(
+      const ReferencePoint& refPoint) {
     Path path;
-    const ReferencePoint refPointNew = addPointsFromPreviousData(path, refPoint);
-    refPoint = refPointNew;
+    const ReferencePoint refPointNew = addPointsFromPreviousData(path,
+                                                                 refPoint);
     addNewPoints(path);
-    return createSplinePoints(path, refPointNew);
+    vector<FrenetCart> splinePoints = createSplinePoints(path, refPointNew);
+    return make_tuple(splinePoints, refPointNew);
   }
 
   ReferencePoint addPointsFromPreviousData(Path& path,
