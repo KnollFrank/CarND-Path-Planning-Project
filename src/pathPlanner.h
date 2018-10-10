@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
+#include <tuple>
 
 #include "coords/coordinateSystem.h"
 #include "coords/coordsConverter.h"
@@ -75,7 +76,6 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
       previousData(_previousData) {
 }
 
-
 Path PathPlanner::createPath() {
   planPath();
   Path path = computePath();
@@ -96,7 +96,11 @@ void PathPlanner::planPath() {
 
 Path PathPlanner::computePath() {
   PathCreator pathCreator(coordsConverter, previousData, egoCar, dt, lane);
-  return pathCreator.createPath(refPoint);
+  Path path;
+  ReferencePoint refPointNew;
+  tie(path, refPointNew) = pathCreator.createPath(refPoint);
+  refPoint = refPointNew;
+  return path;
 }
 
 FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {
@@ -114,13 +118,13 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
 }
 
 bool PathPlanner::canSwitch2Lane(const Lane& lane) {
-  // TODO: hier den Pfad zur lane berechnen und simulieren, ob es mit irgendeinem Vehicle kracht.
+// TODO: hier den Pfad zur lane berechnen und simulieren, ob es mit irgendeinem Vehicle kracht.
   return !isEgoCarTooCloseToAnyVehicleInLane(lane);
 }
 
 double PathPlanner::getVehiclesSPositionAfterNumTimeSteps(
     const Vehicle& vehicle) {
-  // TODO: hier sollte man jeden einzelnen der numTimeSteps Schritte simulieren und bei jedem Schritt schauen, ob es kracht.
+// TODO: hier sollte man jeden einzelnen der numTimeSteps Schritte simulieren und bei jedem Schritt schauen, ob es kracht.
   const int numTimeSteps = previousData.sizeOfPreviousPath();
   const double speed = vehicle.getVel_frenet_m_per_s().len();
   return vehicle.getPos().getFrenet().s + numTimeSteps * dt * speed;
@@ -129,7 +133,7 @@ double PathPlanner::getVehiclesSPositionAfterNumTimeSteps(
 bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
     const Vehicle& vehicle) {
   double check_vehicle_s = getVehiclesSPositionAfterNumTimeSteps(vehicle);
-  // TODO: replace magic number 30 with constant
+// TODO: replace magic number 30 with constant
   return check_vehicle_s > egoCar.getPos().getFrenet().s
       && check_vehicle_s - egoCar.getPos().getFrenet().s < 30;
 }

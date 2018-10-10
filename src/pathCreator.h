@@ -34,15 +34,14 @@ class PathCreator {
         lane(_lane) {
   }
 
-  Path createPath(ReferencePoint& refPoint) {
+  tuple<Path, ReferencePoint> createPath(const ReferencePoint& refPoint) {
     Path path;
     appendSnd2Fst(path.points, previousData.previous_path.points);
     vector<FrenetCart> points;
     ReferencePoint refPointNew;
     tie(points, refPointNew) = createNewPathPoints(refPoint);
-    refPoint = refPointNew;
     appendSnd2Fst(path.points, points);
-    return path;
+    return make_tuple(path, refPointNew);
   }
 
  private:
