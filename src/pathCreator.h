@@ -24,40 +24,38 @@ using namespace std;
 class PathCreator {
 
  public:
-  PathCreator(const CoordsConverter& _coordsConverter,
-              const Path& _previousPath, const EgoCar& _egoCar, double _dt,
-              const Lane& _lane, const ReferencePoint& _refPoint)
+  PathCreator(const CoordsConverter& _coordsConverter, const EgoCar& _egoCar,
+              double _dt, const Lane& _lane, const ReferencePoint& _refPoint)
       : coordsConverter(_coordsConverter),
-        previousPath(_previousPath),
         egoCar(_egoCar),
         dt(_dt),
         lane(_lane),
         refPoint(_refPoint) {
   }
 
-  tuple<Path, ReferencePoint> createPath() {
+  tuple<Path, ReferencePoint> createPath(const Path& previousPath) {
     Path path;
     appendSnd2Fst(path.points, previousPath.points);
     vector<FrenetCart> points;
     ReferencePoint refPointNew;
-    tie(points, refPointNew) = createNewPathPoints();
+    tie(points, refPointNew) = createNewPathPoints(previousPath);
     appendSnd2Fst(path.points, points);
     return make_tuple(path, refPointNew);
   }
 
  private:
-  tuple<vector<FrenetCart>, ReferencePoint> createNewPathPoints() {
+  tuple<vector<FrenetCart>, ReferencePoint> createNewPathPoints(const Path& previousPath) {
     Path path;
-    const ReferencePoint refPointNew = addPointsFromPreviousData(path);
+    const ReferencePoint refPointNew = addPointsFromPreviousData(path, previousPath);
     addNewPoints(path);
-    vector<FrenetCart> splinePoints = createSplinePoints(path, refPointNew);
+    vector<FrenetCart> splinePoints = createSplinePoints(path, refPointNew, previousPath);
     return make_tuple(splinePoints, refPointNew);
   }
 
-  ReferencePoint addPointsFromPreviousData(Path& path) {
+  ReferencePoint addPointsFromPreviousData(Path& path, const Path& previousPath) {
     vector<FrenetCart> points;
     ReferencePoint refPointNew;
-    tie(points, refPointNew) = createPointsFromPreviousData();
+    tie(points, refPointNew) = createPointsFromPreviousData(previousPath);
     appendSnd2Fst(path.points, points);
     return refPointNew;
   }
@@ -66,7 +64,7 @@ class PathCreator {
     appendSnd2Fst(path.points, createNewPoints());
   }
 
-  tuple<vector<FrenetCart>, ReferencePoint> createPointsFromPreviousData() {
+  tuple<vector<FrenetCart>, ReferencePoint> createPointsFromPreviousData(const Path& previousPath) {
     vector<FrenetCart> points;
     ReferencePoint refPointNew = refPoint;
 
@@ -91,7 +89,8 @@ class PathCreator {
   }
 
   vector<FrenetCart> createSplinePoints(const Path& path,
-                                        const ReferencePoint& refPoint) {
+                                        const ReferencePoint& refPoint,
+                                        const Path& previousPath) {
     return workWithPathInCarsCoordinateSystem(
         path,
         [&](const Path& carsPath) {
@@ -200,7 +199,6 @@ class PathCreator {
   }
 
   const CoordsConverter& coordsConverter;
-  const Path& previousPath;
   const EgoCar& egoCar;
   const int path_size = 50;
   const double dt;
