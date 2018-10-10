@@ -76,7 +76,7 @@ class PathCreator {
   }
 
   vector<FrenetCart> createSplinePoints(const Path& path,
-                                        ReferencePoint& refPoint) {
+                                        const ReferencePoint& refPoint) {
     return workWithPathInCarsCoordinateSystem(
         path,
         [&](const Path& carsPath) {
@@ -88,7 +88,7 @@ class PathCreator {
   vector<FrenetCart> workWithPathInCarsCoordinateSystem(
       const Path& path,
       const function<vector<FrenetCart>(const Path& carsPath)>& transformCarsPath2Points,
-      ReferencePoint& refPoint) {
+      const ReferencePoint& refPoint) {
 
     Path carsPath;
     carsPath.points = enterCarsCoordinateSystem(refPoint.point,
@@ -147,7 +147,7 @@ class PathCreator {
   }
 
   vector<FrenetCart> createSplinePoints(const Spline& spline, const int num,
-                                        ReferencePoint& refPoint) {
+                                        const ReferencePoint& refPoint) {
 
     vector<double> s_vals = createSVals(spline, num, refPoint);
     vector<FrenetCart> points = map2<double, FrenetCart>(
@@ -158,7 +158,7 @@ class PathCreator {
 
   // TODO: hier sollen s_vals erzeugt werden, die einen Abstand nach der Bogenlänge s_delta der Splinekurve spline haben.
   vector<double> createSVals(const Spline& spline, const int num,
-                             ReferencePoint& refPoint) {
+                             const ReferencePoint& refPoint) {
     vector<double> s_vals;
     const double s_delta = dt * mph2meter_per_sec(0.89 * refPoint.vel_mph);
     for (int i = 0; i < num; i++) {
