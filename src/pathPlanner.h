@@ -26,10 +26,10 @@ using namespace std::experimental;
 class PathPlanner {
 
  public:
-  PathPlanner(const CoordsConverter& coordsConverter, const ReferencePoint& refPoint,
-              const Lane& lane, double dt, double speed_limit_mph,
-              const vector<Vehicle>& vehicles, const EgoCar& egoCar,
-              const PreviousData& previousData);
+  PathPlanner(const CoordsConverter& coordsConverter,
+              const ReferencePoint& refPoint, const Lane& lane, double dt,
+              double speed_limit_mph, const vector<Vehicle>& vehicles,
+              const EgoCar& egoCar, const PreviousData& previousData);
 
   tuple<Path, Lane, ReferencePoint> createPath();
 
@@ -99,8 +99,11 @@ tuple<Lane, ReferencePoint> PathPlanner::planPath() {
   return make_tuple(newLane, refPointNew);
 }
 
-tuple<Path, ReferencePoint> PathPlanner::computePath(const ReferencePoint& refPoint) {
-  PathCreator pathCreator(coordsConverter, previousData, egoCar, dt, lane, refPoint);
+tuple<Path, ReferencePoint> PathPlanner::computePath(
+    const ReferencePoint& refPoint) {
+
+  PathCreator pathCreator(coordsConverter, previousData.previous_path, egoCar,
+                          dt, lane, refPoint);
   return pathCreator.createPath();
 }
 

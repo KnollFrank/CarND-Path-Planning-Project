@@ -25,19 +25,19 @@ class PathCreator {
 
  public:
   PathCreator(const CoordsConverter& _coordsConverter,
-              const PreviousData& _previousData, const EgoCar& _egoCar,
-              double _dt, const Lane& _lane, const ReferencePoint& _refPoint)
+              const Path& _previousPath, const EgoCar& _egoCar, double _dt,
+              const Lane& _lane, const ReferencePoint& _refPoint)
       : coordsConverter(_coordsConverter),
-        previousData(_previousData),
+        previousPath(_previousPath),
         egoCar(_egoCar),
         dt(_dt),
         lane(_lane),
-        refPoint(_refPoint){
+        refPoint(_refPoint) {
   }
 
   tuple<Path, ReferencePoint> createPath() {
     Path path;
-    appendSnd2Fst(path.points, previousData.previous_path.points);
+    appendSnd2Fst(path.points, previousPath.points);
     vector<FrenetCart> points;
     ReferencePoint refPointNew;
     tie(points, refPointNew) = createNewPathPoints();
@@ -70,17 +70,17 @@ class PathCreator {
     vector<FrenetCart> points;
     ReferencePoint refPointNew = refPoint;
 
-    if (previousData.sizeOfPreviousPath() < 2) {
+    if (previousPath.points.size() < 2) {
       Frenet prev = egoCar.getPos().getFrenet()
           - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
 
       points.push_back(createFrenetCart(prev));
       points.push_back(createFrenetCart(egoCar.getPos().getFrenet()));
     } else {
-      refPointNew.point = previousData.previous_path.points[previousData
-          .sizeOfPreviousPath() - 1].getFrenet();
-      Frenet prev = previousData.previous_path.points[previousData
-          .sizeOfPreviousPath() - 2].getFrenet();
+      refPointNew.point = previousPath.points[previousPath.points.size() - 1]
+          .getFrenet();
+      Frenet prev = previousPath.points[previousPath.points.size() - 2]
+          .getFrenet();
       refPointNew.yaw_rad = (refPointNew.point - prev).getHeading();
 
       points.push_back(createFrenetCart(prev));
@@ -95,7 +95,7 @@ class PathCreator {
     return workWithPathInCarsCoordinateSystem(
         path,
         [&](const Path& carsPath) {
-          return createSplinePoints(carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath(), refPoint);
+          return createSplinePoints(carsPath.asSpline(), path_size - previousPath.points.size(), refPoint);
         },
         refPoint);
   }
@@ -200,7 +200,7 @@ class PathCreator {
   }
 
   const CoordsConverter& coordsConverter;
-  const PreviousData& previousData;
+  const Path& previousPath;
   const EgoCar& egoCar;
   const int path_size = 50;
   const double dt;
