@@ -46,7 +46,7 @@ class PathPlanner {
   std::vector<FrenetCart> createNewPoints();
   double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle);
   FrenetCart createFrenetCart(Frenet frenet) const;
-  Lane planPath();
+  tuple<Lane, ReferencePoint> planPath();
   tuple<Path, ReferencePoint> computePath();
 
   const CoordsConverter& coordsConverter;
@@ -77,25 +77,28 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 }
 
 tuple<Path, Lane> PathPlanner::createPath() {
-  Lane newLane = planPath();
-  Path path;
+  Lane newLane;
   ReferencePoint refPointNew;
+  tie(newLane, refPointNew) = planPath();
+  refPoint = refPointNew;
+  Path path;
   tie(path, refPointNew) = computePath();
   refPoint = refPointNew;
   return make_tuple(path, newLane);
 }
 
-Lane PathPlanner::planPath() {
+tuple<Lane, ReferencePoint> PathPlanner::planPath() {
   if (previousData.sizeOfPreviousPath() > 0) {
     egoCar.setPos(createFrenetCart(previousData.end_path));
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(lane);
   Lane newLane = getNewLane(too_close, lane);
-  refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
-  refPoint.point = egoCar.getPos().getFrenet();
-  refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
-  return newLane;
+  ReferencePoint refPointNew;
+  refPointNew.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
+  refPointNew.point = egoCar.getPos().getFrenet();
+  refPointNew.yaw_rad = deg2rad(egoCar.yaw_deg);
+  return make_tuple(newLane, refPointNew);
 }
 
 tuple<Path, ReferencePoint> PathPlanner::computePath() {
