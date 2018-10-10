@@ -1,13 +1,9 @@
 #ifndef PATHPLANNER_H_
 #define PATHPLANNER_H_
 
-#include <math.h>
-#include <algorithm>
-#include <iterator>
+#include <boost/array.hpp>
 #include <vector>
-#include <tuple>
 
-#include "coords/coordinateSystem.h"
 #include "coords/coordsConverter.h"
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
@@ -17,7 +13,8 @@
 #include "path.h"
 #include "pathCreator.h"
 #include "previousData.h"
-#include "spline.h"
+#include "referencePoint.h"
+#include "tests/simulator2.h"
 #include "vehicle.h"
 
 using namespace std;
@@ -122,7 +119,17 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
 
 bool PathPlanner::canSwitch2Lane(const Lane& lane) {
 // TODO: hier den Pfad zur lane berechnen und simulieren, ob es mit irgendeinem Vehicle kracht.
-  return !isEgoCarTooCloseToAnyVehicleInLane(lane);
+  PathCreator pathCreator(coordsConverter, egoCar, dt, refPoint);
+  tuple<Path, ReferencePoint> result = pathCreator.createPath(
+      previousData.previous_path, lane);
+  Path path = get<0>(result);
+
+  EgoCar egoCar2 = egoCar;
+  VehicleDriver* vehicleDriver = new StandardVehicleDriver(coordsConverter);
+  vector<Vehicle> vehicles2 = vehicles;
+  Simulator2 simulator(coordsConverter, egoCar2, vehicles2, dt, vehicleDriver);
+  bool incidentHappened = simulator.driveEgoCarAndVehicles(path);
+  return !incidentHappened;
 }
 
 double PathPlanner::getVehiclesSPositionAfterNumTimeSteps(
