@@ -35,7 +35,7 @@ class PathPlanner {
 
  private:
   bool isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane);
-  bool willVehicleBeWithin30MetersAheadOfEgoCar(const Vehicle& vehicle);
+  bool isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(const Vehicle& vehicle);
   double getNewVelocity(bool too_close, double vel_mph);
   Lane getNewLane(bool too_close, const Lane& lane);
   Lane getMoreFreeLeftOrRightLane();
@@ -44,7 +44,7 @@ class PathPlanner {
   vector<Vehicle> getVehiclesInLaneInFrontOfEgoCar(const Lane& lane);
   bool canSwitch2Lane(const Lane& lane);
   std::vector<FrenetCart> createNewPoints();
-  double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle);
+  double getVehiclesSPositionAtEndOfPath(const Vehicle& vehicle);
   FrenetCart createFrenetCart(Frenet frenet) const;
   tuple<Lane, ReferencePoint> planPath();
   tuple<Path, ReferencePoint> computePath(const ReferencePoint& refPoint);
@@ -114,7 +114,7 @@ bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
       (const Vehicle& vehicle) {
-        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(vehicle);};
+        return isVehicleInLane(vehicle, lane) && isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(vehicle);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isEgoCarTooCloseToVehicleInLane);
@@ -125,17 +125,17 @@ bool PathPlanner::canSwitch2Lane(const Lane& lane) {
   return !isEgoCarTooCloseToAnyVehicleInLane(lane);
 }
 
-double PathPlanner::getVehiclesSPositionAfterNumTimeSteps(
-    const Vehicle& vehicle) {
-// TODO: hier sollte man jeden einzelnen der numTimeSteps Schritte simulieren und bei jedem Schritt schauen, ob es kracht.
+double PathPlanner::getVehiclesSPositionAtEndOfPath(const Vehicle& vehicle) {
   const int numTimeSteps = previousData.sizeOfPreviousPath();
+  const double time = numTimeSteps * dt;
   const double speed = vehicle.getVel_frenet_m_per_s().len();
-  return vehicle.getPos().getFrenet().s + numTimeSteps * dt * speed;
+  const double lenOfPath = time * speed;
+  return vehicle.getPos().getFrenet().s + lenOfPath;
 }
 
-bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
+bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(
     const Vehicle& vehicle) {
-  double check_vehicle_s = getVehiclesSPositionAfterNumTimeSteps(vehicle);
+  double check_vehicle_s = getVehiclesSPositionAtEndOfPath(vehicle);
 // TODO: replace magic number 30 with constant
   return check_vehicle_s > egoCar.getPos().getFrenet().s
       && check_vehicle_s - egoCar.getPos().getFrenet().s < 30;
