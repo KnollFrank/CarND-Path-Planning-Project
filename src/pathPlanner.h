@@ -36,6 +36,7 @@ class PathPlanner {
  private:
   bool isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(
       const Lane& lane);
+  bool isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane);
   bool isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(const Vehicle& vehicle);
   double getNewVelocity(bool too_close, double vel_mph);
   Lane getNewLane(bool too_close, const Lane& lane);
@@ -124,8 +125,28 @@ bool PathPlanner::isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(
                      isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane);
 }
 
+bool PathPlanner::isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane) {
+  auto isVehicleBehindOfEgoCar = [&](const Vehicle& vehicle) {
+    return vehicle.getPos().getFrenet().s < egoCar.getPos().getFrenet().s;
+  };
+
+  auto isVehicleInTheWay = [&](const Vehicle& vehicle) {
+    return egoCar.getPos().getFrenet().s - vehicle.getPos().getFrenet().s < 30;
+  };
+
+  auto isVehicleInLaneBehindOfEgoCarInTheWay =
+      [&](const Vehicle& vehicle) {
+        return isVehicleInLane(vehicle, lane) && isVehicleBehindOfEgoCar(vehicle) && isVehicleInTheWay(vehicle);
+      };
+
+  return std::any_of(vehicles.cbegin(), vehicles.cend(),
+                     isVehicleInLaneBehindOfEgoCarInTheWay);
+
+}
+
 bool PathPlanner::canSwitch2Lane(const Lane& lane) {
-  return !isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(lane);
+  return !isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(lane)
+      && !isAnyVehicleInLaneBehindOfEgoCarInTheWay(lane);
 }
 
 double PathPlanner::getVehiclesSPositionAtEndOfPath(const Vehicle& vehicle) {
