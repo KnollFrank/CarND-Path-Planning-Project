@@ -26,7 +26,7 @@ using namespace std::experimental;
 class PathPlanner {
 
  public:
-  PathPlanner(const CoordsConverter& coordsConverter, ReferencePoint& refPoint,
+  PathPlanner(const CoordsConverter& coordsConverter, const ReferencePoint& refPoint,
               const Lane& lane, double dt, double speed_limit_mph,
               const vector<Vehicle>& vehicles, const EgoCar& egoCar,
               const PreviousData& previousData);
@@ -51,7 +51,7 @@ class PathPlanner {
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
-  ReferencePoint& refPoint;
+  const ReferencePoint& refPoint;
   const Lane& lane;
   const double dt;
   const double speed_limit_mph;
@@ -61,7 +61,7 @@ class PathPlanner {
 };
 
 PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
-                         ReferencePoint& _refPoint, const Lane& _lane,
+                         const ReferencePoint& _refPoint, const Lane& _lane,
                          double _dt, double _speed_limit_mph,
                          const vector<Vehicle>& _vehicles,
                          const EgoCar& _egoCar,
