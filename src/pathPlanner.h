@@ -141,7 +141,6 @@ bool PathPlanner::isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane) {
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isVehicleInLaneBehindOfEgoCarInTheWay);
-
 }
 
 bool PathPlanner::canSwitch2Lane(const Lane& lane) {
