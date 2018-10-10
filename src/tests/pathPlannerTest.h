@@ -124,9 +124,10 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
                           egoCar, previousData);
   Path path;
   Lane newLane;
+  ReferencePoint refPointNew;
 
   // WHEN
-  tie(path, newLane) = pathPlanner.createPath();
+  tie(path, newLane, refPointNew) = pathPlanner.createPath();
 
 // THEN
   assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE);

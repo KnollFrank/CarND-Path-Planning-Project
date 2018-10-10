@@ -31,7 +31,7 @@ class PathPlanner {
               const vector<Vehicle>& vehicles, const EgoCar& egoCar,
               const PreviousData& previousData);
 
-  tuple<Path, Lane> createPath();
+  tuple<Path, Lane, ReferencePoint> createPath();
 
  private:
   bool isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane);
@@ -76,14 +76,13 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
       previousData(_previousData) {
 }
 
-tuple<Path, Lane> PathPlanner::createPath() {
+tuple<Path, Lane, ReferencePoint> PathPlanner::createPath() {
   Lane newLane;
   ReferencePoint refPointNew;
   tie(newLane, refPointNew) = planPath();
   Path path;
   tie(path, refPointNew) = computePath(refPointNew);
-  refPoint = refPointNew;
-  return make_tuple(path, newLane);
+  return make_tuple(path, newLane, refPointNew);
 }
 
 tuple<Lane, ReferencePoint> PathPlanner::planPath() {

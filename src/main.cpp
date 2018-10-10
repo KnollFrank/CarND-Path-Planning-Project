@@ -161,7 +161,9 @@ int main(int argc, char **argv) {
       PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt, speed_limit_mph, vehicles, egoCar, previousData);
       Path next_vals;
       Lane newLane;
-      tie(next_vals, newLane) = pathPlanner.createPath();
+      ReferencePoint refPointNew;
+      tie(next_vals, newLane, refPointNew) = pathPlanner.createPath();
+      refPoint = refPointNew;
       lane = newLane;
 
 //      {
