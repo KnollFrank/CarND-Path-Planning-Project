@@ -102,8 +102,7 @@ tuple<Lane, ReferencePoint> PathPlanner::planPath() {
 
 tuple<Path, ReferencePoint> PathPlanner::computePath(const ReferencePoint& refPoint) {
   PathCreator pathCreator(coordsConverter, previousData, egoCar, dt, lane);
-  tuple<Path, ReferencePoint> tup = pathCreator.createPath(refPoint);
-  return tup;
+  return pathCreator.createPath(refPoint);
 }
 
 FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {
