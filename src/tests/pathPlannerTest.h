@@ -114,6 +114,8 @@ class PathPlannerTest : public ::testing::Test {
   PreviousData previousData;
 };
 
+// FIXME: brauchen Test, bei dem das EgoCar über die Grenze bei Meter 6914,14925765991 fährt. => kein Incident wie Acc oder Jerk violation.
+
 TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
