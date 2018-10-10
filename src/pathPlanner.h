@@ -114,6 +114,7 @@ FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {
 
 bool PathPlanner::isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(
     const Lane& lane) {
+
   auto isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane =
       [&]
       (const Vehicle& vehicle) {
@@ -132,7 +133,8 @@ double PathPlanner::getVehiclesSPositionAtEndOfPath(const Vehicle& vehicle) {
   const double time = numTimeSteps * dt;
   const double speed = vehicle.getVel_frenet_m_per_s().len();
   const double lenOfPath = time * speed;
-  return vehicle.getPos().getFrenet().s + lenOfPath;
+  const double endOfPath = vehicle.getPos().getFrenet().s + lenOfPath;
+  return endOfPath;
 }
 
 bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(
