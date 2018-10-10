@@ -46,7 +46,6 @@ class Simulator2 {
   }
 
   bool drive2PointsOfEgoCarAndDriveVehicles(const vector<FrenetCart>& points) {
-
     for (int i = 0; i < points.size(); i++) {
       driveVehicles();
       bool incidentHappened = drive2PointOfEgoCar(points[i]);

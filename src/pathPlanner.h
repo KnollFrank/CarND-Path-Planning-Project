@@ -31,15 +31,16 @@ class PathPlanner {
   tuple<Path, Lane, ReferencePoint> createPath();
 
  private:
-  bool isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane);
-  bool willVehicleBeWithin30MetersAheadOfEgoCar(const Vehicle& vehicle);
+  bool isEgoCarTooCloseToAnyVehicleInLane();
+  bool willVehicleBeWithin30MetersAheadOfEgoCarAtEndOfPath(
+      const Vehicle& vehicle);
   double getNewVelocity(bool too_close, double vel_mph);
-  Lane getNewLane(bool too_close, const Lane& lane);
+  Lane getNewLane(bool too_close, const Lane& lane, const ReferencePoint& refPoint);
   Lane getMoreFreeLeftOrRightLane();
   std::experimental::optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
       const Lane& lane);
   vector<Vehicle> getVehiclesInLaneInFrontOfEgoCar(const Lane& lane);
-  bool canSwitch2Lane(const Lane& lane);
+  bool canSwitch2Lane(const Lane& lane, const ReferencePoint& refPoint);
   std::vector<FrenetCart> createNewPoints();
   double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle);
   FrenetCart createFrenetCart(Frenet frenet) const;
@@ -87,12 +88,12 @@ tuple<Lane, ReferencePoint> PathPlanner::planPath() {
     egoCar.setPos(createFrenetCart(previousData.end_path));
   }
 
-  bool too_close = isEgoCarTooCloseToAnyVehicleInLane(lane);
-  Lane newLane = getNewLane(too_close, lane);
+  bool too_close = isEgoCarTooCloseToAnyVehicleInLane();
   ReferencePoint refPointNew;
   refPointNew.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
   refPointNew.point = egoCar.getPos().getFrenet();
   refPointNew.yaw_rad = deg2rad(egoCar.yaw_deg);
+  Lane newLane = getNewLane(too_close, lane, refPointNew);
   return make_tuple(newLane, refPointNew);
 }
 
@@ -107,18 +108,17 @@ FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {
   return FrenetCart(frenet, coordsConverter);
 }
 
-bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
+bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane() {
   auto isEgoCarTooCloseToVehicleInLane =
       [&]
       (const Vehicle& vehicle) {
-        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCar(vehicle);};
+        return isVehicleInLane(vehicle, lane) && willVehicleBeWithin30MetersAheadOfEgoCarAtEndOfPath(vehicle);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isEgoCarTooCloseToVehicleInLane);
 }
 
-bool PathPlanner::canSwitch2Lane(const Lane& lane) {
-// TODO: hier den Pfad zur lane berechnen und simulieren, ob es mit irgendeinem Vehicle kracht.
+bool PathPlanner::canSwitch2Lane(const Lane& lane, const ReferencePoint& refPoint) {
   PathCreator pathCreator(coordsConverter, egoCar, dt, refPoint);
   tuple<Path, ReferencePoint> result = pathCreator.createPath(
       previousData.previous_path, lane);
@@ -134,13 +134,12 @@ bool PathPlanner::canSwitch2Lane(const Lane& lane) {
 
 double PathPlanner::getVehiclesSPositionAfterNumTimeSteps(
     const Vehicle& vehicle) {
-// TODO: hier sollte man jeden einzelnen der numTimeSteps Schritte simulieren und bei jedem Schritt schauen, ob es kracht.
   const int numTimeSteps = previousData.sizeOfPreviousPath();
   const double speed = vehicle.getVel_frenet_m_per_s().len();
   return vehicle.getPos().getFrenet().s + numTimeSteps * dt * speed;
 }
 
-bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCar(
+bool PathPlanner::willVehicleBeWithin30MetersAheadOfEgoCarAtEndOfPath(
     const Vehicle& vehicle) {
   double check_vehicle_s = getVehiclesSPositionAfterNumTimeSteps(vehicle);
 // TODO: replace magic number 30 with constant
@@ -217,13 +216,13 @@ Lane PathPlanner::getMoreFreeLeftOrRightLane() {
   }
 }
 
-Lane PathPlanner::getNewLane(bool too_close, const Lane& lane) {
+Lane PathPlanner::getNewLane(bool too_close, const Lane& lane, const ReferencePoint& refPoint) {
   if (!too_close) {
     return lane;
   }
 
   auto canSwitchFromLaneToLane = [&](const Lane& from, const Lane& to) {
-    return lane == from && canSwitch2Lane(to);
+    return lane == from && canSwitch2Lane(to, refPoint);
   };
 
   if (canSwitchFromLaneToLane(Lane::LEFT, Lane::MIDDLE)) {
