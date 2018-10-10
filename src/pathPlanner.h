@@ -76,8 +76,10 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 }
 
 
-FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {
-  return FrenetCart(frenet, coordsConverter);
+Path PathPlanner::createPath() {
+  planPath();
+  Path path = computePath();
+  return path;
 }
 
 void PathPlanner::planPath() {
@@ -97,10 +99,8 @@ Path PathPlanner::computePath() {
   return pathCreator.createPath();
 }
 
-Path PathPlanner::createPath() {
-  planPath();
-  Path path = computePath();
-  return path;
+FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {
+  return FrenetCart(frenet, coordsConverter);
 }
 
 bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
