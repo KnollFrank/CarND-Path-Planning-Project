@@ -47,7 +47,7 @@ class PathPlanner {
   double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle);
   FrenetCart createFrenetCart(Frenet frenet) const;
   tuple<Lane, ReferencePoint> planPath();
-  tuple<Path, ReferencePoint> computePath();
+  tuple<Path, ReferencePoint> computePath(const ReferencePoint& refPoint);
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
@@ -80,9 +80,8 @@ tuple<Path, Lane> PathPlanner::createPath() {
   Lane newLane;
   ReferencePoint refPointNew;
   tie(newLane, refPointNew) = planPath();
-  refPoint = refPointNew;
   Path path;
-  tie(path, refPointNew) = computePath();
+  tie(path, refPointNew) = computePath(refPointNew);
   refPoint = refPointNew;
   return make_tuple(path, newLane);
 }
@@ -101,7 +100,7 @@ tuple<Lane, ReferencePoint> PathPlanner::planPath() {
   return make_tuple(newLane, refPointNew);
 }
 
-tuple<Path, ReferencePoint> PathPlanner::computePath() {
+tuple<Path, ReferencePoint> PathPlanner::computePath(const ReferencePoint& refPoint) {
   PathCreator pathCreator(coordsConverter, previousData, egoCar, dt, lane);
   tuple<Path, ReferencePoint> tup = pathCreator.createPath(refPoint);
   return tup;
