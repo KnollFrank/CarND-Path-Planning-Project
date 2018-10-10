@@ -44,10 +44,10 @@ class PathCreator {
  private:
   vector<FrenetCart> createNewPathPoints(ReferencePoint& refPoint) {
     Path path;
-    ReferencePoint refPointNew = addPointsFromPreviousData(path, refPoint);
+    const ReferencePoint refPointNew = addPointsFromPreviousData(path, refPoint);
     refPoint = refPointNew;
     addNewPoints(path);
-    return createSplinePoints(path, refPoint);
+    return createSplinePoints(path, refPointNew);
   }
 
   ReferencePoint addPointsFromPreviousData(Path& path,
