@@ -27,11 +27,11 @@ class PathPlanner {
 
  public:
   PathPlanner(const CoordsConverter& coordsConverter, ReferencePoint& refPoint,
-              Lane& lane, double dt, double speed_limit_mph,
+              const Lane& lane, double dt, double speed_limit_mph,
               const vector<Vehicle>& vehicles, const EgoCar& egoCar,
               const PreviousData& previousData);
 
-  Path createPath();
+  tuple<Path, Lane> createPath();
 
  private:
   bool isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane);
@@ -46,13 +46,13 @@ class PathPlanner {
   std::vector<FrenetCart> createNewPoints();
   double getVehiclesSPositionAfterNumTimeSteps(const Vehicle& vehicle);
   FrenetCart createFrenetCart(Frenet frenet) const;
-  void planPath();
+  Lane planPath();
   Path computePath();
 
   const CoordsConverter& coordsConverter;
   // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
   ReferencePoint& refPoint;
-  Lane& lane;
+  const Lane& lane;
   const double dt;
   const double speed_limit_mph;
   const vector<Vehicle>& vehicles;
@@ -61,8 +61,8 @@ class PathPlanner {
 };
 
 PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
-                         ReferencePoint& _refPoint, Lane& _lane, double _dt,
-                         double _speed_limit_mph,
+                         ReferencePoint& _refPoint, const Lane& _lane,
+                         double _dt, double _speed_limit_mph,
                          const vector<Vehicle>& _vehicles,
                          const EgoCar& _egoCar,
                          const PreviousData& _previousData)
@@ -76,22 +76,23 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
       previousData(_previousData) {
 }
 
-Path PathPlanner::createPath() {
-  planPath();
+tuple<Path, Lane> PathPlanner::createPath() {
+  Lane newLane = planPath();
   Path path = computePath();
-  return path;
+  return make_tuple(path, newLane);
 }
 
-void PathPlanner::planPath() {
+Lane PathPlanner::planPath() {
   if (previousData.sizeOfPreviousPath() > 0) {
     egoCar.setPos(createFrenetCart(previousData.end_path));
   }
 
   bool too_close = isEgoCarTooCloseToAnyVehicleInLane(lane);
-  lane = getNewLane(too_close, lane);
+  Lane newLane = getNewLane(too_close, lane);
   refPoint.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
   refPoint.point = egoCar.getPos().getFrenet();
   refPoint.yaw_rad = deg2rad(egoCar.yaw_deg);
+  return newLane;
 }
 
 Path PathPlanner::computePath() {

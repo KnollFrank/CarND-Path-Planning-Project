@@ -75,7 +75,7 @@ class PathPlannerTest : public ::testing::Test {
     return vehicle;
   }
 
-  void assert_car_drives_in_middle_of_lane(const Path& path, Lane lane) {
+  void assert_car_drives_in_middle_of_lane(const Path& path, const Lane& lane) {
     for (const FrenetCart& frenet : path.points) {
       ASSERT_NEAR(2 + 4 * lane, frenet.getFrenet().d, 0.001);
     }
@@ -120,10 +120,13 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
   EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
   vector<Vehicle> vehicles;
 
-  PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02, 50, vehicles, egoCar, previousData);
+  PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02, 50, vehicles,
+                          egoCar, previousData);
+  Path path;
+  Lane newLane;
 
-// WHEN
-  Path path = pathPlanner.createPath();
+  // WHEN
+  tie(path, newLane) = pathPlanner.createPath();
 
 // THEN
   assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE);
