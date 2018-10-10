@@ -183,7 +183,7 @@ class PathCreator {
 
   const CoordsConverter& coordsConverter;
   const PreviousData& previousData;
-  EgoCar egoCar;
+  const EgoCar& egoCar;
   ReferencePoint& refPoint;
   const int path_size = 50;
   const double dt;
