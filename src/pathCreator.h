@@ -3,9 +3,12 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <vector>
+#include <tuple>
 
 #include "coords/coordinateSystem.h"
+#include "coords/coordsConverter.h"
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
 #include "egoCar.h"
@@ -15,6 +18,8 @@
 #include "previousData.h"
 #include "referencePoint.h"
 #include "spline.h"
+
+using namespace std;
 
 class PathCreator {
 
@@ -45,15 +50,20 @@ class PathCreator {
   }
 
   void addPointsFromPreviousData(Path& path, ReferencePoint& refPoint) {
-    appendSnd2Fst(path.points, createPointsFromPreviousData(refPoint));
+    vector<FrenetCart> points;
+    ReferencePoint refPointNew;
+    tie(points, refPointNew) = createPointsFromPreviousData(refPoint);
+    refPoint = refPointNew;
+    appendSnd2Fst(path.points, points);
   }
 
   void addNewPoints(Path& path) {
     appendSnd2Fst(path.points, createNewPoints());
   }
 
-  vector<FrenetCart> createPointsFromPreviousData(ReferencePoint& refPoint) {
+  tuple<vector<FrenetCart>, ReferencePoint> createPointsFromPreviousData(const ReferencePoint& refPoint) {
     vector<FrenetCart> points;
+    ReferencePoint refPointNew = refPoint;
 
     if (previousData.sizeOfPreviousPath() < 2) {
       Frenet prev = egoCar.getPos().getFrenet()
@@ -62,17 +72,17 @@ class PathCreator {
       points.push_back(createFrenetCart(prev));
       points.push_back(createFrenetCart(egoCar.getPos().getFrenet()));
     } else {
-      refPoint.point = previousData.previous_path.points[previousData
+      refPointNew.point = previousData.previous_path.points[previousData
           .sizeOfPreviousPath() - 1].getFrenet();
       Frenet prev = previousData.previous_path.points[previousData
           .sizeOfPreviousPath() - 2].getFrenet();
-      refPoint.yaw_rad = (refPoint.point - prev).getHeading();
+      refPointNew.yaw_rad = (refPointNew.point - prev).getHeading();
 
       points.push_back(createFrenetCart(prev));
-      points.push_back(createFrenetCart(refPoint.point));
+      points.push_back(createFrenetCart(refPointNew.point));
     }
 
-    return points;
+    return make_tuple(points, refPointNew);
   }
 
   vector<FrenetCart> createSplinePoints(const Path& path,
