@@ -15,7 +15,6 @@
 #include "funs.h"
 #include "lane.h"
 #include "path.h"
-#include "previousData.h"
 #include "referencePoint.h"
 #include "spline.h"
 
@@ -46,16 +45,16 @@ class PathCreator {
  private:
   tuple<vector<FrenetCart>, ReferencePoint> createNewPathPoints(const Path& previousPath) {
     Path path;
-    const ReferencePoint refPointNew = addPointsFromPreviousData(path, previousPath);
+    const ReferencePoint refPointNew = addPointsFromPreviousPath(path, previousPath);
     addNewPoints(path);
     vector<FrenetCart> splinePoints = createSplinePoints(path, refPointNew, previousPath);
     return make_tuple(splinePoints, refPointNew);
   }
 
-  ReferencePoint addPointsFromPreviousData(Path& path, const Path& previousPath) {
+  ReferencePoint addPointsFromPreviousPath(Path& path, const Path& previousPath) {
     vector<FrenetCart> points;
     ReferencePoint refPointNew;
-    tie(points, refPointNew) = createPointsFromPreviousData(previousPath);
+    tie(points, refPointNew) = createPointsFromPreviousPath(previousPath);
     appendSnd2Fst(path.points, points);
     return refPointNew;
   }
@@ -64,7 +63,7 @@ class PathCreator {
     appendSnd2Fst(path.points, createNewPoints());
   }
 
-  tuple<vector<FrenetCart>, ReferencePoint> createPointsFromPreviousData(const Path& previousPath) {
+  tuple<vector<FrenetCart>, ReferencePoint> createPointsFromPreviousPath(const Path& previousPath) {
     vector<FrenetCart> points;
     ReferencePoint refPointNew = refPoint;
 
