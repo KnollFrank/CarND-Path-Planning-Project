@@ -34,7 +34,8 @@ class PathPlanner {
   tuple<Path, Lane, ReferencePoint> createPath();
 
  private:
-  bool isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane);
+  bool isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(
+      const Lane& lane);
   bool isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(const Vehicle& vehicle);
   double getNewVelocity(bool too_close, double vel_mph);
   Lane getNewLane(bool too_close, const Lane& lane);
@@ -90,7 +91,8 @@ tuple<Lane, ReferencePoint> PathPlanner::planPath() {
     egoCar.setPos(createFrenetCart(previousData.end_path));
   }
 
-  bool too_close = isEgoCarTooCloseToAnyVehicleInLane(lane);
+  bool too_close = isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(
+      lane);
   Lane newLane = getNewLane(too_close, lane);
   ReferencePoint refPointNew;
   refPointNew.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
@@ -110,19 +112,19 @@ FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {
   return FrenetCart(frenet, coordsConverter);
 }
 
-bool PathPlanner::isEgoCarTooCloseToAnyVehicleInLane(const Lane& lane) {
-  auto isEgoCarTooCloseToVehicleInLane =
+bool PathPlanner::isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(
+    const Lane& lane) {
+  auto isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane =
       [&]
       (const Vehicle& vehicle) {
         return isVehicleInLane(vehicle, lane) && isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(vehicle);};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
-                     isEgoCarTooCloseToVehicleInLane);
+                     isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane);
 }
 
 bool PathPlanner::canSwitch2Lane(const Lane& lane) {
-// TODO: hier den Pfad zur lane berechnen und simulieren, ob es mit irgendeinem Vehicle kracht.
-  return !isEgoCarTooCloseToAnyVehicleInLane(lane);
+  return !isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(lane);
 }
 
 double PathPlanner::getVehiclesSPositionAtEndOfPath(const Vehicle& vehicle) {
