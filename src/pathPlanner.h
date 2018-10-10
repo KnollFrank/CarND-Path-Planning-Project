@@ -95,8 +95,8 @@ void PathPlanner::planPath() {
 }
 
 Path PathPlanner::computePath() {
-  PathCreator pathCreator(coordsConverter, previousData, egoCar, refPoint, dt, lane);
-  return pathCreator.createPath();
+  PathCreator pathCreator(coordsConverter, previousData, egoCar, dt, lane);
+  return pathCreator.createPath(refPoint);
 }
 
 FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {

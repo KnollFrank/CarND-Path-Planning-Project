@@ -21,39 +21,38 @@ class PathCreator {
  public:
   PathCreator(const CoordsConverter& _coordsConverter,
               const PreviousData& _previousData, const EgoCar& _egoCar,
-              ReferencePoint& _refPoint, double _dt, const Lane& _lane)
+              double _dt, const Lane& _lane)
       : coordsConverter(_coordsConverter),
         previousData(_previousData),
         egoCar(_egoCar),
-        refPoint(_refPoint),
         dt(_dt),
-        lane(_lane){
+        lane(_lane) {
   }
 
-  Path createPath() {
+  Path createPath(ReferencePoint& refPoint) {
     Path path;
     appendSnd2Fst(path.points, previousData.previous_path.points);
-    appendSnd2Fst(path.points, createNewPathPoints());
+    appendSnd2Fst(path.points, createNewPathPoints(refPoint));
     return path;
   }
 
  private:
-  vector<FrenetCart> createNewPathPoints() {
+  vector<FrenetCart> createNewPathPoints(ReferencePoint& refPoint) {
     Path path;
-    addPointsFromPreviousData(path);
+    addPointsFromPreviousData(path, refPoint);
     addNewPoints(path);
-    return createSplinePoints(path);
+    return createSplinePoints(path, refPoint);
   }
 
-  void addPointsFromPreviousData(Path& path) {
-    appendSnd2Fst(path.points, createPointsFromPreviousData());
+  void addPointsFromPreviousData(Path& path, ReferencePoint& refPoint) {
+    appendSnd2Fst(path.points, createPointsFromPreviousData(refPoint));
   }
 
   void addNewPoints(Path& path) {
     appendSnd2Fst(path.points, createNewPoints());
   }
 
-  vector<FrenetCart> createPointsFromPreviousData() {
+  vector<FrenetCart> createPointsFromPreviousData(ReferencePoint& refPoint) {
     vector<FrenetCart> points;
 
     if (previousData.sizeOfPreviousPath() < 2) {
@@ -76,17 +75,20 @@ class PathCreator {
     return points;
   }
 
-  vector<FrenetCart> createSplinePoints(const Path& path) {
+  vector<FrenetCart> createSplinePoints(const Path& path,
+                                        ReferencePoint& refPoint) {
     return workWithPathInCarsCoordinateSystem(
         path,
         [&](const Path& carsPath) {
-          return createSplinePoints(carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath());
-        });
+          return createSplinePoints(carsPath.asSpline(), path_size - previousData.sizeOfPreviousPath(), refPoint);
+        },
+        refPoint);
   }
 
   vector<FrenetCart> workWithPathInCarsCoordinateSystem(
       const Path& path,
-      const function<vector<FrenetCart>(const Path& carsPath)>& transformCarsPath2Points) {
+      const function<vector<FrenetCart>(const Path& carsPath)>& transformCarsPath2Points,
+      ReferencePoint& refPoint) {
 
     Path carsPath;
     carsPath.points = enterCarsCoordinateSystem(refPoint.point,
@@ -116,9 +118,8 @@ class PathCreator {
     return transform(createRotatedCoordinateSystem(origin, angle_rad), points);
   }
 
-  vector<FrenetCart> transform(
-      const CoordinateSystem& coordinateSystem,
-      const vector<FrenetCart>& points) const {
+  vector<FrenetCart> transform(const CoordinateSystem& coordinateSystem,
+                               const vector<FrenetCart>& points) const {
 
     return map2<FrenetCart, FrenetCart>(points, [&](const FrenetCart& point) {
       return createFrenetCart(coordinateSystem.transform(point.getFrenet()));});
@@ -145,9 +146,10 @@ class PathCreator {
     return {egoCarPlus(30), egoCarPlus(60), egoCarPlus(90)};
   }
 
-  vector<FrenetCart> createSplinePoints(const Spline& spline, const int num) {
+  vector<FrenetCart> createSplinePoints(const Spline& spline, const int num,
+                                        ReferencePoint& refPoint) {
 
-    vector<double> s_vals = createSVals(spline, num);
+    vector<double> s_vals = createSVals(spline, num, refPoint);
     vector<FrenetCart> points = map2<double, FrenetCart>(
         s_vals,
         [&](const double s_val) {return createSplinePoint(s_val, spline);});
@@ -155,7 +157,8 @@ class PathCreator {
   }
 
   // TODO: hier sollen s_vals erzeugt werden, die einen Abstand nach der Bogenlänge s_delta der Splinekurve spline haben.
-  vector<double> createSVals(const Spline& spline, const int num) {
+  vector<double> createSVals(const Spline& spline, const int num,
+                             ReferencePoint& refPoint) {
     vector<double> s_vals;
     const double s_delta = dt * mph2meter_per_sec(0.89 * refPoint.vel_mph);
     for (int i = 0; i < num; i++) {
@@ -184,7 +187,6 @@ class PathCreator {
   const CoordsConverter& coordsConverter;
   const PreviousData& previousData;
   const EgoCar& egoCar;
-  ReferencePoint& refPoint;
   const int path_size = 50;
   const double dt;
   const Lane& lane;
