@@ -21,7 +21,7 @@ class PathCreator {
  public:
   PathCreator(const CoordsConverter& _coordsConverter,
               const PreviousData& _previousData, const EgoCar& _egoCar,
-              ReferencePoint& _refPoint, double _dt, Lane& _lane)
+              ReferencePoint& _refPoint, double _dt, const Lane& _lane)
       : coordsConverter(_coordsConverter),
         previousData(_previousData),
         egoCar(_egoCar),
@@ -187,7 +187,7 @@ class PathCreator {
   ReferencePoint& refPoint;
   const int path_size = 50;
   const double dt;
-  Lane& lane;
+  const Lane& lane;
 };
 
 #endif /* PATHCREATOR_H_ */
