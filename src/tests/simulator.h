@@ -105,7 +105,7 @@ void Simulator::run(function<void(void)> afterEachMovementOfEgoCar) {
 }
 
 bool Simulator::oneRoundDriven(const EgoCar& egoCar) {
-  return egoCar.getPos().getFrenet().s > 6947.2427832056264; // 6900
+  return egoCar.getPos().getFrenet().s > 6900; // 6947.2427832056264
 }
 
 bool Simulator::oneRoundDriven() {
