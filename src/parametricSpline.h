@@ -15,7 +15,6 @@
 #include "coords/cart.h"
 #include "coords/frenet.h"
 #include "funs.h"
-#include <experimental/optional>
 
 using namespace std::experimental;
 using namespace alglib;
@@ -243,9 +242,10 @@ vector<Polynom2D> ParametricSpline::getPolys() const {
 
 Frenet ParametricSpline::getFrenetHavingMinimalDCoordinate(
     const vector<Frenet>& frenets) const {
-  return *min_element(frenets.cbegin(), frenets.cend(),
-                      [](const Frenet& frenet1, const Frenet& frenet2) {
-                        return frenet1.d < frenet2.d;});
+
+  return getMinimum<Frenet>(frenets,
+                            [](const Frenet& frenet1, const Frenet& frenet2) {
+                              return frenet1.d < frenet2.d;});
 }
 
 Frenet ParametricSpline::getFrenet(const Polynom2D& poly,

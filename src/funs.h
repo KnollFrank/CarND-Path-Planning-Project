@@ -84,13 +84,20 @@ double getMinimum(const vector<double>& v) {
 }
 
 template<typename T>
-inline std::experimental::optional<T> getMinimum(
+inline std::experimental::optional<T> getOptionalMinimum(
     const vector<T>& v, function<bool(const T&, const T&)> comp) {
 
   auto it = std::min_element(v.begin(), v.end(), comp);
   return
       it != v.end() ?
           std::experimental::make_optional(*it) : std::experimental::nullopt;
+}
+
+template<typename T>
+inline T getMinimum(const vector<T>& v,
+                    function<bool(const T&, const T&)> comp) {
+
+  return *std::min_element(v.begin(), v.end(), comp);
 }
 
 double getMaximum(const vector<double>& v) {
