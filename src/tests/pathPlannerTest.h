@@ -82,7 +82,6 @@ class PathPlannerTest : public ::testing::Test {
   }
 
   vector<double> getDistancesAlongRoad(const Path& path) {
-
     return map2<FrenetCart, double>(
         path.points,
         [&](const FrenetCart& frenet) {return frenet.getFrenet().s;});
@@ -124,12 +123,9 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane) {
 
   PathPlanner pathPlanner(*coordsConverter, refPoint, lane, 0.02, 50, vehicles,
                           egoCar, previousData);
-  Path path;
-  Lane newLane;
-  ReferencePoint refPointNew;
 
   // WHEN
-  tie(path, newLane, refPointNew) = pathPlanner.createPath();
+  Path path = get<0>(pathPlanner.createPath());
 
 // THEN
   assert_car_drives_in_middle_of_lane(path, Lane::MIDDLE);
