@@ -42,8 +42,7 @@ class Simulator {
                           const vector<Vehicle>& vehicles);
   static std::experimental::optional<Vehicle> getCollidingVehicle(
       const EgoCar& egoCar, const vector<Vehicle>& vehicles);
-  static bool oneRoundDriven(const EgoCar& egoCar,
-                             const CoordsConverter& coordsConverter);
+  static bool oneRoundDriven(const EgoCar& egoCar);
 
  private:
   double driveEgoCarAndVehicles(function<void(void)> afterEachMovementOfEgoCar);
@@ -105,13 +104,12 @@ void Simulator::run(function<void(void)> afterEachMovementOfEgoCar) {
   }
 }
 
-bool Simulator::oneRoundDriven(const EgoCar& egoCar,
-                               const CoordsConverter& coordsConverter) {
-  return egoCar.getPos().getFrenet().s > 6900;
+bool Simulator::oneRoundDriven(const EgoCar& egoCar) {
+  return egoCar.getPos().getFrenet().s > 6900; // 6947.2427832056264;
 }
 
 bool Simulator::oneRoundDriven() {
-  return oneRoundDriven(egoCar, coordsConverter);
+  return oneRoundDriven(egoCar);
 }
 
 double Simulator::driveEgoCarAndVehicles(
