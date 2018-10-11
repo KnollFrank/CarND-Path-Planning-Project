@@ -174,11 +174,10 @@ class PathCreator {
     return points;
   }
 
-  // TODO: hier sollen s_vals erzeugt werden, die einen Abstand nach der Bogenlänge s_delta der Splinekurve spline haben.
   vector<double> createSVals(const Spline& spline, const int num,
                              const ReferencePoint& refPoint) {
     vector<double> s_vals;
-    const double s_delta = dt * mph2meter_per_sec(0.89 * refPoint.vel_mph);
+    const double s_delta = dt * mph2meter_per_sec(refPoint.vel_mph);
     for (int i = 0; i < num; i++) {
       s_vals.push_back((i + 1) * s_delta);
     }

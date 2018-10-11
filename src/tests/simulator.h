@@ -105,7 +105,7 @@ void Simulator::run(function<void(void)> afterEachMovementOfEgoCar) {
 }
 
 bool Simulator::oneRoundDriven(const EgoCar& egoCar) {
-  return egoCar.getPos().getFrenet().s > 6900; // 6947.2427832056264;
+  return egoCar.getPos().getFrenet().s > 6900;  // 6947.2427832056264;
 }
 
 bool Simulator::oneRoundDriven() {
@@ -114,8 +114,9 @@ bool Simulator::oneRoundDriven() {
 
 double Simulator::driveEgoCarAndVehicles(
     function<void(void)> afterEachMovementOfEgoCar) {
-  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt, speed_limit_mph,
-                          vehicles, egoCar, previousData);
+  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt,
+                          0.89 * speed_limit_mph, vehicles, egoCar,
+                          previousData);
   Path path;
   Lane newLane;
   ReferencePoint refPointNew;

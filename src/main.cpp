@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
   const double dt = 0.02;
-  const double speed_limit_mph = 50;
+  const double speed_limit_mph = 46;
   vector<tuple<Frenet, Point>> frenetPointTuples;
 
   h.onMessage([&](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
