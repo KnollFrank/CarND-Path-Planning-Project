@@ -180,7 +180,7 @@ real_2d_array ParametricSpline::as_real_2d_array(
 
 ParametricSpline::ParametricSpline(const vector<Point>& points) {
   real_2d_array xy = as_real_2d_array(points);
-  pspline2buildperiodic(xy, points.size(), SplineType::Cubic,
+  pspline2buildperiodic(xy, points.size(), SplineType::CatmullRom,
                         ParameterizationType::chordLength, spline);
   length = pspline2arclength(spline, 0, 1);
 }
