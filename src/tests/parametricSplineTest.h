@@ -59,8 +59,7 @@ TEST(ParametricSplineTest, should_getFrenet) {
     for (double s = 0; s < splineLength; s += 10) {
       check_getFrenet(Frenet { s, d }, spline, coordsConverter);
     }
-    // FIXME: int i = 0 (d.h. mapWaypoints.map_waypoints_s[0] == 0) ergibt Fehler!
-    for (int i = 1; i < mapWaypoints.map_waypoints_s.size(); i++) {
+    for (int i = 0; i < mapWaypoints.map_waypoints_s.size(); i++) {
       check_getFrenet(Frenet { mapWaypoints.map_waypoints_s[i], d }, spline,
                       coordsConverter);
     }
