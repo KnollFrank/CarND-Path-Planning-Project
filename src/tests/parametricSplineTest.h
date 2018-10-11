@@ -72,16 +72,16 @@ TEST(ParametricSplineTest, should_getFrenet_for_periodic_param) {
   // Given
   MapWaypoints mapWaypoints = MapWaypoints::load();
   ParametricSpline spline(mapWaypoints.map_waypoints);
-  double splineLength = spline.getLength();  // = 6947.2427832056264
+  const double abs_error = 0.0001;
 
   // When & Then
   double delta = 0.1;
-  expect_near(spline(0 + delta), spline(1 + delta), 0.0001);
+  expect_near(spline(0 + delta), spline(1 + delta), abs_error);
 
   delta = spline.getLength() / 4;
   expect_near(spline(spline.toSplineParameter(0 + delta)),
               spline(spline.toSplineParameter(spline.getLength() + delta)),
-              0.0001);
+              abs_error);
 }
 
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */
