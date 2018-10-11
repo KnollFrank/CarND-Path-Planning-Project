@@ -44,8 +44,8 @@ class Rectangle {
     return other.getTopLeft().s < getBottomRight().s;
   }
 
-  Frenet topLeft;
-  Dimension dimension;
+  const Frenet topLeft;
+  const Dimension dimension;
 };
 
 Rectangle Rectangle::fromTopLeftAndDimension(const Frenet& topLeft,

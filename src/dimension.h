@@ -9,8 +9,8 @@ class Dimension {
 
  private:
   Dimension(double width, double height);
-  double width;
-  double height;
+  const double width;
+  const double height;
 };
 
 Dimension::Dimension(double _width, double _height)
