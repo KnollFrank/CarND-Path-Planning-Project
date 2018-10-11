@@ -204,7 +204,7 @@ std::experimental::optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFront
   auto isNearer = [](const Vehicle& vehicle1, const Vehicle& vehicle2) {
     return vehicle1.getPos().getFrenet().s < vehicle2.getPos().getFrenet().s;};
 
-  return getMinimum<Vehicle>(vehiclesInLaneInFrontOfEgoCar, isNearer);
+  return getOptionalMinimum<Vehicle>(vehiclesInLaneInFrontOfEgoCar, isNearer);
 }
 
 Lane PathPlanner::getMoreFreeLeftOrRightLane() {
