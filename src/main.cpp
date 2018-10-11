@@ -149,6 +149,7 @@ int main(int argc, char **argv) {
             // j[1] is the data JSON object
 
             EgoCar egoCar = createEgoCar(j, coordsConverter);
+            // cout << egoCar.getPos().getFrenet() << endl;
 #if COLLECT_DATA_FOR_UNIT_TESTS
       frenetPointTuples.push_back(make_tuple(Frenet {j[1]["s"], j[1]["d"]}, Point {j[1]["x"], j[1]["y"]}));
       if(Simulator::oneRoundDriven(egoCar)) {
