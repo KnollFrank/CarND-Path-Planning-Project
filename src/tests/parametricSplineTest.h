@@ -88,24 +88,23 @@ TEST(ParametricSplineTest, should_getFrenet_for_periodic_param) {
   }
 }
 
+void print_spline(const ParametricSpline& spline, const string& varName,
+                  auto getValueFromPoint) {
+  GTEST_COUT<< varName << " = [";
+  for (double s = 0; s < spline.getLength(); s += 10) {
+    Point point = spline(spline.toSplineParameter(s));
+    GTEST_COUT << getValueFromPoint(point) << ", ";
+  }
+  GTEST_COUT << "]" << endl;
+}
+
 TEST(ParametricSplineTest, print_spline_for_display) {
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
   ParametricSpline spline(mapWaypoints.map_waypoints);
 
-  GTEST_COUT << "x = [";
-  for (double s = 0; s < spline.getLength(); s += 10) {
-    Point point = spline(spline.toSplineParameter(s));
-    GTEST_COUT << point.x << ", ";
-  }
-  GTEST_COUT << "]" << endl;
-
-  GTEST_COUT << "y = [";
-  for (double s = 0; s < spline.getLength(); s += 10) {
-    Point point = spline(spline.toSplineParameter(s));
-    GTEST_COUT << point.y << ", ";
-  }
-  GTEST_COUT << "]";
+  print_spline(spline, "x", [](const Point& point) {return point.x;});
+  print_spline(spline, "y", [](const Point& point) {return point.y;});
 }
 
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */
