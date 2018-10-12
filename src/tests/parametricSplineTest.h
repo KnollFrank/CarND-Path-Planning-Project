@@ -88,4 +88,24 @@ TEST(ParametricSplineTest, should_getFrenet_for_periodic_param) {
   }
 }
 
+TEST(ParametricSplineTest, print_spline_for_display) {
+  MapWaypoints mapWaypoints = MapWaypoints::load();
+  CoordsConverter coordsConverter(mapWaypoints);
+  ParametricSpline spline(mapWaypoints.map_waypoints);
+
+  GTEST_COUT << "x = [";
+  for (double s = 0; s < spline.getLength(); s += 10) {
+    Point point = spline(spline.toSplineParameter(s));
+    GTEST_COUT << point.x << ", ";
+  }
+  GTEST_COUT << "]" << endl;
+
+  GTEST_COUT << "y = [";
+  for (double s = 0; s < spline.getLength(); s += 10) {
+    Point point = spline(spline.toSplineParameter(s));
+    GTEST_COUT << point.y << ", ";
+  }
+  GTEST_COUT << "]";
+}
+
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */
