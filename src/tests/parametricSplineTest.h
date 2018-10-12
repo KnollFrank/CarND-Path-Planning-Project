@@ -106,7 +106,7 @@ TEST(ParametricSplineTest, print_spline_for_display) {
 
   const double sStart = spline.getLength() - 10;
   const double sEnd = spline.getLength() + 10;
-  const double sInc = 0.1;
+  const double sInc = 0.2;
   print_spline(spline, "x", sStart, sEnd, sInc,
                [](const Point& point) {return point.x;});
   print_spline(spline, "y", sStart, sEnd, sInc,
