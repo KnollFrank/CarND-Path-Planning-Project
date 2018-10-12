@@ -105,7 +105,7 @@ void Simulator::run(function<void(void)> afterEachMovementOfEgoCar) {
 }
 
 bool Simulator::oneRoundDriven(const EgoCar& egoCar) {
-  return egoCar.getPos().getFrenet().s > 6900; // 6947.2427832056264
+  return egoCar.getPos().getFrenet().s > 6900;  // 6947.2427832056264
 }
 
 bool Simulator::oneRoundDriven() {
@@ -168,7 +168,7 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
 }
 
 void Simulator::assertNoIncidentsHappened(double dt) {
-//  ASSERT_LE(egoCar.getAcceleration(dt).len(), 10)<< egoCar;
+  ASSERT_LE(egoCar.getAcceleration(dt).len(), 10)<< egoCar;
   ASSERT_LE(egoCar.getJerk(dt).len(), 10)<< egoCar;
   ASSERT_LE(egoCar.speed_mph, speed_limit_mph) << egoCar;
   std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(
