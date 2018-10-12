@@ -14,14 +14,6 @@
 #include "../coords/waypoints.h"
 #include "gtestHelper.h"
 
-void print_array(string name, vector<double> xs) {
-  GTEST_COUT<< name << " = [";
-  for (int i = 0; i < xs.size(); i++) {
-    GTEST_COUT<< xs[i] << ", " << endl;
-  }
-  GTEST_COUT<< "]";
-}
-
 TEST(ParametricSplineTest, should_get_length) {
   // Given
   MapWaypoints mapWaypoints = MapWaypoints::load();

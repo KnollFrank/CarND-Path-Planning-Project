@@ -12,6 +12,15 @@
 
 #define GTEST_COUT std::cerr
 
+template<typename T>
+void print_array(string name, vector<T> xs) {
+  GTEST_COUT<< name << " = [";
+  for (int i = 0; i < xs.size(); i++) {
+    GTEST_COUT<< xs[i] << ", " << endl;
+  }
+  GTEST_COUT<< "]";
+}
+
 string asString(function<void(stringstream&)> print2Stream) {
 	stringstream stream;
 	print2Stream(stream);

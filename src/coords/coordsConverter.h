@@ -20,6 +20,9 @@ class CoordsConverter {
                                       const Frenet& end) const;
   Frenet createFrenetVectorFromStart2End(const Point& start,
                                          const Point& end) const;
+  ParametricSpline* getSpline() const {
+    return spline;
+  }
 
  private:
   Point getClockwisePerpendicular(Point v) const;
