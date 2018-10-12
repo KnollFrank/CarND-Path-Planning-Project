@@ -89,9 +89,10 @@ TEST(ParametricSplineTest, should_getFrenet_for_periodic_param) {
 }
 
 void print_spline(const ParametricSpline& spline, const string& varName,
+                  const double sStart, const double sEnd, const double sInc,
                   auto getValueFromPoint) {
   GTEST_COUT<< varName << " = [";
-  for (double s = 0; s < spline.getLength(); s += 10) {
+  for (double s = sStart; s <= sEnd; s += sInc) {
     Point point = spline(spline.toSplineParameter(s));
     GTEST_COUT << getValueFromPoint(point) << ", ";
   }
@@ -103,8 +104,13 @@ TEST(ParametricSplineTest, print_spline_for_display) {
   CoordsConverter coordsConverter(mapWaypoints);
   ParametricSpline spline(mapWaypoints.map_waypoints);
 
-  print_spline(spline, "x", [](const Point& point) {return point.x;});
-  print_spline(spline, "y", [](const Point& point) {return point.y;});
+  const double sStart = spline.getLength() - 10;
+  const double sEnd = spline.getLength() + 10;
+  const double sInc = 0.1;
+  print_spline(spline, "x", sStart, sEnd, sInc,
+               [](const Point& point) {return point.x;});
+  print_spline(spline, "y", sStart, sEnd, sInc,
+               [](const Point& point) {return point.y;});
 }
 
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */
