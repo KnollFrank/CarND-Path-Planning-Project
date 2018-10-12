@@ -52,7 +52,6 @@ class PathPlanner {
   tuple<Path, ReferencePoint> computePath(const ReferencePoint& refPoint);
 
   const CoordsConverter& coordsConverter;
-  // TODO: refPoint und lane sollen unveränderbare Rückgabewerte von createPath sein.
   const ReferencePoint& refPoint;
   const Lane& lane;
   const double dt;

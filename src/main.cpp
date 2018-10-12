@@ -29,6 +29,8 @@
 #include "tests/pathPlannerTest.h"
 #include "tests/coordsConverterTest.h"
 
+// TODO: download and incorporate GTest automatically
+
 #define COLLECT_DATA_FOR_UNIT_TESTS false
 
 // for convenience
