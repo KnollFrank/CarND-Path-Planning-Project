@@ -38,7 +38,7 @@ class PathPlanner {
       const Lane& lane);
   bool isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane);
   bool isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(const Vehicle& vehicle);
-  double getNewVelocity(bool too_close, double vel_mph);
+  double getNewVelocity(const bool too_close, const double vel_mph);
   Lane getNewLane(bool too_close, const Lane& lane);
   Lane getMoreFreeLeftOrRightLane();
   std::experimental::optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
@@ -164,15 +164,15 @@ bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(
       && check_vehicle_s - egoCar.getPos().getFrenet().s < 30;
 }
 
-double PathPlanner::getNewVelocity(bool too_close, double vel_mph) {
+double PathPlanner::getNewVelocity(const bool too_close, const double vel_mph) {
   double speed_delta_mph = 2;
 
   if (too_close) {
-    vel_mph -= speed_delta_mph;
+    return vel_mph - speed_delta_mph;
   } else if (vel_mph + speed_delta_mph < speed_limit_mph) {
-    vel_mph += speed_delta_mph;
+    return vel_mph + speed_delta_mph;
   } else {
-    vel_mph = speed_limit_mph;
+    return speed_limit_mph;
   }
 
   return vel_mph;
