@@ -79,14 +79,12 @@ class PathCreator {
       points.push_back(createFrenetCart(prev));
       points.push_back(createFrenetCart(egoCar.getPos().getFrenet()));
     } else {
-      refPointNew.point = previousPath.points[previousPath.points.size() - 1]
-          .getFrenet();
-      Frenet prev = previousPath.points[previousPath.points.size() - 2]
-          .getFrenet();
-      refPointNew.yaw_rad = (refPointNew.point - prev).getHeading();
+      refPointNew.point = previousPath.points[previousPath.points.size() - 1];
+      FrenetCart prev = previousPath.points[previousPath.points.size() - 2];
+      refPointNew.yaw_rad = (refPointNew.point.getFrenet() - prev.getFrenet()).getHeading();
 
-      points.push_back(createFrenetCart(prev));
-      points.push_back(createFrenetCart(refPointNew.point));
+      points.push_back(prev);
+      points.push_back(refPointNew.point);
     }
 
     return make_tuple(points, refPointNew);
@@ -109,11 +107,11 @@ class PathCreator {
       const ReferencePoint& refPoint) {
 
     Path carsPath;
-    carsPath.points = enterCarsCoordinateSystem(refPoint.point,
+    carsPath.points = enterCarsCoordinateSystem(refPoint.point.getFrenet(),
                                                 -refPoint.yaw_rad, path.points);
     sort_and_remove_duplicates(carsPath.points);
     vector<FrenetCart> points = transformCarsPath2Points(carsPath);
-    return leaveCarsCoordinateSystem(refPoint.point, refPoint.yaw_rad, points);
+    return leaveCarsCoordinateSystem(refPoint.point.getFrenet(), refPoint.yaw_rad, points);
   }
 
   vector<FrenetCart> enterCarsCoordinateSystem(

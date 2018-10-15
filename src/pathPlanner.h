@@ -96,7 +96,7 @@ tuple<Lane, ReferencePoint> PathPlanner::planPath() {
   Lane newLane = getNewLane(too_close, lane);
   ReferencePoint refPointNew;
   refPointNew.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
-  refPointNew.point = egoCar.getPos().getFrenet();
+  refPointNew.point = egoCar.getPos();
   refPointNew.yaw_rad = deg2rad(egoCar.yaw_deg);
   return make_tuple(newLane, refPointNew);
 }

@@ -4,7 +4,7 @@
 #include "coords/frenet.h"
 
 struct ReferencePoint {
-  Frenet point;
+  FrenetCart point;
   double yaw_rad;
   double vel_mph;
 };
