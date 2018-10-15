@@ -82,10 +82,9 @@ class PathCreator {
     } else {
       refPointNew.point = previousPath.points[previousPath.points.size() - 1];
       FrenetCart prev = previousPath.points[previousPath.points.size() - 2];
-      refPointNew.yaw_rad =
-          refPointNew.point.getFrenet().minusCircular(
-              prev.getFrenet(), coordsConverter.getSpline()->getLength())
-              .getHeading();
+      Frenet diff = refPointNew.point.getFrenet().minusCircular(
+          prev.getFrenet(), coordsConverter.getSpline()->getLength());
+      refPointNew.yaw_rad = diff.getHeading();
 
       points.push_back(prev);
       points.push_back(refPointNew.point);
@@ -195,10 +194,6 @@ class PathCreator {
   }
 
   void sort_and_remove_duplicates(vector<FrenetCart>& points) {
-    std::sort(
-        points.begin(),
-        points.end(),
-        [&](const FrenetCart& p1, const FrenetCart& p2) {return p1.getFrenet().s < p2.getFrenet().s;});
     points.erase(
         unique(
             points.begin(),

@@ -73,7 +73,7 @@ Frenet Frenet::fromAngle(double angle_rad) {
 }
 
 Frenet Frenet::zero() {
-  return Frenet {0, 0};
+  return Frenet { 0, 0 };
 }
 
 double Frenet::getHeading() const {
