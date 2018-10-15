@@ -77,11 +77,12 @@ class PathCreator {
           - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
 
       points.push_back(createFrenetCart(prev));
-      points.push_back(createFrenetCart(egoCar.getPos().getFrenet()));
+      points.push_back(egoCar.getPos());
     } else {
       refPointNew.point = previousPath.points[previousPath.points.size() - 1];
       FrenetCart prev = previousPath.points[previousPath.points.size() - 2];
-      refPointNew.yaw_rad = (refPointNew.point.getFrenet() - prev.getFrenet()).getHeading();
+      refPointNew.yaw_rad = (refPointNew.point.getFrenet() - prev.getFrenet())
+          .getHeading();
 
       points.push_back(prev);
       points.push_back(refPointNew.point);
@@ -111,7 +112,8 @@ class PathCreator {
                                                 -refPoint.yaw_rad, path.points);
     sort_and_remove_duplicates(carsPath.points);
     vector<FrenetCart> points = transformCarsPath2Points(carsPath);
-    return leaveCarsCoordinateSystem(refPoint.point.getFrenet(), refPoint.yaw_rad, points);
+    return leaveCarsCoordinateSystem(refPoint.point.getFrenet(),
+                                     refPoint.yaw_rad, points);
   }
 
   vector<FrenetCart> enterCarsCoordinateSystem(
