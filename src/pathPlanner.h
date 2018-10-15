@@ -88,7 +88,7 @@ tuple<Path, Lane, ReferencePoint> PathPlanner::createPath() {
 
 tuple<Lane, ReferencePoint> PathPlanner::planPath() {
   if (previousData.sizeOfPreviousPath() > 0) {
-    egoCar.setPos(createFrenetCart(previousData.end_path));
+    egoCar.setPos(previousData.end_path);
   }
 
   bool too_close = isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(

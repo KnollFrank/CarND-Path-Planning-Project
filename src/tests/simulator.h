@@ -139,7 +139,7 @@ void Simulator::updatePreviousData(const vector<FrenetCart>& points,
     previousData.previous_path.points.push_back(path.points[i]);
   }
   previousData.end_path = points[points.size() - numberOfUnprocessedPathElements
-      - 1].getFrenet();
+      - 1];
 }
 
 double Simulator::drive2PointsOfEgoCarAndDriveVehicles(

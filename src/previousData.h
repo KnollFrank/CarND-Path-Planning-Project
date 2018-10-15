@@ -19,7 +19,7 @@ using json = nlohmann::json;
 
 struct PreviousData {
   Path previous_path;
-  Frenet end_path;
+  FrenetCart end_path;
 
   int sizeOfPreviousPath() const;
   static PreviousData fromJson(
@@ -62,11 +62,12 @@ PreviousData PreviousData::fromJson(
 
 // Previous path's end s and d values
   if (previousData.sizeOfPreviousPath() > 0) {
-    previousData.end_path =
-        previousData.previous_path.points.back().getFrenet();
+    previousData.end_path = previousData.previous_path.points.back();
   } else {
-    previousData.end_path = Frenet { coordsConverter.adapt_s_coord(
-        j[1]["end_path_s"]), j[1]["end_path_d"] };
+    previousData.end_path = FrenetCart(
+        Frenet { coordsConverter.adapt_s_coord(j[1]["end_path_s"]),
+            j[1]["end_path_d"] },
+        coordsConverter);
   }
   return previousData;
 }
