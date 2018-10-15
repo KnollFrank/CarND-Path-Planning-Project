@@ -85,14 +85,13 @@ vector<Vehicle> createVehicles(
 
   vector<Vehicle> vehicles;
   for (int i = 0; i < sensor_fusion.size(); i++) {
-    Vehicle vehicle(sensor_fusion[i][ID], FrenetCart(Frenet {
-                                                         sensor_fusion[i][S],
-                                                         sensor_fusion[i][D] },
-                                                     Point {
-                                                         sensor_fusion[i][X],
-                                                         sensor_fusion[i][Y] },
-                                                     coordsConverter),
-                    coordsConverter);
+    Vehicle vehicle(
+        sensor_fusion[i][ID],
+        FrenetCart(Frenet { coordsConverter.adapt_s_coord(sensor_fusion[i][S]),
+                       sensor_fusion[i][D] },
+                   Point { sensor_fusion[i][X], sensor_fusion[i][Y] },
+                   coordsConverter),
+        coordsConverter);
     vehicle.setVel_cart_m_per_s(Point { sensor_fusion[i][VX],
         sensor_fusion[i][VY] });
     vehicles.push_back(vehicle);
@@ -151,7 +150,7 @@ int main(int argc, char **argv) {
             // j[1] is the data JSON object
 
             EgoCar egoCar = createEgoCar(j, coordsConverter);
-            // cout << egoCar.getPos().getFrenet() << endl;
+            cout << egoCar.getPos().getFrenet() << endl;
 #if COLLECT_DATA_FOR_UNIT_TESTS
       frenetPointTuples.push_back(make_tuple(Frenet {j[1]["s"], j[1]["d"]}, Point {j[1]["x"], j[1]["y"]}));
       if(Simulator::oneRoundDriven(egoCar)) {

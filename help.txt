@@ -13,9 +13,9 @@ egoCar.s:
 6.88759
 10.2326
 
-                                         Länge gemäß README von udacity: 6945.554
+                                         Länge gemäß README von udacity: 6945,554
   Gesamtlänge der Strecke (auf Grundlage von Liniensegmenten berechnet): 6945,5540547387
-Gesamtlänge der Strecke (auf Grundlage von kubischen Splines berechnet): 6947.2427832056264
+Gesamtlänge der Strecke (auf Grundlage von kubischen Splines berechnet): 6947,2427832056264
 
 bcp --boost=/usr/local/include/ boost/circular_buffer.hpp foo
 

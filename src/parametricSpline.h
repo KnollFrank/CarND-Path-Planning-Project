@@ -94,7 +94,7 @@ class ParametricSpline {
 
   Point operator()(double t) const;
   Point getTangent(double t) const;
-  double getLength() const;
+  const double getLength() const;
   Frenet getFrenet(const Point& point) const;
   double toSplineParameter(double s) const;
 
@@ -148,7 +148,7 @@ vector<Polynom> ParametricSpline::getYPolys() const {
   return createPolynoms(asImplPtr()->y);
 }
 
-double ParametricSpline::getLength() const {
+const double ParametricSpline::getLength() const {
   return length;
 }
 

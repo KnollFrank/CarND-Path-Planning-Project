@@ -52,7 +52,8 @@ PreviousData PreviousData::fromJson(
   }
 
 // Previous path's end s and d values
-  previousData.end_path = Frenet { j[1]["end_path_s"], j[1]["end_path_d"] };
+  previousData.end_path = Frenet { coordsConverter.adapt_s_coord(
+      j[1]["end_path_s"]), j[1]["end_path_d"] };
   return previousData;
 }
 

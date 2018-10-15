@@ -28,6 +28,12 @@ class CoordsConverter {
     return map_waypoints;
   }
 
+  double adapt_s_coord(double s_coord_from_simulator) const {
+    const double overallLineLength_from_simulator = 6945.5540547387;
+    return s_coord_from_simulator * spline->getLength()
+        / overallLineLength_from_simulator;
+  }
+
  private:
   Point getClockwisePerpendicular(Point v) const;
 
