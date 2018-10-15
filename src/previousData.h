@@ -34,6 +34,15 @@ int PreviousData::sizeOfPreviousPath() const {
   return previous_path.points.size();
 }
 
+template<typename T>
+void print_array2(string name, vector<T> xs) {
+  cout << name << " = [";
+  for (int i = 0; i < xs.size(); i++) {
+    cout << xs[i] << ", " << endl;
+  }
+  cout << "]";
+}
+
 PreviousData PreviousData::fromJson(
     const nlohmann::basic_json<std::map, std::vector,
         std::__cxx11::basic_string<char, std::char_traits<char>,
@@ -52,8 +61,13 @@ PreviousData PreviousData::fromJson(
   }
 
 // Previous path's end s and d values
-  previousData.end_path = Frenet { coordsConverter.adapt_s_coord(
-      j[1]["end_path_s"]), j[1]["end_path_d"] };
+  if (previousData.sizeOfPreviousPath() > 0) {
+    previousData.end_path =
+        previousData.previous_path.points.back().getFrenet();
+  } else {
+    previousData.end_path = Frenet { coordsConverter.adapt_s_coord(
+        j[1]["end_path_s"]), j[1]["end_path_d"] };
+  }
   return previousData;
 }
 

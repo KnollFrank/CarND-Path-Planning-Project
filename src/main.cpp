@@ -58,9 +58,7 @@ EgoCar createEgoCar(
         std::allocator, nlohmann::adl_serializer>& j,
     const CoordsConverter& coordsConverter) {
   EgoCar egoCar(coordsConverter);
-  egoCar.setPos(FrenetCart(Frenet { coordsConverter.adapt_s_coord(j[1]["s"]),
-                               j[1]["d"] },
-                           Point { j[1]["x"], j[1]["y"] }, coordsConverter));
+  egoCar.setPos(FrenetCart(Point { j[1]["x"], j[1]["y"] }, coordsConverter));
   egoCar.yaw_deg = j[1]["yaw"];
   egoCar.speed_mph = j[1]["speed"];
   return egoCar;
@@ -85,13 +83,11 @@ vector<Vehicle> createVehicles(
 
   vector<Vehicle> vehicles;
   for (int i = 0; i < sensor_fusion.size(); i++) {
-    Vehicle vehicle(
-        sensor_fusion[i][ID],
-        FrenetCart(Frenet { coordsConverter.adapt_s_coord(sensor_fusion[i][S]),
-                       sensor_fusion[i][D] },
-                   Point { sensor_fusion[i][X], sensor_fusion[i][Y] },
-                   coordsConverter),
-        coordsConverter);
+    Vehicle vehicle(sensor_fusion[i][ID], FrenetCart(Point {
+                                                         sensor_fusion[i][X],
+                                                         sensor_fusion[i][Y] },
+                                                     coordsConverter),
+                    coordsConverter);
     vehicle.setVel_cart_m_per_s(Point { sensor_fusion[i][VX],
         sensor_fusion[i][VY] });
     vehicles.push_back(vehicle);
@@ -128,7 +124,7 @@ int main(int argc, char **argv) {
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
   const double dt = 0.02;
-  const double speed_limit_mph = 46;
+  const double speed_limit_mph = 20;
   vector<tuple<Frenet, Point>> frenetPointTuples;
 
   h.onMessage([&](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
@@ -150,7 +146,7 @@ int main(int argc, char **argv) {
             // j[1] is the data JSON object
 
             EgoCar egoCar = createEgoCar(j, coordsConverter);
-            cout << egoCar.getPos().getFrenet() << endl;
+            cout << "egoCar: " << egoCar.getPos().getFrenet() << endl;
 #if COLLECT_DATA_FOR_UNIT_TESTS
       // TODO: hier noch adapt_s_coord aufrufen?
       frenetPointTuples.push_back(make_tuple(Frenet {j[1]["s"], j[1]["d"]}, Point {j[1]["x"], j[1]["y"]}));
