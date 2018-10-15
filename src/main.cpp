@@ -58,9 +58,9 @@ EgoCar createEgoCar(
         std::allocator, nlohmann::adl_serializer>& j,
     const CoordsConverter& coordsConverter) {
   EgoCar egoCar(coordsConverter);
-  egoCar.setPos(FrenetCart(Frenet { j[1]["s"], j[1]["d"] }, Point { j[1]["x"],
-                               j[1]["y"] },
-                           coordsConverter));
+  egoCar.setPos(FrenetCart(Frenet { coordsConverter.adapt_s_coord(j[1]["s"]),
+                               j[1]["d"] },
+                           Point { j[1]["x"], j[1]["y"] }, coordsConverter));
   egoCar.yaw_deg = j[1]["yaw"];
   egoCar.speed_mph = j[1]["speed"];
   return egoCar;
@@ -152,6 +152,7 @@ int main(int argc, char **argv) {
             EgoCar egoCar = createEgoCar(j, coordsConverter);
             cout << egoCar.getPos().getFrenet() << endl;
 #if COLLECT_DATA_FOR_UNIT_TESTS
+      // TODO: hier noch adapt_s_coord aufrufen?
       frenetPointTuples.push_back(make_tuple(Frenet {j[1]["s"], j[1]["d"]}, Point {j[1]["x"], j[1]["y"]}));
       if(Simulator::oneRoundDriven(egoCar)) {
         printAsCppCode(frenetPointTuples);
