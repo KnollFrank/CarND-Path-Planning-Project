@@ -21,6 +21,7 @@ struct Frenet {
   static Frenet zero();
   Frenet operator+(const Frenet& other) const;
   Frenet operator-(const Frenet& other) const;
+  Frenet minusCircular(const Frenet& prev, const double len) const;
   Frenet operator*(double scalar) const;
   Frenet operator/(double scalar) const;
 
@@ -38,6 +39,11 @@ Frenet Frenet::operator+(const Frenet &other) const {
 
 Frenet Frenet::operator-(const Frenet &other) const {
   return *this + (other * -1);
+}
+
+Frenet Frenet::minusCircular(const Frenet& prev, const double len) const {
+  const Frenet diff = *this - prev;
+  return prev.s <= s ? diff : diff + Frenet { len, 0 };
 }
 
 Frenet Frenet::operator*(double scalar) const {

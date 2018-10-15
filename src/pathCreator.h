@@ -82,17 +82,10 @@ class PathCreator {
     } else {
       refPointNew.point = previousPath.points[previousPath.points.size() - 1];
       FrenetCart prev = previousPath.points[previousPath.points.size() - 2];
-      double refPointNew_s = refPointNew.point.getFrenet().s;
-      double prev_s = prev.getFrenet().s;
-      // TODO: if (0.06738587146532965 <= 6946.8994024539452)
-      if (refPointNew_s <= prev_s) {
-        cout << "refPointNew_s: " << refPointNew_s << ", prev_x: " << prev_s
-             << endl;
-      }
-      // Originalcode berechnet das in cartesischen Koordinaten.
-      // FIXME: Widerspruch zu [123]
-      refPointNew.yaw_rad = (refPointNew.point.getFrenet() - prev.getFrenet())
-          .getHeading();
+      refPointNew.yaw_rad =
+          refPointNew.point.getFrenet().minusCircular(
+              prev.getFrenet(), coordsConverter.getSpline()->getLength())
+              .getHeading();
 
       points.push_back(prev);
       points.push_back(refPointNew.point);

@@ -5,31 +5,39 @@
 #include <gtest/gtest.h>
 #include <tests/gtestHelper.h>
 
-Frenet minusCircular(const Frenet& past, const Frenet& prev, const double len) {
-  const Frenet diff = past - prev;
-  return prev.s <= past.s ? diff : diff + Frenet { len, 0 };
-}
-
 TEST(FrenetTest, test_minusCircular1) {
   // GIVEN
-  const Frenet prev = Frenet { 6946.8994024539452, 10 };
-  const Frenet past = Frenet { 0.06738587146532965, 7 };
-  const double len = 6947.2427832056264;
+  const Frenet prev = Frenet { 4, 10 };
+  const Frenet past = Frenet { 1, 7 };
+  const double len = 5;
 
   // WHEN
-  Frenet diff = ::minusCircular(past, prev, len);
+  Frenet diff = past.minusCircular(prev, len);
 
   // THEN
-  expect_near(Frenet { len - prev.s + past.s, past.d - prev.d }, diff, 0.001);
+  expect_near(Frenet { 2, 7 - 10 }, diff, 0.001);
 }
 
 TEST(FrenetTest, test_minusCircular2) {
+  // GIVEN
+  const Frenet prev = Frenet { 4, 10 };
+  const Frenet past = Frenet { 2, 7 };
+  const double len = 5;
+
+  // WHEN
+  Frenet diff = past.minusCircular(prev, len);
+
+  // THEN
+  expect_near(Frenet { 3, 7 - 10 }, diff, 0.001);
+}
+
+TEST(FrenetTest, test_minusCircular3) {
   // GIVEN
   Frenet prev = Frenet { 10, 6 };
   Frenet past = Frenet { 15, 8 };
 
   // WHEN
-  Frenet diff = ::minusCircular(past, prev, 6947.2427832056264);
+  Frenet diff = past.minusCircular(prev, 6947.2427832056264);
 
   // THEN
   expect_near(past - prev, diff, 0.001);
