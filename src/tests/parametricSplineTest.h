@@ -96,9 +96,9 @@ TEST(ParametricSplineTest, print_spline_for_display) {
   CoordsConverter coordsConverter(mapWaypoints);
   ParametricSpline spline(mapWaypoints.map_waypoints);
 
-  const double sStart = spline.getLength() - 10;
-  const double sEnd = spline.getLength() + 10;
-  const double sInc = 0.2;
+  const double sStart = 0;
+  const double sEnd = spline.getLength();
+  const double sInc = 2;
   print_spline(spline, "x", sStart, sEnd, sInc,
                [](const Point& point) {return point.x;});
   print_spline(spline, "y", sStart, sEnd, sInc,
