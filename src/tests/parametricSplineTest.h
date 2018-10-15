@@ -91,6 +91,17 @@ void print_spline(const ParametricSpline& spline, const string& varName,
   GTEST_COUT << "]" << endl;
 }
 
+void print_arclength(const CoordsConverter& coordsConverter) {
+  const vector<Point>& map_waypoints = coordsConverter.getMapWaypoints()
+      .map_waypoints;
+  const vector<double>& map_waypoints_s = coordsConverter.getMapWaypoints()
+      .map_waypoints_s;
+  ParametricSpline* spline = coordsConverter.getSpline();
+  for (int i = 0; i < map_waypoints.size(); i++) {
+    GTEST_COUT<< "line, spline: " << map_waypoints_s[i] << ", " << spline->getFrenet(map_waypoints[i]).s << endl;
+  }
+}
+
 TEST(ParametricSplineTest, print_spline_for_display) {
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
@@ -103,6 +114,7 @@ TEST(ParametricSplineTest, print_spline_for_display) {
                [](const Point& point) {return point.x;});
   print_spline(spline, "y", sStart, sEnd, sInc,
                [](const Point& point) {return point.y;});
+  print_arclength(coordsConverter);
 }
 
 #endif /* TESTS_PARAMETRICSPLINETEST_H_ */

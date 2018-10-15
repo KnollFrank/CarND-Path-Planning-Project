@@ -24,6 +24,10 @@ class CoordsConverter {
     return spline;
   }
 
+  const MapWaypoints& getMapWaypoints() const {
+    return map_waypoints;
+  }
+
  private:
   Point getClockwisePerpendicular(Point v) const;
 
