@@ -73,6 +73,7 @@ class PathCreator {
     ReferencePoint refPointNew = refPoint;
 
     if (previousPath.points.size() < 2) {
+      // FIXME: Widerspruch zu [123]
       Frenet prev = egoCar.getPos().getFrenet()
           - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
 
@@ -81,6 +82,15 @@ class PathCreator {
     } else {
       refPointNew.point = previousPath.points[previousPath.points.size() - 1];
       FrenetCart prev = previousPath.points[previousPath.points.size() - 2];
+      double refPointNew_s = refPointNew.point.getFrenet().s;
+      double prev_s = prev.getFrenet().s;
+      // TODO: if (0.06738587146532965 <= 6946.8994024539452)
+      if (refPointNew_s <= prev_s) {
+        cout << "refPointNew_s: " << refPointNew_s << ", prev_x: " << prev_s
+             << endl;
+      }
+      // Originalcode berechnet das in cartesischen Koordinaten.
+      // FIXME: Widerspruch zu [123]
       refPointNew.yaw_rad = (refPointNew.point.getFrenet() - prev.getFrenet())
           .getHeading();
 
@@ -108,6 +118,9 @@ class PathCreator {
       const ReferencePoint& refPoint) {
 
     Path carsPath;
+    // FIXME: nach enterCarsCoordinateSystem macht es nur noch Sinn mit Frenet-Koordinaten weiterzurechnen innerhalb von
+    // transformCarsPath2Points, denn die aus FrenetCart gewonnenen XY-Koordinaten sind ab hier FALSCH. Also Signaturen der abhängigen Methoden von FrenetCart ändern in Frenet.
+    // FrenetCart im Rückgabewert von workWithPathInCarsCoordinateSystem ist aber wieder ok.
     carsPath.points = enterCarsCoordinateSystem(refPoint.point.getFrenet(),
                                                 -refPoint.yaw_rad, path.points);
     sort_and_remove_duplicates(carsPath.points);

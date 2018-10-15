@@ -28,6 +28,7 @@
 #include "tests/parametricSplineTest.h"
 #include "tests/pathPlannerTest.h"
 #include "tests/coordsConverterTest.h"
+#include "tests/frenetTest.h"
 
 // TODO: download and incorporate GTest automatically
 
@@ -59,6 +60,8 @@ EgoCar createEgoCar(
     const CoordsConverter& coordsConverter) {
   EgoCar egoCar(coordsConverter);
   egoCar.setPos(FrenetCart(Point { j[1]["x"], j[1]["y"] }, coordsConverter));
+  // ["yaw"] The car's yaw angle in the map, also in XY-Koordinaten.
+  // TODO: [123]:
   egoCar.yaw_deg = j[1]["yaw"];
   egoCar.speed_mph = j[1]["speed"];
   return egoCar;
@@ -111,7 +114,7 @@ int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     // see https://stackoverflow.com/questions/7208070/googletest-how-to-skip-a-test
     // testing::GTEST_FLAG(filter) = "-PathPlannerTest.should_drive_with_max_50_mph";
-    // testing::GTEST_FLAG(filter) = "ParametricSplineTest.should_getFrenet";
+    testing::GTEST_FLAG(filter) = "FrenetTest.test_minus";
     return RUN_ALL_TESTS();
   }
 
