@@ -97,6 +97,7 @@ void print_arclength(const CoordsConverter& coordsConverter) {
   const vector<double>& map_waypoints_s = coordsConverter.getMapWaypoints()
       .map_waypoints_s;
   ParametricSpline* spline = coordsConverter.getSpline();
+
   for (int i = 0; i < map_waypoints.size(); i++) {
     GTEST_COUT<< "line, spline: " << map_waypoints_s[i] << ", " << spline->getFrenet(map_waypoints[i]).s << endl;
   }
