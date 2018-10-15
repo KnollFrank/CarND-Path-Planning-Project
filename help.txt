@@ -1,0 +1,22 @@
+nach einer Runde wird die S-Koordinate des EgoCars wieder zurückgesetzt: 
+Frenet(s = 6945.43, d = 2.01917)
+Frenet(s = 2.55194, d = 2.0332)
+
+hier tritt eine Acceleration- und Jerk-Violation auf:
+egoCar.s:
+6934.9
+6938.7
+6941.98
+6944.33
+0.717507
+3.26868
+6.88759
+10.2326
+
+                                         Länge gemäß README von udacity: 6945.554
+  Gesamtlänge der Strecke (auf Grundlage von Liniensegmenten berechnet): 6945,5540547387
+Gesamtlänge der Strecke (auf Grundlage von kubischen Splines berechnet): 6947.2427832056264
+
+bcp --boost=/usr/local/include/ boost/circular_buffer.hpp foo
+
+bcp --scan --boost=/usr/local/include/ '/home/frankknoll/udacity/SDCND/CarND-Path-Planning-Project/src/egoCar.h' '/home/frankknoll/udacity/SDCND/CarND-Path-Planning-Project/src/funs.h' '/home/frankknoll/udacity/SDCND/CarND-Path-Planning-Project/src/parametricSpline.h' '/home/frankknoll/udacity/SDCND/CarND-Path-Planning-Project/src/spline.h' boost
