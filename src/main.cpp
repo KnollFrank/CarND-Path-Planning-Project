@@ -61,8 +61,6 @@ EgoCar createEgoCar(
     const CoordsConverter& coordsConverter) {
   EgoCar egoCar(coordsConverter);
   egoCar.setPos(FrenetCart(Point { j[1]["x"], j[1]["y"] }, coordsConverter));
-  // ["yaw"] The car's yaw angle in the map, also in XY-Koordinaten.
-  // TODO: [123]:
   egoCar.yaw_deg = j[1]["yaw"];
   egoCar.speed_mph = j[1]["speed"];
   return egoCar;
