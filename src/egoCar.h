@@ -43,8 +43,9 @@ class EgoCar {
                         double dt) const;
 
   const CoordsConverter& coordsConverter;
-  boost::circular_buffer<FrenetCart> positions;
   const Dimension shapeTemplate;
+ public:
+  boost::circular_buffer<FrenetCart> positions;
 };
 
 ostream& operator<<(ostream& os, const EgoCar& egoCar) {

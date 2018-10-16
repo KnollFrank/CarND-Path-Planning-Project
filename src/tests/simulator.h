@@ -1,27 +1,28 @@
 #ifndef TESTS_SIMULATOR_H_
 #define TESTS_SIMULATOR_H_
 
+#include <boost/circular_buffer/base.hpp>
+#include <coords/cart.h>
+#include <coords/coordsConverter.h>
+#include <coords/frenet.h>
+#include <coords/frenetCart.h>
+#include <egoCar.h>
+#include <funs.h>
 #include <gtest/gtest.h>
 #include <gtest/gtest-message.h>
+#include <lane.h>
+#include <parametricSpline.h>
+#include <path.h>
+#include <pathPlanner.h>
+#include <previousData.h>
+#include <rectangle.h>
+#include <referencePoint.h>
+#include <tests/gtestHelper.h>
+#include <tests/vehicleDriver.h>
+#include <vehicle.h>
 #include <algorithm>
-#include <experimental/optional>
-#include <functional>
 #include <iostream>
 #include <vector>
-
-#include "../coords/cart.h"
-#include "../coords/coordsConverter.h"
-#include "../coords/frenet.h"
-#include "../coords/frenetCart.h"
-#include "../egoCar.h"
-#include "../funs.h"
-#include "../lane.h"
-#include "../path.h"
-#include "../pathPlanner.h"
-#include "../previousData.h"
-#include "../rectangle.h"
-#include "../vehicle.h"
-#include "vehicleDriver.h"
 
 using namespace std;
 using namespace std::experimental;
@@ -167,8 +168,21 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
   vehicleDriver->driveVehicle(vehicle, egoCar, dt);
 }
 
+template<typename T>
+void print_circular_buffer(string name, const boost::circular_buffer<T>& xs) {
+  GTEST_COUT<< name << " = [";
+  for (int i = 0; i < xs.size(); i++) {
+    GTEST_COUT<< xs[i] << ", " << endl;
+  }
+  GTEST_COUT<< "]";
+}
+
 void Simulator::assertNoIncidentsHappened(double dt) {
   const double acceleration = egoCar.getAcceleration(dt).len();
+  if(acceleration > 10) {
+    GTEST_COUT << "acceleration = " << acceleration << endl;
+    print_circular_buffer("positions", egoCar.positions);
+  }
   ASSERT_LE(acceleration, 10)<< egoCar;
   ASSERT_LE(egoCar.getJerk(dt).len(), 10)<< egoCar;
   ASSERT_LE(egoCar.speed_mph, speed_limit_mph)<< egoCar;
@@ -190,7 +204,7 @@ void Simulator::drive2PointOfEgoCar(
       src.getXY().distanceTo(dst.getXY()) / dt);
   egoCar.setPos(dst);
   egoCar.yaw_deg = getYawDeg(src.getFrenet(), dst.getFrenet());
-// GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
+  GTEST_COUT<< "egoCar: " << egoCar.getPos().getFrenet() << endl;
 
   assertNoIncidentsHappened(dt);
   afterEachMovementOfEgoCar();
