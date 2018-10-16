@@ -16,7 +16,6 @@
 #include "coords/frenet.h"
 #include "funs.h"
 
-using namespace std::experimental;
 using namespace alglib;
 using namespace boost::math::tools;
 
@@ -99,6 +98,7 @@ class ParametricSpline {
   double toSplineParameter(double s) const;
 
  private:
+  vector<Polynom2D> getPolysNextToPoint(const Point& point) const;
   real_2d_array as_real_2d_array(const vector<Point> &points) const;
   alglib_impl::pspline2interpolant* asImplPtr() const;
   vector<Polynom> createPolynoms(
@@ -107,6 +107,7 @@ class ParametricSpline {
   double getRootOf(const Polynom& poly) const;
   vector<Polynom> getXPolys() const;
   vector<Polynom> getYPolys() const;
+  vector<Polynom2D> computePolys() const;
   vector<Polynom2D> getPolys() const;
   Frenet getFrenet(const Polynom2D& poly, const Point& point) const;
   vector<Frenet> getFrenets(const vector<Polynom2D>&, const Point& point) const;
@@ -115,6 +116,7 @@ class ParametricSpline {
 
   pspline2interpolant spline;
   double length;
+  vector<Polynom2D> polys;
 };
 
 vector<Polynom> ParametricSpline::createPolynoms(
@@ -182,6 +184,7 @@ ParametricSpline::ParametricSpline(const vector<Point>& points) {
   real_2d_array xy = as_real_2d_array(points);
   pspline2buildperiodic(xy, points.size(), SplineType::CatmullRom,
                         ParameterizationType::chordLength, spline);
+  polys = computePolys();
   length = pspline2arclength(spline, 0, 1);
 }
 
@@ -226,8 +229,7 @@ Polynom ParametricSpline::getSquaredDistance(const Point& point,
   return squaredDistance;
 }
 
-// TODO: Profile and see whether precomputing getPolys() improves performance.
-vector<Polynom2D> ParametricSpline::getPolys() const {
+vector<Polynom2D> ParametricSpline::computePolys() const {
   vector<Polynom2D> polys;
   vector<Polynom> xpolys = getXPolys();
   vector<Polynom> ypolys = getYPolys();
@@ -237,6 +239,10 @@ vector<Polynom2D> ParametricSpline::getPolys() const {
     poly.y = ypolys[i];
     polys.push_back(poly);
   }
+  return polys;
+}
+
+vector<Polynom2D> ParametricSpline::getPolys() const {
   return polys;
 }
 
@@ -276,8 +282,14 @@ double ParametricSpline::toSplineParameter(double s) const {
 
 Frenet ParametricSpline::getFrenet(const Point& point) const {
   Frenet frenet = getFrenetHavingMinimalDCoordinate(
-      getFrenets(getPolys(), point));
+      getFrenets(getPolysNextToPoint(point), point));
   return Frenet { fromSplineParameter(frenet.s), frenet.d };
+}
+
+vector<Polynom2D> ParametricSpline::getPolysNextToPoint(
+    const Point& point) const {
+
+  return polys;
 }
 
 #endif /* PARAMETRICSPLINE_H_ */
