@@ -13,7 +13,7 @@
 #define GTEST_COUT std::cerr
 
 template<typename T>
-void print_array(string name, vector<T> xs) {
+void print_array(string name, const vector<T>& xs) {
   GTEST_COUT<< name << " = [";
   for (int i = 0; i < xs.size(); i++) {
     GTEST_COUT<< xs[i] << ", " << endl;
