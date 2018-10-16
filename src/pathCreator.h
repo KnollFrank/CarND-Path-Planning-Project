@@ -113,6 +113,7 @@ class PathCreator {
     // FrenetCart im Rückgabewert von workWithPathInCarsCoordinateSystem ist aber wieder ok.
     carsPath.points = enterCarsCoordinateSystem(refPoint.point.getXY(),
                                                 -refPoint.yaw_rad, path.points);
+    remove_duplicates(carsPath.points);
     vector<FrenetCart> points = transformCarsPath2Points(carsPath);
     return leaveCarsCoordinateSystem(refPoint.point.getXY(), refPoint.yaw_rad,
                                      points);
@@ -191,6 +192,15 @@ class PathCreator {
 
   FrenetCart createSplinePoint(double x, const Spline& spline) {
     return createFrenetCart(Point { x, spline(x) });
+  }
+
+  void remove_duplicates(vector<FrenetCart>& points) {
+    points.erase(
+        unique(
+            points.begin(),
+            points.end(),
+            [&](const FrenetCart& p1, const FrenetCart& p2) {return p1.getFrenet().s == p2.getFrenet().s;}),
+        points.end());
   }
 
   const CoordsConverter& coordsConverter;

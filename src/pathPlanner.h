@@ -165,7 +165,7 @@ bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(
 }
 
 double PathPlanner::getNewVelocity(const bool too_close, const double vel_mph) {
-  double speed_delta_mph = 2;
+  double speed_delta_mph = 0.5;
 
   if (too_close) {
     return vel_mph - speed_delta_mph;
