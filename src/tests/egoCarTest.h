@@ -59,8 +59,10 @@ TEST(EgoCarTest, shouldGetAcceleration2) {
   Point acceleration = egoCar.getAcceleration(dt);
 
   // THEN
-  expect_near(Point { 44.340878413606788, -0.26436536529672594 }, acceleration,
-              0.001);
+  Point vel1 = (p4 - p3) / dt;
+  Point vel2 = (p3 - p2) / dt;
+  Point acc = (vel1 - vel2) / dt;
+  expect_near(acc, acceleration, 0.001);
 }
 
 #endif /* TESTS_EGOCARTEST_H_ */
