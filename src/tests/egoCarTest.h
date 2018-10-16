@@ -15,15 +15,21 @@ TEST(EgoCarTest, shouldGetAcceleration) {
   EgoCar egoCar(coordsConverter);
 
   const double dt = 0.02;
-  const Point acc {2, 3};
-  const Point vel {5, 7};
+  const Point acc { 2, 3 };
+  const Point vel { 5, 7 };
 
-  auto s = [&](const double t) {return acc * (0.5 * t * t) + vel * t;};
+  auto s = [&](const double t) {
+    return acc * (0.5 * t * t) + vel * t;
+  };
 
-  egoCar.setPos(FrenetCart(s(0 * dt), coordsConverter));
-  egoCar.setPos(FrenetCart(s(1 * dt), coordsConverter));
-  egoCar.setPos(FrenetCart(s(2 * dt), coordsConverter));
-  egoCar.setPos(FrenetCart(s(3 * dt), coordsConverter));
+  auto moveCarToPointAtTimeStep = [&](const int timeStep) {
+    egoCar.setPos(FrenetCart(s(timeStep * dt), coordsConverter));
+  };
+
+  moveCarToPointAtTimeStep(0);
+  moveCarToPointAtTimeStep(1);
+  moveCarToPointAtTimeStep(2);
+  moveCarToPointAtTimeStep(3);
 
   // WHEN
   Point acceleration = egoCar.getAcceleration(dt);
