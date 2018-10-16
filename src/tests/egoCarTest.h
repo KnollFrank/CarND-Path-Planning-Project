@@ -12,16 +12,22 @@ TEST(EgoCarTest, shouldGetAcceleration) {
   CoordsConverter coordsConverter(mapWaypoints);
   EgoCar egoCar(coordsConverter);
 
-  egoCar.setPos(FrenetCart(Point {0, 0}, coordsConverter));
-  egoCar.setPos(FrenetCart(Point {10, 0}, coordsConverter));
-  egoCar.setPos(FrenetCart(Point {20, 0}, coordsConverter));
-  egoCar.setPos(FrenetCart(Point {30, 0}, coordsConverter));
+  const double dt = 0.02;
+  const double acc = 2;
+  const double v = 5;
+
+  auto s = [&](double t) {return 0.5 * acc * t * t + v * t;};
+
+  egoCar.setPos(FrenetCart(Point { s(0 * dt), 0 }, coordsConverter));
+  egoCar.setPos(FrenetCart(Point { s(1 * dt), 0 }, coordsConverter));
+  egoCar.setPos(FrenetCart(Point { s(2 * dt), 0 }, coordsConverter));
+  egoCar.setPos(FrenetCart(Point { s(3 * dt), 0 }, coordsConverter));
 
   // WHEN
-  double acceleration = egoCar.getAcceleration(1).len();
+  double acceleration = egoCar.getAcceleration(dt).len();
 
   // THEN
-  ASSERT_EQ(0, acceleration);
+  ASSERT_NEAR(acc, acceleration, 0.001);
 }
 
 #endif /* TESTS_EGOCARTEST_H_ */
