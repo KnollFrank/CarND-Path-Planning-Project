@@ -1,7 +1,9 @@
 #ifndef TESTS_EGOCARTEST_H_
 #define TESTS_EGOCARTEST_H_
 
+#include <coords/cart.h>
 #include <coords/coordsConverter.h>
+#include <coords/frenetCart.h>
 #include <coords/waypoints.h>
 #include <egoCar.h>
 #include <gtest/gtest.h>
@@ -13,21 +15,21 @@ TEST(EgoCarTest, shouldGetAcceleration) {
   EgoCar egoCar(coordsConverter);
 
   const double dt = 0.02;
-  const double acc = 2;
-  const double v = 5;
+  const Point acc {2, 3};
+  const Point v {5, 7};
 
-  auto s = [&](double t) {return 0.5 * acc * t * t + v * t;};
+  auto s = [&](const double t) {return acc * (0.5 * t * t) + v * t;};
 
-  egoCar.setPos(FrenetCart(Point { s(0 * dt), 0 }, coordsConverter));
-  egoCar.setPos(FrenetCart(Point { s(1 * dt), 0 }, coordsConverter));
-  egoCar.setPos(FrenetCart(Point { s(2 * dt), 0 }, coordsConverter));
-  egoCar.setPos(FrenetCart(Point { s(3 * dt), 0 }, coordsConverter));
+  egoCar.setPos(FrenetCart(s(0 * dt), coordsConverter));
+  egoCar.setPos(FrenetCart(s(1 * dt), coordsConverter));
+  egoCar.setPos(FrenetCart(s(2 * dt), coordsConverter));
+  egoCar.setPos(FrenetCart(s(3 * dt), coordsConverter));
 
   // WHEN
-  double acceleration = egoCar.getAcceleration(dt).len();
+  Point acceleration = egoCar.getAcceleration(dt);
 
   // THEN
-  ASSERT_NEAR(acc, acceleration, 0.001);
+  expect_near(acc, acceleration, 0.001);
 }
 
 #endif /* TESTS_EGOCARTEST_H_ */
