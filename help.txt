@@ -23,3 +23,7 @@ bcp --scan --boost=/usr/local/include/ '/home/frankknoll/udacity/SDCND/CarND-Pat
 
 Vielleicht kann man die Beschleunigung und Jerk und Geschwindigkeitsgrenze nur dann einhalten, wenn man den Path in kartesischen und nicht in
 Frenet-Koordinaten berechnet. Probiere diese Umstellung von Frenet- zu kartesischen Koordinaten aus. Schaue dazu in die History:  
+
+valgrind --tool=callgrind ./path_planning test
+kcachegrind
+
