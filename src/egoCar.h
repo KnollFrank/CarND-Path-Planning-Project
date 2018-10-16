@@ -92,6 +92,7 @@ Point EgoCar::getAcceleration(const PositionHistory& positionHistory,
           Point::zero();
 }
 
+// TODO: die Berechnung soll über einen größeren Zeitraum als dt erfolgen, d.h. z.B. Punkte im zeitlichen Abstand 10*dt statt 1*dt heranziehen.
 Point EgoCar::getAcceleration(double dt) const {
   return getAcceleration(PositionHistory::ACTUAL, dt);
 }
