@@ -49,23 +49,23 @@ FrenetCart::FrenetCart()
 FrenetCart::FrenetCart(const Frenet& _frenet,
                        const CoordsConverter& _coordsConverter)
     : frenet(_frenet),
-      cart(std::experimental::nullopt),
+      cart(coordsConverter->getXY(_frenet)),
       coordsConverter(&_coordsConverter) {
 }
 
 FrenetCart::FrenetCart(const Point& _cart,
                        const CoordsConverter& _coordsConverter)
-    : frenet(std::experimental::nullopt),
+    : frenet(coordsConverter->getFrenet(_cart)),
       cart(_cart),
       coordsConverter(&_coordsConverter) {
 }
 
 Frenet FrenetCart::getFrenet() const {
-  return frenet ? *frenet : coordsConverter->getFrenet(*cart);
+  return *frenet;
 }
 
 Point FrenetCart::getXY() const {
-  return cart ? *cart : coordsConverter->getXY(*frenet);
+  return *cart;
 }
 
 #endif /* COORDS_FRENETCART_H_ */
