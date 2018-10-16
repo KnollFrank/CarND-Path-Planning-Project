@@ -58,6 +58,7 @@ class Simulator {
                           const Path& path);
   bool oneRoundDriven();
   void assertNoIncidentsHappened(double dt);
+  double getYawDeg(const Frenet& src, const Frenet& dst);
 
   ReferencePoint& refPoint;
   Lane& lane;
@@ -167,12 +168,19 @@ void Simulator::driveVehicle(Vehicle& vehicle) {
 }
 
 void Simulator::assertNoIncidentsHappened(double dt) {
-  // ASSERT_LE(egoCar.getAcceleration(dt).len(), 10)<< egoCar;
+  const double acceleration = egoCar.getAcceleration(dt).len();
+  ASSERT_LE(acceleration, 10)<< egoCar;
   ASSERT_LE(egoCar.getJerk(dt).len(), 10)<< egoCar;
-  ASSERT_LE(egoCar.speed_mph, speed_limit_mph) << egoCar;
+  ASSERT_LE(egoCar.speed_mph, speed_limit_mph)<< egoCar;
   std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(
       egoCar, vehicles);
   ASSERT_FALSE(collidingVehicle)<< "COLLISION between" << endl << egoCar << endl << " and " << endl << *collidingVehicle;
+}
+
+double Simulator::getYawDeg(const Frenet& src, const Frenet& dst) {
+  Frenet diff = dst.minusCircular(src,
+                                  coordsConverter.getSpline()->getLength());
+  return rad2deg(diff.getHeading());
 }
 
 void Simulator::drive2PointOfEgoCar(
@@ -181,7 +189,7 @@ void Simulator::drive2PointOfEgoCar(
   egoCar.speed_mph = meter_per_sec2mph(
       src.getXY().distanceTo(dst.getXY()) / dt);
   egoCar.setPos(dst);
-  egoCar.yaw_deg = rad2deg((dst.getFrenet() - src.getFrenet()).getHeading());
+  egoCar.yaw_deg = getYawDeg(src.getFrenet(), dst.getFrenet());
 // GTEST_COUT<< "egoCar: " << egoCar.getPos_frenet() << endl;
 
   assertNoIncidentsHappened(dt);
