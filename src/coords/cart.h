@@ -11,6 +11,9 @@
 #include <tuple>
 
 #include "../funs.h"
+#include <limits>
+
+typedef std::numeric_limits< double > dbl;
 
 using namespace std;
 
@@ -33,6 +36,12 @@ struct Point {
 
   friend ostream& operator<<(ostream& os, const Point& point);
 };
+
+ostream& operator<<(ostream& os, const Point& point) {
+  os.precision(dbl::max_digits10);
+  os << "Point(x = " << point.x << ", y = " << point.y << ")";
+  return os;
+}
 
 Point Point::zero() {
   return Point {0, 0};

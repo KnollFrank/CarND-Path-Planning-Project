@@ -54,11 +54,6 @@ Frenet Frenet::operator/(double scalar) const {
   return *this * (1.0 / scalar);
 }
 
-ostream& operator<<(ostream& os, const Point& point) {
-  os << "Point(x = " << point.x << ", y = " << point.y << ")";
-  return os;
-}
-
 ostream& operator<<(ostream& os, const Frenet& frenet) {
   os << "Frenet(s = " << frenet.s << ", d = " << frenet.d << ")";
   return os;
