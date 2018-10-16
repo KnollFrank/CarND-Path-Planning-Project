@@ -77,7 +77,7 @@ class PathPlannerTest : public ::testing::Test {
 
   void assert_car_drives_in_middle_of_lane(const Path& path, const Lane& lane) {
     for (const FrenetCart& frenet : path.points) {
-      ASSERT_NEAR(2 + 4 * lane, frenet.getFrenet().d, 0.001);
+      ASSERT_NEAR(2 + 4 * lane, frenet.getFrenet().d, 0.01);
     }
   }
 
@@ -143,7 +143,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
 
 // WHEN
   simulator.run([&]() {
-    ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos().getFrenet().d, 0.001);
+    ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos().getFrenet().d, 0.01);
   });
 
 // THEN

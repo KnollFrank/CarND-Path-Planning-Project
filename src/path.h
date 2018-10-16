@@ -20,7 +20,7 @@ class Path {
 
   vector<double> asXVals() const;
   vector<double> asYVals() const;
-  Spline asSpline() const;
+  Spline asXYSpline() const;
   double getCartLen() const;
   friend ostream& operator<<(ostream& os, const Path& path);
 
@@ -69,8 +69,8 @@ vector<double> Path::asDVals() const {
                               [](const Frenet& point) {return point.d;});
 }
 
-Spline Path::asSpline() const {
-  Spline spline(asSVals(), asDVals());
+Spline Path::asXYSpline() const {
+  Spline spline(asXVals(), asYVals());
   return spline;
 }
 

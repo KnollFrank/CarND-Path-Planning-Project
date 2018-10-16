@@ -7,7 +7,7 @@
 #include <vector>
 #include <tuple>
 
-#include "coords/coordinateSystem.h"
+#include "coords/coordinateSystemCart.h"
 #include "coords/coordsConverter.h"
 #include "coords/frenet.h"
 #include "coords/frenetCart.h"
@@ -73,18 +73,16 @@ class PathCreator {
     ReferencePoint refPointNew = refPoint;
 
     if (previousPath.points.size() < 2) {
-      // FIXME: Widerspruch zu [123]
-      Frenet prev = egoCar.getPos().getFrenet()
-          - Frenet::fromAngle(deg2rad(egoCar.yaw_deg));
+      Point prev = egoCar.getPos().getXY()
+          - Point::fromAngle(deg2rad(egoCar.yaw_deg));
 
       points.push_back(createFrenetCart(prev));
       points.push_back(egoCar.getPos());
     } else {
       refPointNew.point = previousPath.points[previousPath.points.size() - 1];
       FrenetCart prev = previousPath.points[previousPath.points.size() - 2];
-      Frenet diff = refPointNew.point.getFrenet().minusCircular(
-          prev.getFrenet(), coordsConverter.getSpline()->getLength());
-      refPointNew.yaw_rad = diff.getHeading();
+      refPointNew.yaw_rad = (refPointNew.point.getXY() - prev.getXY())
+          .getHeading();
 
       points.push_back(prev);
       points.push_back(refPointNew.point);
@@ -99,7 +97,7 @@ class PathCreator {
     return workWithPathInCarsCoordinateSystem(
         path,
         [&](const Path& carsPath) {
-          return createSplinePoints(carsPath.asSpline(), path_size - previousPath.points.size(), refPoint);
+          return createSplinePoints(carsPath.asXYSpline(), path_size - previousPath.points.size(), refPoint);
         },
         refPoint);
   }
@@ -113,50 +111,52 @@ class PathCreator {
     // FIXME: nach enterCarsCoordinateSystem macht es nur noch Sinn mit Frenet-Koordinaten weiterzurechnen innerhalb von
     // transformCarsPath2Points, denn die aus FrenetCart gewonnenen XY-Koordinaten sind ab hier FALSCH. Also Signaturen der abhängigen Methoden von FrenetCart ändern in Frenet.
     // FrenetCart im Rückgabewert von workWithPathInCarsCoordinateSystem ist aber wieder ok.
-    carsPath.points = enterCarsCoordinateSystem(refPoint.point.getFrenet(),
+    carsPath.points = enterCarsCoordinateSystem(refPoint.point.getXY(),
                                                 -refPoint.yaw_rad, path.points);
-    remove_duplicates(carsPath.points);
     vector<FrenetCart> points = transformCarsPath2Points(carsPath);
-    return leaveCarsCoordinateSystem(refPoint.point.getFrenet(),
-                                     refPoint.yaw_rad, points);
+    return leaveCarsCoordinateSystem(refPoint.point.getXY(), refPoint.yaw_rad,
+                                     points);
   }
 
   vector<FrenetCart> enterCarsCoordinateSystem(
-      const Frenet& origin, const double angle_rad,
+      const Point& origin, const double angle_rad,
       const vector<FrenetCart>& points) {
 
-    CoordinateSystem coordinateSystem = createRotatedCoordinateSystem(
-        Frenet::zero(), angle_rad);
+    CoordinateSystemCart coordinateSystem = createRotatedCoordinateSystem(
+        Point::zero(), angle_rad);
     vector<FrenetCart> origin2points = map2<FrenetCart, FrenetCart>(
         points, [&](const FrenetCart& point) {
-          return createFrenetCart(point.getFrenet() - origin);
+          return createFrenetCart(point.getXY() - origin);
         });
     return transform(coordinateSystem, origin2points);
   }
 
   vector<FrenetCart> leaveCarsCoordinateSystem(
-      const Frenet& origin, double angle_rad,
-      const vector<FrenetCart>& points) {
+      const Point& origin, double angle_rad, const vector<FrenetCart>& points) {
 
     return transform(createRotatedCoordinateSystem(origin, angle_rad), points);
   }
 
-  vector<FrenetCart> transform(const CoordinateSystem& coordinateSystem,
+  vector<FrenetCart> transform(const CoordinateSystemCart& coordinateSystem,
                                const vector<FrenetCart>& points) const {
 
     return map2<FrenetCart, FrenetCart>(points, [&](const FrenetCart& point) {
-      return createFrenetCart(coordinateSystem.transform(point.getFrenet()));});
+      return createFrenetCart(coordinateSystem.transform(point.getXY()));});
   }
 
-  CoordinateSystem createRotatedCoordinateSystem(const Frenet& origin,
-                                                 double angle_rad) {
-    Frenet e1 = Frenet { cos(angle_rad), sin(angle_rad) };
-    Frenet e2 = Frenet { -sin(angle_rad), cos(angle_rad) };
-    return CoordinateSystem { origin, e1, e2 };
+  CoordinateSystemCart createRotatedCoordinateSystem(const Point& origin,
+                                                     double angle_rad) {
+    Point e1 = Point { cos(angle_rad), sin(angle_rad) };
+    Point e2 = Point { -sin(angle_rad), cos(angle_rad) };
+    return CoordinateSystemCart { origin, e1, e2 };
   }
 
-  FrenetCart createFrenetCart(Frenet frenet) const {
+  FrenetCart createFrenetCart(const Frenet& frenet) const {
     return FrenetCart(frenet, coordsConverter);
+  }
+
+  FrenetCart createFrenetCart(const Point& point) const {
+    return FrenetCart(point, coordsConverter);
   }
 
   vector<FrenetCart> createNewPoints(const Lane& lane) {
@@ -172,7 +172,7 @@ class PathCreator {
   vector<FrenetCart> createSplinePoints(const Spline& spline, const int num,
                                         const ReferencePoint& refPoint) {
 
-    vector<double> s_vals = createSVals(spline, num, refPoint);
+    vector<double> s_vals = createSVals(spline, num, refPoint.vel_mph);
     vector<FrenetCart> points = map2<double, FrenetCart>(
         s_vals,
         [&](const double s_val) {return createSplinePoint(s_val, spline);});
@@ -180,9 +180,9 @@ class PathCreator {
   }
 
   vector<double> createSVals(const Spline& spline, const int num,
-                             const ReferencePoint& refPoint) {
+                             double vel_mph) {
     vector<double> s_vals;
-    const double s_delta = dt * mph2meter_per_sec(refPoint.vel_mph);
+    const double s_delta = dt * mph2meter_per_sec(vel_mph);
     for (int i = 0; i < num; i++) {
       s_vals.push_back((i + 1) * s_delta);
     }
@@ -190,16 +190,7 @@ class PathCreator {
   }
 
   FrenetCart createSplinePoint(double x, const Spline& spline) {
-    return createFrenetCart(Frenet { x, spline(x) });
-  }
-
-  void remove_duplicates(vector<FrenetCart>& points) {
-    points.erase(
-        unique(
-            points.begin(),
-            points.end(),
-            [&](const FrenetCart& p1, const FrenetCart& p2) {return p1.getFrenet().s == p2.getFrenet().s;}),
-        points.end());
+    return createFrenetCart(Point { x, spline(x) });
   }
 
   const CoordsConverter& coordsConverter;
