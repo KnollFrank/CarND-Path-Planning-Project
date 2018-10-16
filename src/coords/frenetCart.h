@@ -6,7 +6,6 @@
 #include "cart.h"
 #include "coordsConverter.h"
 #include "frenet.h"
-#include <experimental/optional>
 
 class FrenetCart {
  public:
@@ -23,8 +22,8 @@ class FrenetCart {
 
  private:
   const CoordsConverter* coordsConverter;
-  std::experimental::optional<Frenet> frenet;
-  std::experimental::optional<Point> cart;
+  Frenet frenet;
+  Point cart;
 };
 
 ostream& operator<<(ostream& os, const FrenetCart& frenetCart) {
@@ -41,9 +40,7 @@ FrenetCart::FrenetCart(const Frenet& _frenet, const Point& _cart,
       coordsConverter(&_coordsConverter) {
 }
 
-FrenetCart::FrenetCart()
-    : frenet(std::experimental::nullopt),
-      cart(std::experimental::nullopt) {
+FrenetCart::FrenetCart() {
 }
 
 FrenetCart::FrenetCart(const Frenet& _frenet,
@@ -61,11 +58,11 @@ FrenetCart::FrenetCart(const Point& _cart,
 }
 
 Frenet FrenetCart::getFrenet() const {
-  return *frenet;
+  return frenet;
 }
 
 Point FrenetCart::getXY() const {
-  return *cart;
+  return cart;
 }
 
 #endif /* COORDS_FRENETCART_H_ */
