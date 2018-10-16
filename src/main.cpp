@@ -29,6 +29,7 @@
 #include "tests/pathPlannerTest.h"
 #include "tests/coordsConverterTest.h"
 #include "tests/frenetTest.h"
+#include "tests/egoCarTest.h"
 
 // TODO: download and incorporate GTest automatically
 
@@ -114,7 +115,7 @@ int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     // see https://stackoverflow.com/questions/7208070/googletest-how-to-skip-a-test
     // testing::GTEST_FLAG(filter) = "-PathPlannerTest.should_drive_with_max_50_mph";
-    // testing::GTEST_FLAG(filter) = "FrenetTest.test_minus";
+    // testing::GTEST_FLAG(filter) = "EgoCarTest.*";
     return RUN_ALL_TESTS();
   }
 
@@ -127,7 +128,7 @@ int main(int argc, char **argv) {
   ReferencePoint refPoint;
   refPoint.vel_mph = 0;
   const double dt = 0.02;
-  const double speed_limit_mph = 46; // 20
+  const double speed_limit_mph = 46;  // 20
   vector<tuple<Frenet, Point>> frenetPointTuples;
 
   h.onMessage([&](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
