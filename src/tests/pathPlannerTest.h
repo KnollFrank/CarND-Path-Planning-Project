@@ -55,7 +55,7 @@ class PathPlannerTest : public ::testing::Test {
                             std::experimental::optional<int> minSecs2Drive,
                             VehicleDriver* vehicleDriver) {
     const double dt = 0.02;
-    const double speed_limit_mph = 50;
+    const double speed_limit_mph = 49;
     return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                      vehicles, dt, minSecs2Drive, vehicleDriver,
                      speed_limit_mph);
@@ -168,7 +168,7 @@ TEST_F(PathPlannerTest, should_keep_speed_close_to_speed_limit) {
 //  for (double velocity : velocities) {
 //    GTEST_COUT<< velocity << endl;
 //  }
-  double real_speed_limit_mph = 0.89 * simulator.speed_limit_mph;
+  double real_speed_limit_mph = simulator.speed_limit_mph;
   auto speedLimitReached = find_if(
       begin(velocities), end(velocities), [&](const double& velocity) {
         return areNear(velocity, real_speed_limit_mph, 1);

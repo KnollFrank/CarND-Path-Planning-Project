@@ -116,7 +116,7 @@ bool Simulator::oneRoundDriven() {
 double Simulator::driveEgoCarAndVehicles(
     function<void(void)> afterEachMovementOfEgoCar) {
   PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt,
-                          0.89 * speed_limit_mph, vehicles, egoCar,
+                          speed_limit_mph, vehicles, egoCar,
                           previousData);
   Path path;
   Lane newLane;
@@ -179,14 +179,14 @@ void print_circular_buffer(string name, const boost::circular_buffer<T>& xs) {
 void Simulator::assertNoIncidentsHappened(double dt) {
   const Point acceleration = egoCar.getAcceleration(dt);
   const double acceleration_len = acceleration.len();
-  if(acceleration_len > 10) {
-    GTEST_COUT << "acceleration_len = " << acceleration_len << endl;
+  if (acceleration_len > 10) {
+    GTEST_COUT<< "acceleration_len = " << acceleration_len << endl;
     GTEST_COUT << "acceleration = " << acceleration << endl;
     print_circular_buffer("positions", egoCar.positions);
   }
   ASSERT_LE(acceleration_len, 10)<< egoCar;
   ASSERT_LE(egoCar.getJerk(dt).len(), 10)<< egoCar;
-  ASSERT_LE(egoCar.speed_mph, speed_limit_mph)<< egoCar;
+  ASSERT_LE(egoCar.speed_mph, 50)<< egoCar;
   std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(
       egoCar, vehicles);
   ASSERT_FALSE(collidingVehicle)<< "COLLISION between" << endl << egoCar << endl << " and " << endl << *collidingVehicle;
