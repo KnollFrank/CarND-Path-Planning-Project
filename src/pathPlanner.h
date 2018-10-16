@@ -129,11 +129,9 @@ bool PathPlanner::isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane) {
     return vehicle.getPos().getFrenet().s < egoCar.getPos().getFrenet().s;
   };
 
-  auto isVehicleInTheWay =
-      [&](const Vehicle& vehicle) {
-        Frenet diff = egoCar.getPos().getFrenet().minusCircular(vehicle.getPos().getFrenet(), coordsConverter.getSpline()->getLength());
-        return diff.s < 30;
-      };
+  auto isVehicleInTheWay = [&](const Vehicle& vehicle) {
+    return egoCar.getPos().getFrenet().s - vehicle.getPos().getFrenet().s < 30;
+  };
 
   auto isVehicleInLaneBehindOfEgoCarInTheWay =
       [&](const Vehicle& vehicle) {
