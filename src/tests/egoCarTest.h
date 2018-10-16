@@ -16,9 +16,9 @@ TEST(EgoCarTest, shouldGetAcceleration) {
 
   const double dt = 0.02;
   const Point acc {2, 3};
-  const Point v {5, 7};
+  const Point vel {5, 7};
 
-  auto s = [&](const double t) {return acc * (0.5 * t * t) + v * t;};
+  auto s = [&](const double t) {return acc * (0.5 * t * t) + vel * t;};
 
   egoCar.setPos(FrenetCart(s(0 * dt), coordsConverter));
   egoCar.setPos(FrenetCart(s(1 * dt), coordsConverter));
