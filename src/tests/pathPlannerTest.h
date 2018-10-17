@@ -55,7 +55,7 @@ class PathPlannerTest : public ::testing::Test {
                             std::experimental::optional<int> minSecs2Drive,
                             VehicleDriver* vehicleDriver) {
     const double dt = 0.02;
-    const double speed_limit_mph = 49;
+    const double speed_limit_mph = 48;
     return Simulator(refPoint, lane, *coordsConverter, egoCar, previousData,
                      vehicles, dt, minSecs2Drive, vehicleDriver,
                      speed_limit_mph);
