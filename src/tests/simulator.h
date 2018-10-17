@@ -194,8 +194,8 @@ void Simulator::assertNoIncidentsHappened(double dt) {
 void Simulator::drive2PointOfEgoCar(
     const FrenetCart& dst, function<void(void)> afterEachMovementOfEgoCar) {
   const FrenetCart& src = egoCar.getPos();
-  egoCar.speed_mph = meter_per_sec2mph(egoCar.getVelocity(dt).len());
   egoCar.setPos(dst);
+  egoCar.speed_mph = meter_per_sec2mph(egoCar.getVelocity(dt).len());
   egoCar.yaw_deg = rad2deg((dst.getXY() - src.getXY()).getHeading());
   // GTEST_COUT<< "egoCar: " << egoCar.getPos().getFrenet() << endl;
 
