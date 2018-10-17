@@ -36,7 +36,7 @@ PositionHistory getPrevious(PositionHistory positionHistory) {
 class EgoCar {
 
  public:
-  EgoCar(const CoordsConverter& coordsConverter, int positionsIndexDelta);
+  EgoCar(const CoordsConverter& coordsConverter, int considerOnlyEachNthPos);
   double yaw_deg;
   double speed_mph;
 
@@ -57,7 +57,7 @@ class EgoCar {
   double getDt(double dt) const;
 
   const CoordsConverter& coordsConverter;
-  const int positionsIndexDelta;
+  const int considerOnlyEachNthPos;
   const Dimension shapeTemplate;
  public:
   boost::circular_buffer<FrenetCart> positions;
@@ -73,11 +73,11 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
 }
 
 EgoCar::EgoCar(const CoordsConverter& _coordsConverter,
-               int _positionsIndexDelta)
+               int _considerOnlyEachNthPos)
     : coordsConverter(_coordsConverter),
-      positionsIndexDelta(_positionsIndexDelta),
+      considerOnlyEachNthPos(_considerOnlyEachNthPos),
       positions(
-          boost::circular_buffer<FrenetCart>(3 * _positionsIndexDelta + 1)),
+          boost::circular_buffer<FrenetCart>(3 * _considerOnlyEachNthPos + 1)),
       shapeTemplate(Dimension::fromWidthAndHeight(2.5, 2.5)) {
 }
 
@@ -95,7 +95,7 @@ FrenetCart EgoCar::getPos() const {
 }
 
 int EgoCar::asIndex(const PositionHistory& positionHistory) const {
-  return positionHistory * positionsIndexDelta;
+  return positionHistory * considerOnlyEachNthPos;
 }
 
 Point EgoCar::getVelocity(const PositionHistory& positionHistory,
@@ -105,7 +105,7 @@ Point EgoCar::getVelocity(const PositionHistory& positionHistory,
 }
 
 double EgoCar::getDt(double dt) const {
-  return positionsIndexDelta * dt;
+  return considerOnlyEachNthPos * dt;
 }
 
 Point EgoCar::getAcceleration(const PositionHistory& positionHistory,
