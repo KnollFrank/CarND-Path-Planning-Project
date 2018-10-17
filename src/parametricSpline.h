@@ -98,7 +98,6 @@ class ParametricSpline {
   double toSplineParameter(double s) const;
 
  private:
-  vector<Polynom2D> getPolysNextTo(const Point& point) const;
   real_2d_array as_real_2d_array(const vector<Point> &points) const;
   alglib_impl::pspline2interpolant* asImplPtr() const;
   vector<Polynom> createPolynoms(
@@ -110,7 +109,7 @@ class ParametricSpline {
   vector<Polynom2D> computePolys() const;
   vector<Polynom2D> getPolys() const;
   Frenet getFrenet(const Polynom2D& poly, const Point& point) const;
-  vector<Frenet> getFrenets(const vector<Polynom2D>&, const Point& point) const;
+  vector<Frenet> getFrenets(const Point& point) const;
   double fromSplineParameter(double s) const;
   Frenet getFrenetHavingMinimalDCoordinate(const vector<Frenet>& frenets) const;
 
@@ -264,10 +263,9 @@ Frenet ParametricSpline::getFrenet(const Polynom2D& poly,
   return getFrenetHavingMinimalDCoordinate(frenets);
 }
 
-vector<Frenet> ParametricSpline::getFrenets(const vector<Polynom2D>& polys,
-                                            const Point& point) const {
+vector<Frenet> ParametricSpline::getFrenets(const Point& point) const {
 
-  return map2<Polynom2D, Frenet>(polys, [&](const Polynom2D& poly) {
+  return map2<Polynom2D, Frenet>(getPolys(), [&](const Polynom2D& poly) {
     return getFrenet(poly, point);
   });
 }
@@ -281,15 +279,8 @@ double ParametricSpline::toSplineParameter(double s) const {
 }
 
 Frenet ParametricSpline::getFrenet(const Point& point) const {
-  Frenet frenet = getFrenetHavingMinimalDCoordinate(
-      getFrenets(getPolysNextTo(point), point));
+  Frenet frenet = getFrenetHavingMinimalDCoordinate(getFrenets(point));
   return Frenet { fromSplineParameter(frenet.s), frenet.d };
-}
-
-vector<Polynom2D> ParametricSpline::getPolysNextTo(
-    const Point& point) const {
-
-  return polys;
 }
 
 #endif /* PARAMETRICSPLINE_H_ */
