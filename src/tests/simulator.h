@@ -177,13 +177,13 @@ void print_circular_buffer(string name, const boost::circular_buffer<T>& xs) {
 
 void Simulator::assertNoIncidentsHappened(double dt) {
   const Point acceleration = egoCar.getAcceleration(dt);
-  const double acceleration_len = acceleration.len();
-  if (acceleration_len > 10) {
-    GTEST_COUT<< "acceleration_len = " << acceleration_len << endl;
+  const int accLimit = 10;
+  if (acceleration.len() > accLimit) {
+    GTEST_COUT<< "acceleration.len() = " << acceleration.len() << endl;
     GTEST_COUT << "acceleration = " << acceleration << endl;
     print_circular_buffer("positions", egoCar.positions);
   }
-  ASSERT_LE(acceleration_len, 10)<< egoCar;
+  ASSERT_LE(acceleration.len(), accLimit)<< egoCar;
   ASSERT_LE(egoCar.getJerk(dt).len(), 10)<< egoCar;
   ASSERT_LE(egoCar.speed_mph, 50)<< egoCar;
   std::experimental::optional<Vehicle> collidingVehicle = getCollidingVehicle(

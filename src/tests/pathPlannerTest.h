@@ -62,7 +62,7 @@ class PathPlannerTest : public ::testing::Test {
   }
 
   EgoCar createEgoCar(const Frenet& pos) {
-    EgoCar egoCar(*coordsConverter);
+    EgoCar egoCar(*coordsConverter, 10);
     egoCar.setPos(FrenetCart(pos, *coordsConverter));
     egoCar.yaw_deg = 0;
     egoCar.speed_mph = 0;

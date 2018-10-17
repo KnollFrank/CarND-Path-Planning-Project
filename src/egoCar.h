@@ -15,9 +15,9 @@
 using namespace std;
 
 enum PositionHistory {
-  ACTUAL = 30,
-  PREVIOUS = 20,
-  PREVIOUS_PREVIOUS = 10,
+  ACTUAL = 3,
+  PREVIOUS = 2,
+  PREVIOUS_PREVIOUS = 1,
   PREVIOUS_PREVIOUS_PREVIOUS = 0
 };
 
@@ -36,7 +36,7 @@ PositionHistory getPrevious(PositionHistory positionHistory) {
 class EgoCar {
 
  public:
-  EgoCar(const CoordsConverter& coordsConverter);
+  EgoCar(const CoordsConverter& coordsConverter, int positionsIndexDelta);
   double yaw_deg;
   double speed_mph;
 
@@ -50,12 +50,14 @@ class EgoCar {
   friend ostream& operator<<(ostream& os, const EgoCar& egoCar);
 
  private:
+  int asIndex(const PositionHistory& positionHistory) const;
   Point getVelocity(const PositionHistory& positionHistory, double dt) const;
   Point getAcceleration(const PositionHistory& positionHistory,
                         double dt) const;
   double getDt(double dt) const;
 
   const CoordsConverter& coordsConverter;
+  const int positionsIndexDelta;
   const Dimension shapeTemplate;
  public:
   boost::circular_buffer<FrenetCart> positions;
@@ -70,9 +72,12 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
   return os;
 }
 
-EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
+EgoCar::EgoCar(const CoordsConverter& _coordsConverter,
+               int _positionsIndexDelta)
     : coordsConverter(_coordsConverter),
-      positions(boost::circular_buffer<FrenetCart>(31)),
+      positionsIndexDelta(_positionsIndexDelta),
+      positions(
+          boost::circular_buffer<FrenetCart>(3 * _positionsIndexDelta + 1)),
       shapeTemplate(Dimension::fromWidthAndHeight(2.5, 2.5)) {
 }
 
@@ -89,14 +94,18 @@ FrenetCart EgoCar::getPos() const {
   return positions.back();
 }
 
+int EgoCar::asIndex(const PositionHistory& positionHistory) const {
+  return positionHistory * positionsIndexDelta;
+}
+
 Point EgoCar::getVelocity(const PositionHistory& positionHistory,
                           double dt) const {
-  return (positions[positionHistory].getXY()
-      - positions[getPrevious(positionHistory)].getXY()) / getDt(dt);
+  return (positions[asIndex(positionHistory)].getXY()
+      - positions[asIndex(getPrevious(positionHistory))].getXY()) / getDt(dt);
 }
 
 double EgoCar::getDt(double dt) const {
-  return 10 * dt;
+  return positionsIndexDelta * dt;
 }
 
 Point EgoCar::getAcceleration(const PositionHistory& positionHistory,

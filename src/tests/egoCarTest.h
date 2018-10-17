@@ -12,7 +12,7 @@ TEST(EgoCarTest, shouldGetAcceleration) {
   // GIVEN
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
-  EgoCar egoCar(coordsConverter);
+  EgoCar egoCar(coordsConverter, 1);
 
   const double dt = 0.02;
   const Point acc { 2, 3 };
@@ -42,7 +42,7 @@ TEST(EgoCarTest, shouldGetAcceleration2) {
   // GIVEN
   MapWaypoints mapWaypoints = MapWaypoints::load();
   CoordsConverter coordsConverter(mapWaypoints);
-  EgoCar egoCar(coordsConverter);
+  EgoCar egoCar(coordsConverter, 1);
 
   const double dt = 0.02;
 
