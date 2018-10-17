@@ -49,6 +49,7 @@ TEST(ParametricSplineTest, should_getFrenet) {
   // When & Then
   for (double d : { 2.0, 6.0, 10.0 }) {
     // FIXME: double s = 0 ergibt Fehler!
+    // TODO: lasse die Schleife weiter als splineLength laufen z.B. bis splineLength + 10 und teste dann, ob die S-Koordinaten modulo Splinelänge übereinstimmen (verwenden dazu fmod).
     for (double s = 1; s < splineLength; s += 10) {
       check_getFrenet(Frenet { s, d }, spline, coordsConverter);
     }
