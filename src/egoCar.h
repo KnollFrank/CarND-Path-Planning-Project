@@ -15,11 +15,22 @@
 using namespace std;
 
 enum PositionHistory {
-  ACTUAL = 3,
-  PREVIOUS = 2,
-  PREVIOUS_PREVIOUS = 1,
+  ACTUAL = 30,
+  PREVIOUS = 20,
+  PREVIOUS_PREVIOUS = 10,
   PREVIOUS_PREVIOUS_PREVIOUS = 0
 };
+
+PositionHistory getPrevious(PositionHistory positionHistory) {
+  switch (positionHistory) {
+    case ACTUAL:
+      return PREVIOUS;
+    case PREVIOUS:
+      return PREVIOUS_PREVIOUS;
+    case PREVIOUS_PREVIOUS:
+      return PREVIOUS_PREVIOUS_PREVIOUS;
+  }
+}
 
 // TODO: merge EgoCar and Vehicle, because they are essentially the same thing.
 class EgoCar {
@@ -32,6 +43,7 @@ class EgoCar {
   void setPos(const FrenetCart& pos);
   FrenetCart getPos() const;
   Point getAcceleration(double dt) const;
+  Point getVelocity(double dt) const;
   Point getJerk(double dt) const;
   Rectangle getShape() const;
 
@@ -41,6 +53,7 @@ class EgoCar {
   Point getVelocity(const PositionHistory& positionHistory, double dt) const;
   Point getAcceleration(const PositionHistory& positionHistory,
                         double dt) const;
+  double getDt(double dt) const;
 
   const CoordsConverter& coordsConverter;
   const Dimension shapeTemplate;
@@ -59,7 +72,7 @@ ostream& operator<<(ostream& os, const EgoCar& egoCar) {
 
 EgoCar::EgoCar(const CoordsConverter& _coordsConverter)
     : coordsConverter(_coordsConverter),
-      positions(boost::circular_buffer<FrenetCart>(4)),
+      positions(boost::circular_buffer<FrenetCart>(31)),
       shapeTemplate(Dimension::fromWidthAndHeight(2.5, 2.5)) {
 }
 
@@ -79,29 +92,36 @@ FrenetCart EgoCar::getPos() const {
 Point EgoCar::getVelocity(const PositionHistory& positionHistory,
                           double dt) const {
   return (positions[positionHistory].getXY()
-      - positions[positionHistory - 1].getXY()) / dt;
+      - positions[getPrevious(positionHistory)].getXY()) / getDt(dt);
+}
+
+double EgoCar::getDt(double dt) const {
+  return 10 * dt;
 }
 
 Point EgoCar::getAcceleration(const PositionHistory& positionHistory,
                               double dt) const {
-  return
-      positions.full() ?
-          (getVelocity(positionHistory, dt)
-              - getVelocity(static_cast<PositionHistory>(positionHistory - 1),
-                            dt)) / dt :
-          Point::zero();
+  return (getVelocity(positionHistory, dt)
+      - getVelocity(getPrevious(positionHistory), dt)) / getDt(dt);
 }
 
-// TODO: die Berechnung soll über einen größeren Zeitraum als dt erfolgen, d.h. z.B. Punkte im zeitlichen Abstand 10*dt statt 1*dt heranziehen.
 Point EgoCar::getAcceleration(double dt) const {
-  return getAcceleration(PositionHistory::ACTUAL, dt);
+  return
+      positions.full() ?
+          getAcceleration(PositionHistory::ACTUAL, dt) : Point::zero();
+}
+
+Point EgoCar::getVelocity(double dt) const {
+  return
+      positions.full() ?
+          getVelocity(PositionHistory::ACTUAL, dt) : Point::zero();
 }
 
 Point EgoCar::getJerk(double dt) const {
   return
       positions.full() ?
           (getAcceleration(PositionHistory::ACTUAL)
-              - getAcceleration(PositionHistory::PREVIOUS)) / dt :
+              - getAcceleration(PositionHistory::PREVIOUS)) / getDt(dt) :
           Point::zero();
 }
 

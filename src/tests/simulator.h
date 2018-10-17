@@ -115,9 +115,8 @@ bool Simulator::oneRoundDriven() {
 
 double Simulator::driveEgoCarAndVehicles(
     function<void(void)> afterEachMovementOfEgoCar) {
-  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt,
-                          speed_limit_mph, vehicles, egoCar,
-                          previousData);
+  PathPlanner pathPlanner(coordsConverter, refPoint, lane, dt, speed_limit_mph,
+                          vehicles, egoCar, previousData);
   Path path;
   Lane newLane;
   ReferencePoint refPointNew;
@@ -195,8 +194,7 @@ void Simulator::assertNoIncidentsHappened(double dt) {
 void Simulator::drive2PointOfEgoCar(
     const FrenetCart& dst, function<void(void)> afterEachMovementOfEgoCar) {
   const FrenetCart& src = egoCar.getPos();
-  egoCar.speed_mph = meter_per_sec2mph(
-      src.getXY().distanceTo(dst.getXY()) / dt);
+  egoCar.speed_mph = meter_per_sec2mph(egoCar.getVelocity(dt).len());
   egoCar.setPos(dst);
   egoCar.yaw_deg = rad2deg((dst.getXY() - src.getXY()).getHeading());
   // GTEST_COUT<< "egoCar: " << egoCar.getPos().getFrenet() << endl;
