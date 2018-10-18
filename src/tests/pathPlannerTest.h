@@ -107,6 +107,19 @@ class PathPlannerTest : public ::testing::Test {
     return egoCar.getPos().getFrenet() + Frenet { s, 0 };
   }
 
+  void assertEgoCarOvertakesVehicle(Simulator& simulator, EgoCar& egoCar, Vehicle& vehicle) {
+    // WHEN
+    bool egoCarOvertakesVehicle = false;
+    simulator.run(
+        [&]() {
+          bool overtaken = egoCar.getPos().getFrenet().s > vehicle.getPos().getFrenet().s;
+          egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
+        });
+
+    // THEN
+    ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
+  }
+
   MapWaypoints mapWaypoints;
   CoordsConverter* coordsConverter;
   ReferencePoint refPoint;
@@ -248,16 +261,8 @@ TEST_F(PathPlannerTest, should_overtake_vehicle) {
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
 
-// WHEN
-  bool egoCarOvertakesVehicle = false;
-  simulator.run(
-      [&]() {
-        bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
-        egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
-      });
-
-// THEN
-  ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
+// WHEN & THEN
+  assertEgoCarOvertakesVehicle(simulator, egoCar, vehicles[0]);
 }
 
 void PathPlannerTest::should_overtake_two_parallel_vehicles(
@@ -275,16 +280,8 @@ void PathPlannerTest::should_overtake_two_parallel_vehicles(
 
   Simulator simulator = createSimulator(lane, egoCar, vehicles, 60);
 
-  // WHEN
-  bool egoCarOvertakesVehicle = false;
-  simulator.run(
-      [&]() {
-        bool overtaken = egoCar.getPos().getFrenet().s > vehicles[0].getPos().getFrenet().s;
-        egoCarOvertakesVehicle = egoCarOvertakesVehicle || overtaken;
-      });
-
-  // THEN
-  ASSERT_TRUE(egoCarOvertakesVehicle)<< "egoCar should overtake vehicle";
+  // WHEN & THEN
+  assertEgoCarOvertakesVehicle(simulator, egoCar, vehicles[0]);
 }
 
 TEST_F(PathPlannerTest,
