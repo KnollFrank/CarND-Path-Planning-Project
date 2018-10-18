@@ -304,16 +304,16 @@ vector<Polynom2D> ParametricSpline::getPolysNextTo(const Point& point) const {
     return point.distanceTo(start);
   };
 
-  auto polyClosest2PointIterator = std::min_element(
+  auto polyClosest2PointIt = std::min_element(
       polys.begin(), polys.end(),
       [&](const Polynom2D& p1, const Polynom2D& p2) {
         return distanceToPoint(p1) < distanceToPoint(p2);
       });
 
-  vector<Polynom2D> result;
-  result.push_back(*polyClosest2PointIterator);
-  result.push_back(*cyclicMinusMinus(polyClosest2PointIterator));
-  return result;
+  vector<Polynom2D> polysNextToPoint;
+  polysNextToPoint.push_back(*polyClosest2PointIt);
+  polysNextToPoint.push_back(*cyclicMinusMinus(polyClosest2PointIt));
+  return polysNextToPoint;
 }
 
 #endif /* PARAMETRICSPLINE_H_ */

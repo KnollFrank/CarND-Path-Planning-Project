@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     // see https://stackoverflow.com/questions/7208070/googletest-how-to-skip-a-test
     // testing::GTEST_FLAG(filter) = "-PathPlannerTest.should_drive_with_max_50_mph";
-    testing::GTEST_FLAG(filter) = "ParametricSplineTest.*";
+    // testing::GTEST_FLAG(filter) = "ParametricSplineTest.*";
     // testing::GTEST_FLAG(filter) = "CoordsConverterTest.*";
     // testing::GTEST_FLAG(filter) = "PathPlannerTest.*";
     return RUN_ALL_TESTS();
