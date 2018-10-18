@@ -290,21 +290,22 @@ vector<Polynom2D> ParametricSpline::getPolysNextTo(const Point& point) const {
 
   auto distanceToPoint = [&](const Polynom2D& poly) {
     Point start = operator()(poly.x.start);
-    Point end = operator()(poly.x.end);
-    return min(point.distanceTo(start), point.distanceTo(end));
+    return point.distanceTo(start);
   };
 
-  Polynom2D minPoly = getMinimum<Polynom2D>(
-      polys, [&](const Polynom2D& p1, const Polynom2D& p2) {
-        return distanceToPoint(p1) < distanceToPoint(p2);
-      });
-  vector<Polynom2D> result =
-      filter<Polynom2D>(
-          polys,
-          [&](const Polynom2D& poly) {
-            return fmod(minPoly.x.end, getLength()) == fmod(poly.x.start, getLength()) || fmod(minPoly.x.start, getLength()) == fmod(poly.x.end, getLength());
-          });
-  result.insert(result.begin(), minPoly);
+  auto it = std::min_element(polys.begin(), polys.end(),
+                             [&](const Polynom2D& p1, const Polynom2D& p2) {
+                               return distanceToPoint(p1) < distanceToPoint(p2);
+                             });
+
+  vector<Polynom2D> result;
+  result.push_back(*it);
+  if (it == polys.begin()) {
+    result.push_back(*(polys.end() - 1));
+  } else {
+    result.push_back(*(it - 1));
+  }
+
   return result;
 }
 
