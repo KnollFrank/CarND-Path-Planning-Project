@@ -141,7 +141,7 @@ TEST_F(PathPlannerTest, should_drive_in_same_lane_without_incidents) {
 
 // WHEN
   simulator.run([&]() {
-    ASSERT_NEAR(2 + 4 * Lane::MIDDLE, egoCar.getPos().getFrenet().d, 0.1);
+    ASSERT_TRUE(isInLane(egoCar.getPos().getFrenet().d, Lane::MIDDLE));
   });
 
 // THEN
