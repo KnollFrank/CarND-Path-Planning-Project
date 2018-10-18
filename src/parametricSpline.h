@@ -299,15 +299,15 @@ Iterator& ParametricSpline::cyclicMinusMinus(Iterator& it) const {
 
 vector<Polynom2D> ParametricSpline::getPolysNextTo(const Point& point) const {
 
-  auto distanceToPoint = [&](const Polynom2D& poly) {
-    Point start = operator()(poly.x.start);
-    return point.distanceTo(start);
+  auto startOfPolyDistanceToPoint = [&](const Polynom2D& poly) {
+    Point startOfPoly = operator()(poly.x.start);
+    return startOfPoly.distanceTo(point);
   };
 
   auto polyClosest2PointIt = std::min_element(
       polys.begin(), polys.end(),
       [&](const Polynom2D& p1, const Polynom2D& p2) {
-        return distanceToPoint(p1) < distanceToPoint(p2);
+        return startOfPolyDistanceToPoint(p1) < startOfPolyDistanceToPoint(p2);
       });
 
   vector<Polynom2D> polysNextToPoint;
