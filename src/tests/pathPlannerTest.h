@@ -218,7 +218,7 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
   EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
 
   Vehicle middle = createVehicle(0, egoCarPlusMeters(egoCar, 35),
-                                 mph2meter_per_sec(35));
+                                 mph2meter_per_sec(45));
 
   Vehicle left = createVehicle(1, parallelToVehicleInLane(middle, Lane::LEFT),
                                middle.getVel_frenet_m_per_s().s);
