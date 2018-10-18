@@ -9,7 +9,7 @@ find_package(GTest REQUIRED)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
-add_definitions(-std=c++17 -Wall -O1)
+add_definitions(-std=c++17 -O1)
 
 file(GLOB alglib_SRC "alglib/*.cpp")
 set(sources main.cpp ${alglib_SRC})

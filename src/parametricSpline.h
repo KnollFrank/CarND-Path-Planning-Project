@@ -98,6 +98,7 @@ class ParametricSpline {
   double toSplineParameter(double s) const;
 
  private:
+  vector<Polynom2D> getPolysNextTo(const Point& point) const;
   real_2d_array as_real_2d_array(const vector<Point> &points) const;
   alglib_impl::pspline2interpolant* asImplPtr() const;
   vector<Polynom> createPolynoms(
@@ -109,7 +110,7 @@ class ParametricSpline {
   vector<Polynom2D> computePolys() const;
   vector<Polynom2D> getPolys() const;
   Frenet getFrenet(const Polynom2D& poly, const Point& point) const;
-  vector<Frenet> getFrenets(const Point& point) const;
+  vector<Frenet> getFrenets(const vector<Polynom2D>&, const Point& point) const;
   double fromSplineParameter(double s) const;
   Frenet getFrenetHavingMinimalDCoordinate(const vector<Frenet>& frenets) const;
 
@@ -263,9 +264,10 @@ Frenet ParametricSpline::getFrenet(const Polynom2D& poly,
   return getFrenetHavingMinimalDCoordinate(frenets);
 }
 
-vector<Frenet> ParametricSpline::getFrenets(const Point& point) const {
+vector<Frenet> ParametricSpline::getFrenets(const vector<Polynom2D>& polys,
+                                            const Point& point) const {
 
-  return map2<Polynom2D, Frenet>(getPolys(), [&](const Polynom2D& poly) {
+  return map2<Polynom2D, Frenet>(polys, [&](const Polynom2D& poly) {
     return getFrenet(poly, point);
   });
 }
@@ -279,8 +281,31 @@ double ParametricSpline::toSplineParameter(double s) const {
 }
 
 Frenet ParametricSpline::getFrenet(const Point& point) const {
-  Frenet frenet = getFrenetHavingMinimalDCoordinate(getFrenets(point));
+  Frenet frenet = getFrenetHavingMinimalDCoordinate(
+      getFrenets(getPolysNextTo(point), point));
   return Frenet { fromSplineParameter(frenet.s), frenet.d };
+}
+
+vector<Polynom2D> ParametricSpline::getPolysNextTo(const Point& point) const {
+
+  auto distanceToPoint = [&](const Polynom2D& poly) {
+    Point start = operator()(poly.x.start);
+    Point end = operator()(poly.x.end);
+    return min(point.distanceTo(start), point.distanceTo(end));
+  };
+
+  Polynom2D minPoly = getMinimum<Polynom2D>(
+      polys, [&](const Polynom2D& p1, const Polynom2D& p2) {
+        return distanceToPoint(p1) < distanceToPoint(p2);
+      });
+  vector<Polynom2D> result =
+      filter<Polynom2D>(
+          polys,
+          [&](const Polynom2D& poly) {
+            return fmod(minPoly.x.end, getLength()) == fmod(poly.x.start, getLength()) || fmod(minPoly.x.start, getLength()) == fmod(poly.x.end, getLength());
+          });
+  result.insert(result.begin(), minPoly);
+  return result;
 }
 
 #endif /* PARAMETRICSPLINE_H_ */
