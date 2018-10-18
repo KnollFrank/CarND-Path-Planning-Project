@@ -99,6 +99,8 @@ class ParametricSpline {
 
  private:
   vector<Polynom2D> getPolysNextTo(const Point& point) const;
+  template<typename Iterator>
+  void cyclicPrevious(Iterator& it) const;
   real_2d_array as_real_2d_array(const vector<Point> &points) const;
   alglib_impl::pspline2interpolant* asImplPtr() const;
   vector<Polynom> createPolynoms(
@@ -286,6 +288,14 @@ Frenet ParametricSpline::getFrenet(const Point& point) const {
   return Frenet { fromSplineParameter(frenet.s), frenet.d };
 }
 
+template<typename Iterator>
+void ParametricSpline::cyclicPrevious(Iterator& it) const {
+  if (it == polys.begin()) {
+    it = polys.end();
+  }
+  --it;
+}
+
 vector<Polynom2D> ParametricSpline::getPolysNextTo(const Point& point) const {
 
   auto distanceToPoint = [&](const Polynom2D& poly) {
@@ -293,18 +303,16 @@ vector<Polynom2D> ParametricSpline::getPolysNextTo(const Point& point) const {
     return point.distanceTo(start);
   };
 
-  auto it = std::min_element(polys.begin(), polys.end(),
-                             [&](const Polynom2D& p1, const Polynom2D& p2) {
-                               return distanceToPoint(p1) < distanceToPoint(p2);
-                             });
+  auto polyClosest2PointIterator = std::min_element(
+      polys.begin(), polys.end(),
+      [&](const Polynom2D& p1, const Polynom2D& p2) {
+        return distanceToPoint(p1) < distanceToPoint(p2);
+      });
 
-  vector<Polynom2D> result;
-  result.push_back(*it);
-  if (it == polys.begin()) {
-    result.push_back(*(polys.end() - 1));
-  } else {
-    result.push_back(*(it - 1));
-  }
+  vector<Polynom2D> result = { *polyClosest2PointIterator };
+  cyclicPrevious(polyClosest2PointIterator);
+
+  result.push_back(*polyClosest2PointIterator);
 
   return result;
 }
