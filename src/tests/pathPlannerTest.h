@@ -176,7 +176,7 @@ TEST_F(PathPlannerTest, should_keep_speed_close_to_speed_limit) {
           speedLimitReached,
           end(velocities),
           [&](const double& velocity) {
-            return areNear(velocity, real_speed_limit_mph, 3);
+            return areNear(velocity, real_speed_limit_mph, 1);
           }))<< "should keep speed close to speed limit";
 }
 
