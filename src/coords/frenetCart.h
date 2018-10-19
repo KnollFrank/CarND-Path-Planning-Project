@@ -46,13 +46,13 @@ FrenetCart::FrenetCart() {
 FrenetCart::FrenetCart(const Frenet& _frenet,
                        const CoordsConverter& _coordsConverter)
     : frenet(_frenet),
-      cart(coordsConverter->getXY(_frenet)),
+      cart(_coordsConverter.getXY(_frenet)),
       coordsConverter(&_coordsConverter) {
 }
 
 FrenetCart::FrenetCart(const Point& _cart,
                        const CoordsConverter& _coordsConverter)
-    : frenet(coordsConverter->getFrenet(_cart)),
+    : frenet(_coordsConverter.getFrenet(_cart)),
       cart(_cart),
       coordsConverter(&_coordsConverter) {
 }
