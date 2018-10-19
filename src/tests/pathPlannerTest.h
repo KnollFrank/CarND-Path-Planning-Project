@@ -251,6 +251,35 @@ TEST_F(PathPlannerTest, should_drive_behind_three_parallel_vehicles) {
 // THEN
 }
 
+TEST_F(PathPlannerTest, should_drive_behind_vehicle_which_is_much_too_close_to_egoCar) {
+  // GIVEN
+  refPoint.vel_mph = 10;
+  Lane lane = Lane::MIDDLE;
+
+  EgoCar egoCar = createEgoCar(Frenet { START_S_COORD, getMiddleOfLane(lane) });
+
+  Vehicle middle = createVehicle(0, egoCarPlusMeters(egoCar, 1.5 * egoCar.getShape().getHeight()),
+                                 mph2meter_per_sec(refPoint.vel_mph));
+
+  Vehicle left = createVehicle(1, parallelToVehicleInLane(middle, Lane::LEFT),
+                               middle.getVel_frenet_m_per_s().s);
+
+  Vehicle right = createVehicle(2, parallelToVehicleInLane(middle, Lane::RIGHT),
+                                middle.getVel_frenet_m_per_s().s);
+
+  vector<Vehicle> vehicles { middle, left, right };
+
+  Simulator simulator = createSimulator(lane, egoCar, vehicles,
+                                        std::experimental::nullopt);
+
+// WHEN
+  simulator.run([&]() {
+    ASSERT_FALSE(Simulator::isCollision(egoCar, vehicles));
+  });
+
+// THEN
+}
+
 TEST_F(PathPlannerTest, should_overtake_vehicle) {
 // GIVEN
   Lane lane = Lane::MIDDLE;
