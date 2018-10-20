@@ -41,8 +41,8 @@ class PathPlanner {
                                             const double egoCar_s) const;
   bool isVehicleWithin30MetersAheadOfEgoCarAtStartOfPath(
       const Vehicle& vehicle);
-  double getNewVelocity(const bool too_close, const double vel_mph);
-  Lane getNewLane(bool too_close, const Lane& lane);
+  double getNewVelocityMph(const bool tooClose, const double actualVelMph);
+  Lane getNewLane(bool tooClose, const Lane& lane);
   Lane getMoreFreeLeftOrRightLane();
   std::experimental::optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
       const Lane& lane);
@@ -96,10 +96,10 @@ tuple<Path, Lane, ReferencePoint> PathPlanner::createPath() {
 }
 
 tuple<Lane, ReferencePoint> PathPlanner::planPath() {
-  bool too_close = isAnyVehicleWithin30MetersAheadOfEgoCarInLane(lane);
-  Lane newLane = getNewLane(too_close, lane);
+  bool tooClose = isAnyVehicleWithin30MetersAheadOfEgoCarInLane(lane);
+  Lane newLane = getNewLane(tooClose, lane);
   ReferencePoint refPointNew;
-  refPointNew.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
+  refPointNew.vel_mph = getNewVelocityMph(tooClose, refPoint.vel_mph);
   refPointNew.point = egoCarAtEndOfPath.getPos();
   refPointNew.yaw_rad = deg2rad(egoCarAtEndOfPath.yaw_deg);
   return make_tuple(newLane, refPointNew);
@@ -184,14 +184,19 @@ bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtStartOfPath(
       egoCarAtStartOfPath.getPos().getFrenet().s);
 }
 
-double PathPlanner::getNewVelocity(const bool too_close, const double vel_mph) {
-  if (too_close) {
-    const double new_velocity = vel_mph - 1;
-    return new_velocity > 0 ? new_velocity : vel_mph;
-  } else {
-    const double new_velocity = vel_mph + 0.25;
-    return new_velocity < speed_limit_mph ? new_velocity : speed_limit_mph;
-  }
+double PathPlanner::getNewVelocityMph(const bool tooClose,
+                                      const double actualVelMph) {
+  auto slowDown = [&]() {
+    const double newVelMph = actualVelMph - 1;
+    return newVelMph > 0 ? newVelMph : actualVelMph;
+  };
+
+  auto speedUp = [&]() {
+    const double newVelMph = actualVelMph + 0.25;
+    return newVelMph < speed_limit_mph ? newVelMph : speed_limit_mph;
+  };
+
+  return tooClose ? slowDown() : speedUp();
 }
 
 vector<Vehicle> PathPlanner::getVehiclesInLaneInFrontOfEgoCar(
@@ -250,8 +255,8 @@ Lane PathPlanner::getMoreFreeLeftOrRightLane() {
   }
 }
 
-Lane PathPlanner::getNewLane(bool too_close, const Lane& lane) {
-  if (!too_close) {
+Lane PathPlanner::getNewLane(bool tooClose, const Lane& lane) {
+  if (!tooClose) {
     return lane;
   }
 
