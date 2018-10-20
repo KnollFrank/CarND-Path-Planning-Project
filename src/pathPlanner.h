@@ -34,10 +34,11 @@ class PathPlanner {
   tuple<Path, Lane, ReferencePoint> createPath();
 
  private:
-  bool isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(
-      const Lane& lane);
+  bool isAnyVehicleWithin30MetersAheadOfEgoCarInLane(const Lane& lane);
   bool isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane);
   bool isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(const Vehicle& vehicle);
+  bool isVehicleWithin30MetersAheadOfEgoCarAtBeginningOfPath(
+      const Vehicle& vehicle);
   double getNewVelocity(const bool too_close, const double vel_mph);
   Lane getNewLane(bool too_close, const Lane& lane);
   Lane getMoreFreeLeftOrRightLane();
@@ -58,6 +59,7 @@ class PathPlanner {
   const double speed_limit_mph;
   const vector<Vehicle>& vehicles;
   EgoCar egoCar;
+  FrenetCart egoCarPos;
   const PreviousData& previousData;
 };
 
@@ -87,12 +89,12 @@ tuple<Path, Lane, ReferencePoint> PathPlanner::createPath() {
 }
 
 tuple<Lane, ReferencePoint> PathPlanner::planPath() {
+  egoCarPos = egoCar.getPos();
   if (previousData.sizeOfPreviousPath() > 0) {
     egoCar.setPos(previousData.end_path);
   }
 
-  bool too_close = isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(
-      lane);
+  bool too_close = isAnyVehicleWithin30MetersAheadOfEgoCarInLane(lane);
   Lane newLane = getNewLane(too_close, lane);
   ReferencePoint refPointNew;
   refPointNew.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
@@ -112,13 +114,13 @@ FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {
   return FrenetCart(frenet, coordsConverter);
 }
 
-bool PathPlanner::isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(
+bool PathPlanner::isAnyVehicleWithin30MetersAheadOfEgoCarInLane(
     const Lane& lane) {
 
   auto isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane =
       [&]
       (const Vehicle& vehicle) {
-        return isVehicleInLane(vehicle, lane) && isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(vehicle);};
+        return isVehicleInLane(vehicle, lane) && (isVehicleWithin30MetersAheadOfEgoCarAtBeginningOfPath(vehicle) || isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(vehicle));};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane);
@@ -143,7 +145,7 @@ bool PathPlanner::isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane) {
 }
 
 bool PathPlanner::canSwitch2Lane(const Lane& lane) {
-  return !isAnyVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane(lane)
+  return !isAnyVehicleWithin30MetersAheadOfEgoCarInLane(lane)
       && !isAnyVehicleInLaneBehindOfEgoCarInTheWay(lane);
 }
 
@@ -164,11 +166,21 @@ bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(
       && check_vehicle_s - egoCar.getPos().getFrenet().s < 30;
 }
 
+// TODO: DRY with isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath
+bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtBeginningOfPath(
+    const Vehicle& vehicle) {
+  double check_egoCar_s = egoCarPos.getFrenet().s;
+  double check_vehicle_s = vehicle.getPos().getFrenet().s;
+  return check_vehicle_s > check_egoCar_s
+      && check_vehicle_s - check_egoCar_s < 30;
+}
+
 double PathPlanner::getNewVelocity(const bool too_close, const double vel_mph) {
-  double speed_delta_mph = 0.5;
+  double speed_delta_mph = 0.25;
 
   if (too_close) {
-    return vel_mph - speed_delta_mph;
+    double new_velocity = vel_mph - 1;
+    return new_velocity > 0 ? new_velocity : vel_mph;
   } else if (vel_mph + speed_delta_mph < speed_limit_mph) {
     return vel_mph + speed_delta_mph;
   } else {
