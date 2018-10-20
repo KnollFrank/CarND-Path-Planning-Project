@@ -187,7 +187,8 @@ bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtStartOfPath(
 double PathPlanner::getNewVelocityMph(const bool tooClose,
                                       const double actualVelMph) {
   auto slowDown = [&]() {
-    const double newVelMph = actualVelMph - 1;
+    // TODO: nicht irgendwie bremsen mit 0.75, sondern genau so, dass ein Unfall mit dem vorderen Fahrzeug verhindert wird.
+    const double newVelMph = actualVelMph - 0.75;
     return newVelMph > 0 ? newVelMph : actualVelMph;
   };
 
