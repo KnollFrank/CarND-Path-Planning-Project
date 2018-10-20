@@ -185,18 +185,13 @@ bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtStartOfPath(
 }
 
 double PathPlanner::getNewVelocity(const bool too_close, const double vel_mph) {
-  double speed_delta_mph = 0.25;
-
   if (too_close) {
-    double new_velocity = vel_mph - 1;
+    const double new_velocity = vel_mph - 1;
     return new_velocity > 0 ? new_velocity : vel_mph;
-  } else if (vel_mph + speed_delta_mph < speed_limit_mph) {
-    return vel_mph + speed_delta_mph;
   } else {
-    return speed_limit_mph;
+    const double new_velocity = vel_mph + 0.25;
+    return new_velocity < speed_limit_mph ? new_velocity : speed_limit_mph;
   }
-
-  return vel_mph;
 }
 
 vector<Vehicle> PathPlanner::getVehiclesInLaneInFrontOfEgoCar(
@@ -206,9 +201,10 @@ vector<Vehicle> PathPlanner::getVehiclesInLaneInFrontOfEgoCar(
     return ::isInLane(vehicle.getPos().getFrenet().d, lane);
   };
 
-  auto isInFrontOfEgoCar = [&](const Vehicle& vehicle) {
-    return vehicle.getPos().getFrenet().s > egoCarAtEndOfPath.getPos().getFrenet().s;
-  };
+  auto isInFrontOfEgoCar =
+      [&](const Vehicle& vehicle) {
+        return vehicle.getPos().getFrenet().s > egoCarAtEndOfPath.getPos().getFrenet().s;
+      };
 
   return filter<Vehicle>(vehicles, [&](const Vehicle& vehicle) {
     return isInLane(vehicle) && isInFrontOfEgoCar(vehicle);
