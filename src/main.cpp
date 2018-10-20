@@ -31,8 +31,6 @@
 #include "tests/frenetTest.h"
 #include "tests/egoCarTest.h"
 
-// TODO: download and incorporate GTest automatically
-
 #define COLLECT_DATA_FOR_UNIT_TESTS false
 
 // for convenience
