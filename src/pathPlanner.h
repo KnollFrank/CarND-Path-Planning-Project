@@ -37,6 +37,8 @@ class PathPlanner {
   bool isAnyVehicleWithin30MetersAheadOfEgoCarInLane(const Lane& lane);
   bool isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane);
   bool isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(const Vehicle& vehicle);
+  bool isVehicleWithin30MetersAheadOfEgoCar(const double vehicle_s,
+                                            const double egoCar_s) const;
   bool isVehicleWithin30MetersAheadOfEgoCarAtBeginningOfPath(
       const Vehicle& vehicle);
   double getNewVelocity(const bool too_close, const double vel_mph);
@@ -158,21 +160,23 @@ double PathPlanner::getVehiclesSPositionAtEndOfPath(const Vehicle& vehicle) {
   return endOfPath;
 }
 
+bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCar(
+    const double vehicle_s, const double egoCar_s) const {
+  // TODO: replace magic number 30 with constant
+  return vehicle_s > egoCar_s && vehicle_s - egoCar_s < 30;
+}
+
 bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(
     const Vehicle& vehicle) {
-  double check_vehicle_s = getVehiclesSPositionAtEndOfPath(vehicle);
-// TODO: replace magic number 30 with constant
-  return check_vehicle_s > egoCar.getPos().getFrenet().s
-      && check_vehicle_s - egoCar.getPos().getFrenet().s < 30;
+  return isVehicleWithin30MetersAheadOfEgoCar(
+      getVehiclesSPositionAtEndOfPath(vehicle), egoCar.getPos().getFrenet().s);
 }
 
 // TODO: DRY with isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath
 bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtBeginningOfPath(
     const Vehicle& vehicle) {
-  double check_egoCar_s = egoCarPos.getFrenet().s;
-  double check_vehicle_s = vehicle.getPos().getFrenet().s;
-  return check_vehicle_s > check_egoCar_s
-      && check_vehicle_s - check_egoCar_s < 30;
+  return isVehicleWithin30MetersAheadOfEgoCar(vehicle.getPos().getFrenet().s,
+                                              egoCarPos.getFrenet().s);
 }
 
 double PathPlanner::getNewVelocity(const bool too_close, const double vel_mph) {
