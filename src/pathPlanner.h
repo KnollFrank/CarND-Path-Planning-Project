@@ -172,7 +172,6 @@ bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(
       getVehiclesSPositionAtEndOfPath(vehicle), egoCar.getPos().getFrenet().s);
 }
 
-// TODO: DRY with isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath
 bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtBeginningOfPath(
     const Vehicle& vehicle) {
   return isVehicleWithin30MetersAheadOfEgoCar(vehicle.getPos().getFrenet().s,
