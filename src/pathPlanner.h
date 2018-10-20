@@ -39,7 +39,7 @@ class PathPlanner {
   bool isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(const Vehicle& vehicle);
   bool isVehicleWithin30MetersAheadOfEgoCar(const double vehicle_s,
                                             const double egoCar_s) const;
-  bool isVehicleWithin30MetersAheadOfEgoCarAtBeginningOfPath(
+  bool isVehicleWithin30MetersAheadOfEgoCarAtStartOfPath(
       const Vehicle& vehicle);
   double getNewVelocity(const bool too_close, const double vel_mph);
   Lane getNewLane(bool too_close, const Lane& lane);
@@ -60,8 +60,8 @@ class PathPlanner {
   const double dt;
   const double speed_limit_mph;
   const vector<Vehicle>& vehicles;
-  EgoCar egoCar;
-  FrenetCart egoCarPos;
+  const EgoCar& egoCarAtStartOfPath;
+  EgoCar egoCarAtEndOfPath;
   const PreviousData& previousData;
 };
 
@@ -77,8 +77,13 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
       dt(_dt),
       speed_limit_mph(_speed_limit_mph),
       vehicles(_vehicles),
-      egoCar(_egoCar),
+      egoCarAtStartOfPath(_egoCar),
+      egoCarAtEndOfPath(_egoCar),
       previousData(_previousData) {
+
+  if (previousData.sizeOfPreviousPath() > 0) {
+    egoCarAtEndOfPath.setPos(previousData.end_path);
+  }
 }
 
 tuple<Path, Lane, ReferencePoint> PathPlanner::createPath() {
@@ -91,24 +96,19 @@ tuple<Path, Lane, ReferencePoint> PathPlanner::createPath() {
 }
 
 tuple<Lane, ReferencePoint> PathPlanner::planPath() {
-  egoCarPos = egoCar.getPos();
-  if (previousData.sizeOfPreviousPath() > 0) {
-    egoCar.setPos(previousData.end_path);
-  }
-
   bool too_close = isAnyVehicleWithin30MetersAheadOfEgoCarInLane(lane);
   Lane newLane = getNewLane(too_close, lane);
   ReferencePoint refPointNew;
   refPointNew.vel_mph = getNewVelocity(too_close, refPoint.vel_mph);
-  refPointNew.point = egoCar.getPos();
-  refPointNew.yaw_rad = deg2rad(egoCar.yaw_deg);
+  refPointNew.point = egoCarAtEndOfPath.getPos();
+  refPointNew.yaw_rad = deg2rad(egoCarAtEndOfPath.yaw_deg);
   return make_tuple(newLane, refPointNew);
 }
 
 tuple<Path, ReferencePoint> PathPlanner::computePath(
     const ReferencePoint& refPoint) {
 
-  PathCreator pathCreator(coordsConverter, egoCar, dt, refPoint);
+  PathCreator pathCreator(coordsConverter, egoCarAtEndOfPath, dt, refPoint);
   return pathCreator.createPath(previousData.previous_path, lane);
 }
 
@@ -122,20 +122,22 @@ bool PathPlanner::isAnyVehicleWithin30MetersAheadOfEgoCarInLane(
   auto isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane =
       [&]
       (const Vehicle& vehicle) {
-        return isVehicleInLane(vehicle, lane) && (isVehicleWithin30MetersAheadOfEgoCarAtBeginningOfPath(vehicle) || isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(vehicle));};
+        return isVehicleInLane(vehicle, lane) && (isVehicleWithin30MetersAheadOfEgoCarAtStartOfPath(vehicle) || isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(vehicle));};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
                      isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane);
 }
 
 bool PathPlanner::isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane) {
-  auto isVehicleBehindOfEgoCar = [&](const Vehicle& vehicle) {
-    return vehicle.getPos().getFrenet().s < egoCar.getPos().getFrenet().s;
-  };
+  auto isVehicleBehindOfEgoCar =
+      [&](const Vehicle& vehicle) {
+        return vehicle.getPos().getFrenet().s < egoCarAtEndOfPath.getPos().getFrenet().s;
+      };
 
-  auto isVehicleInTheWay = [&](const Vehicle& vehicle) {
-    return egoCar.getPos().getFrenet().s - vehicle.getPos().getFrenet().s < 30;
-  };
+  auto isVehicleInTheWay =
+      [&](const Vehicle& vehicle) {
+        return egoCarAtEndOfPath.getPos().getFrenet().s - vehicle.getPos().getFrenet().s < 30;
+      };
 
   auto isVehicleInLaneBehindOfEgoCarInTheWay =
       [&](const Vehicle& vehicle) {
@@ -168,14 +170,18 @@ bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCar(
 
 bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(
     const Vehicle& vehicle) {
+
   return isVehicleWithin30MetersAheadOfEgoCar(
-      getVehiclesSPositionAtEndOfPath(vehicle), egoCar.getPos().getFrenet().s);
+      getVehiclesSPositionAtEndOfPath(vehicle),
+      egoCarAtEndOfPath.getPos().getFrenet().s);
 }
 
-bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtBeginningOfPath(
+bool PathPlanner::isVehicleWithin30MetersAheadOfEgoCarAtStartOfPath(
     const Vehicle& vehicle) {
-  return isVehicleWithin30MetersAheadOfEgoCar(vehicle.getPos().getFrenet().s,
-                                              egoCarPos.getFrenet().s);
+
+  return isVehicleWithin30MetersAheadOfEgoCar(
+      vehicle.getPos().getFrenet().s,
+      egoCarAtStartOfPath.getPos().getFrenet().s);
 }
 
 double PathPlanner::getNewVelocity(const bool too_close, const double vel_mph) {
@@ -201,7 +207,7 @@ vector<Vehicle> PathPlanner::getVehiclesInLaneInFrontOfEgoCar(
   };
 
   auto isInFrontOfEgoCar = [&](const Vehicle& vehicle) {
-    return vehicle.getPos().getFrenet().s > egoCar.getPos().getFrenet().s;
+    return vehicle.getPos().getFrenet().s > egoCarAtEndOfPath.getPos().getFrenet().s;
   };
 
   return filter<Vehicle>(vehicles, [&](const Vehicle& vehicle) {
