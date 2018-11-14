@@ -1,16 +1,11 @@
 # Model Documentation
 
-TODO:
-- detail how the project was completed.
-- A great write-up should include the rubric points as well as your description of how you addressed each point. You should include a detailed description of the code used in each step (with line-number references and code snippets where appropriate) and links to other supporting documents or external references.
-- just a brief description of how you passed each rubric point, and references to the relevant code :)
-- The code model for generating paths is described in detail.
 
 ## Path Planning
 
-A path for the ego car to follow is created  (`PathPlanner::createPath()`) according to the following simple strategy:
+A path for the ego car to follow is created ([PathPlanner::createPath()](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/43f9a2e1f6289d8c01256a43bf1e2411dbe2ed4c/src/pathPlanner.h#L89)) according to the following simple strategy:
 
-Stay in the current lane and [speed up](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/c1bd39ef43180098045da42c8c21684c68ab09db/src/pathPlanner.h#L195) until the maximum speed of 50 mph is reached. However, if another vehicle gets in the way (`isAnyVehicleWithin30MetersAheadOfEgoCarInLane()`), [slow down](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/c1bd39ef43180098045da42c8c21684c68ab09db/src/pathPlanner.h#L189) and change to a free lane if possible (`getNewLane()`).
+Stay in the current lane and [speed up](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/c1bd39ef43180098045da42c8c21684c68ab09db/src/pathPlanner.h#L195) until the maximum speed of 50 mph is reached. However, if another vehicle gets in the way ([isAnyVehicleWithin30MetersAheadOfEgoCarInLane()](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/43f9a2e1f6289d8c01256a43bf1e2411dbe2ed4c/src/pathPlanner.h#L119)), [slow down](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/c1bd39ef43180098045da42c8c21684c68ab09db/src/pathPlanner.h#L189) and change to a free lane if possible ([getNewLane()](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/43f9a2e1f6289d8c01256a43bf1e2411dbe2ed4c/src/pathPlanner.h#L258)).
 
 
 ## The car drives according to the speed limit
@@ -26,7 +21,7 @@ The following method calculates the desired speed of the ego car:
  6:   };
  7: 
  8:  auto speedUp = [&]() {
- 9:     const double newVelMph = actualVelMph + 0.25;
+ 9:     const double newVelMph = actualVelMph + 0.4;
 10:     return newVelMph < speed_limit_mph ? newVelMph : speed_limit_mph;
 11:   };
 12: 
@@ -38,8 +33,9 @@ The new velocity is alway between 0 (see line 5) and `speed_limit_mph` = 50 mph 
 
 ## Max Acceleration is not Exceeded
 
-dt = 0.02.
-berechne aus obiger Methode getNewVelocityMph() die ungefähre Beschleunigung und zeige sie ist <= 10 m/s^2.
+- speeding up:
+  dt = 0.02.
+  `newVelMph = actualVelMph + 0.4` => dv = newVelMph - actualVelMph = 0.25 mph = 0.4 / 2.24 m/s = 0.178571429 m/s => a = dv/dt = 0.178571429 / 0.02 m/s^2 = 8.928571429 m/s^2 <= 10 m/s^2
 
 ## Car does not have collisions
 

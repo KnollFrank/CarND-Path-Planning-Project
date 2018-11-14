@@ -193,7 +193,7 @@ double PathPlanner::getNewVelocityMph(const bool tooClose,
     };
 
   auto speedUp = [&]() {
-    const double newVelMph = actualVelMph + 0.25;
+    const double newVelMph = actualVelMph + 0.4;
     return newVelMph < speed_limit_mph ? newVelMph : speed_limit_mph;
   };
 
