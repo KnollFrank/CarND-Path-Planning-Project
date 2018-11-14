@@ -42,7 +42,7 @@ class PathPlanner {
   bool isVehicleWithin30MetersAheadOfEgoCarAtStartOfPath(
       const Vehicle& vehicle);
   double getNewVelocityMph(const bool tooClose, const double actualVelMph);
-  Lane getNewLane(bool tooClose, const Lane& lane);
+  Lane getNewLane(bool tooClose, const Lane& actualLane);
   Lane getMoreFreeLeftOrRightLane();
   std::experimental::optional<Vehicle> getNearestVehicleInLaneInFrontOfEgoCar(
       const Lane& lane);
@@ -188,9 +188,9 @@ double PathPlanner::getNewVelocityMph(const bool tooClose,
                                       const double actualVelMph) {
   auto slowDown = [&]() {
     // TODO: nicht irgendwie bremsen mit 0.75, sondern genau so, dass ein Unfall mit dem vorderen Fahrzeug verhindert wird.
-    const double newVelMph = actualVelMph - 0.75;
-    return newVelMph > 0 ? newVelMph : actualVelMph;
-  };
+      const double newVelMph = actualVelMph - 0.75;
+      return newVelMph > 0 ? newVelMph : actualVelMph;
+    };
 
   auto speedUp = [&]() {
     const double newVelMph = actualVelMph + 0.25;
@@ -230,7 +230,6 @@ std::experimental::optional<Vehicle> PathPlanner::getNearestVehicleInLaneInFront
 }
 
 Lane PathPlanner::getMoreFreeLeftOrRightLane() {
-
   std::experimental::optional<Vehicle> leftVehicleInEgoCarsWay =
       getNearestVehicleInLaneInFrontOfEgoCar(Lane::LEFT);
 
@@ -256,13 +255,13 @@ Lane PathPlanner::getMoreFreeLeftOrRightLane() {
   }
 }
 
-Lane PathPlanner::getNewLane(bool tooClose, const Lane& lane) {
+Lane PathPlanner::getNewLane(bool tooClose, const Lane& actualLane) {
   if (!tooClose) {
-    return lane;
+    return actualLane;
   }
 
   auto canSwitchFromLaneToLane = [&](const Lane& from, const Lane& to) {
-    return lane == from && canSwitch2Lane(to);
+    return actualLane == from && canSwitch2Lane(to);
   };
 
   if (canSwitchFromLaneToLane(Lane::LEFT, Lane::MIDDLE)) {
@@ -287,7 +286,7 @@ Lane PathPlanner::getNewLane(bool tooClose, const Lane& lane) {
     return Lane::MIDDLE;
   }
 
-  return lane;
+  return actualLane;
 }
 
 #endif /* PATHPLANNER_H_ */

@@ -21,27 +21,14 @@ struct MapWaypoints {
   vector<double> map_waypoints_s;
 
   static MapWaypoints load();
-  double getDistanceFromWaypointZeroToWaypoint(int waypointIndex) const;
-  LineSegment getLineSegment(int start, int end) const;
 };
 
 double getLenOfTraverse(const vector<Point>& points) {
   double len = 0;
-  for (int i = 0; i < points.size(); i++) {
+  for (int i = 0; i < points.size() - 1; i++) {
     len += points[i].distanceTo(points[i + 1]);
   }
   return len;
-}
-
-double MapWaypoints::getDistanceFromWaypointZeroToWaypoint(
-    int waypointIndex) const {
-  vector<Point> newVec(map_waypoints.begin(),
-                       map_waypoints.begin() + waypointIndex + 1);
-  return getLenOfTraverse(newVec);
-}
-
-LineSegment MapWaypoints::getLineSegment(int start, int end) const {
-  return LineSegment { map_waypoints[start], map_waypoints[end] };
 }
 
 // Load up map values for waypoint's x,y,s and d normalized normal vectors
