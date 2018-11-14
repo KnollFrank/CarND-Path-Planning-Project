@@ -51,8 +51,8 @@ class PathPlanner {
   std::vector<FrenetCart> createNewPoints();
   double getVehiclesSPositionAtEndOfPath(const Vehicle& vehicle);
   FrenetCart createFrenetCart(Frenet frenet) const;
-  tuple<Lane, ReferencePoint> planPath();
-  tuple<Path, ReferencePoint> computePath(const ReferencePoint& refPoint);
+  tuple<Lane, ReferencePoint> planBehaviour();
+  tuple<Path, ReferencePoint> generatePath(const ReferencePoint& refPoint);
 
   const CoordsConverter& coordsConverter;
   const ReferencePoint& refPoint;
@@ -89,13 +89,13 @@ PathPlanner::PathPlanner(const CoordsConverter& _coordsConverter,
 tuple<Path, Lane, ReferencePoint> PathPlanner::createPath() {
   Lane newLane;
   ReferencePoint refPointNew;
-  tie(newLane, refPointNew) = planPath();
+  tie(newLane, refPointNew) = planBehaviour();
   Path path;
-  tie(path, refPointNew) = computePath(refPointNew);
+  tie(path, refPointNew) = generatePath(refPointNew);
   return make_tuple(path, newLane, refPointNew);
 }
 
-tuple<Lane, ReferencePoint> PathPlanner::planPath() {
+tuple<Lane, ReferencePoint> PathPlanner::planBehaviour() {
   bool tooClose = isAnyVehicleWithin30MetersAheadOfEgoCarInLane(lane);
   Lane newLane = getNewLane(tooClose, lane);
   ReferencePoint refPointNew;
@@ -105,7 +105,7 @@ tuple<Lane, ReferencePoint> PathPlanner::planPath() {
   return make_tuple(newLane, refPointNew);
 }
 
-tuple<Path, ReferencePoint> PathPlanner::computePath(
+tuple<Path, ReferencePoint> PathPlanner::generatePath(
     const ReferencePoint& refPoint) {
 
   PathCreator pathCreator(coordsConverter, egoCarAtEndOfPath, dt, refPoint);
