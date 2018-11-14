@@ -119,13 +119,13 @@ FrenetCart PathPlanner::createFrenetCart(Frenet frenet) const {
 bool PathPlanner::isAnyVehicleWithin30MetersAheadOfEgoCarInLane(
     const Lane& lane) {
 
-  auto isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane =
+  auto isVehicleWithin30MetersAheadOfEgoCarInLane =
       [&]
       (const Vehicle& vehicle) {
         return isVehicleInLane(vehicle, lane) && (isVehicleWithin30MetersAheadOfEgoCarAtStartOfPath(vehicle) || isVehicleWithin30MetersAheadOfEgoCarAtEndOfPath(vehicle));};
 
   return std::any_of(vehicles.cbegin(), vehicles.cend(),
-                     isVehicleWithin30MetersAheadOfEgoCarAtEndOfPathInLane);
+                     isVehicleWithin30MetersAheadOfEgoCarInLane);
 }
 
 bool PathPlanner::isAnyVehicleInLaneBehindOfEgoCarInTheWay(const Lane& lane) {
