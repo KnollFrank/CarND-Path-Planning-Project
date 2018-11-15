@@ -40,7 +40,7 @@ $a = \frac{dv}{dt} = \frac{0.178571429}{0.02} \frac{m}{s^2} = 8.928571429 \frac{
 
 ## Car does not have collisions
 
-Durch den Sicherheitsabstand von 30 Metern und den Test auf freie Bahn sollten Kollisionen mit anderen Fahrzeugen vermieden werden.
+The path planner tries to avoid collisions by maintaining a minimum distance of 30 meters to other vehicles. Before switching lanes the path planner checks in the method [canSwitch2Lane()](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/1211cebcdf2907b05ab3493c58e22481d9719ed8/src/pathPlanner.h#L151) whether a lane switch is safe by assuring that no vehicle in the desired lane is in the way neither in front of the ego car (`!isAnyVehicleWithin30MetersAheadOfEgoCarInLane(lane)`) nor behind the ego car (`!isAnyVehicleInLaneBehindOfEgoCarInTheWay(lane)`):
 
 ```
 bool PathPlanner::canSwitch2Lane(const Lane& lane) {
