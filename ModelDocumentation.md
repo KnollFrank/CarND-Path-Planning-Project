@@ -33,16 +33,10 @@ The new velocity is alway between 0 (see line 5) and `speed_limit_mph` = 50 mph 
 
 ## Max Acceleration is not Exceeded
 
-Acceleration uses the following formula: [newVelMph = actualVelMph + 0.4](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/5c5a44cc69410de5ac237e2de1051dd33def927e/src/pathPlanner.h#L196)
-
+Acceleration uses the formula: [newVelMph = actualVelMph + 0.4](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/5c5a44cc69410de5ac237e2de1051dd33def927e/src/pathPlanner.h#L196).
 So the change $dv$ in velocity is:
-$dv = \textit{newVelMph} - \textit{actualVelMph} = 0.4 \textit{ mph} = \frac{0.4}{2.24} \frac{m}{s} = 0.178571429 \frac{m}{s}$
-
-Given that $dt = 0.02 s$ the acceleration $a$ is:
-
-$a = \frac{dv}{dt} = \frac{0.178571429}{0.02} \frac{m}{s^2} = 8.928571429 \frac{m}{s^2}$
-
-which does not exceed the max acceleration of $10 \frac{m}{s^2}$.
+$dv = \textit{newVelMph} - \textit{actualVelMph} = 0.4 \textit{ mph} = \frac{0.4}{2.24} \frac{m}{s} = 0.178571429 \frac{m}{s}$. Given that $dt = 0.02 s$ the acceleration $a$ is:
+$a = \frac{dv}{dt} = \frac{0.178571429}{0.02} \frac{m}{s^2} = 8.928571429 \frac{m}{s^2}$, which does not exceed the max acceleration of $10 \frac{m}{s^2}$.
 
 ## Car does not have collisions
 
