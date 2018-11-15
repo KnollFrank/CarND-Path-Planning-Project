@@ -103,7 +103,7 @@ The method [getNewLane()](https://github.com/KnollFrank/CarND-Path-Planning-Proj
 ```
 
 When a lane switch from the middle lane to both the
-left and right lane is possible then the lane which is *more free* is preferred (see lines 14 - 18).
+left and right lane is possible, then the lane which is [more free](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/43f9a2e1f6289d8c01256a43bf1e2411dbe2ed4c/src/pathPlanner.h#L232), i.e. the lane that has a greater distance to the first vehicle ahead, is preferred (see lines 14 - 18).
 
 TODO: Bibliotheken nennen:
 - alglib für kubische Splines.
