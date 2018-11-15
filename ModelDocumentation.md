@@ -29,7 +29,7 @@ The method [getNewVelocityMph()](https://github.com/KnollFrank/CarND-Path-Planni
 14: }
 ```
 
-The new velocity is alway between 0 (see line 5) and `speed_limit_mph` = 50 mph (see line 10).
+The new velocity is alway between 0 (see line 5) and `speed_limit_mph` = 50 mph (see line 10), so the car drives according to the speed limit.
 
 ## Max Acceleration is not Exceeded
 
@@ -50,13 +50,16 @@ bool PathPlanner::canSwitch2Lane(const Lane& lane) {
 ```
 
 ## The car stays in its lane
-siehe getNewLane():
+
+Whenever the car is not too close to any other vehicle then the method ([getNewLane()](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/43f9a2e1f6289d8c01256a43bf1e2411dbe2ed4c/src/pathPlanner.h#L258)) returns the actual lane:
 
 ```
   if (!tooClose) {
     return actualLane;
   }
 ```
+
+So the car stays in its lane.
 
 ## The car is able to change lanes
 ```
