@@ -62,42 +62,48 @@ Whenever the car is not too close to any other vehicle then the method ([getNewL
 So the car stays in its lane.
 
 ## The car is able to change lanes
-```
-Lane PathPlanner::getNewLane(bool tooClos}e, const Lane& actualLane) {
-  if (!tooClose) {
-    return actualLane;
-  }
 
-  auto canSwitchFromLaneToLane = [&](const Lane& from, const Lane& to) {
-    return actualLane == from && canSwitch2Lane(to);
-  };
-
-  if (canSwitchFromLaneToLane(Lane::LEFT, Lane::MIDDLE)) {
-    return Lane::MIDDLE;
-  }
-
-  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)
-      && canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
-
-    return getMoreFreeLeftOrRightLane();
-  }
-
-  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)) {
-    return Lane::LEFT;
-  }
-
-  if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
-    return Lane::RIGHT;
-  }
-
-  if (canSwitchFromLaneToLane(Lane::RIGHT, Lane::MIDDLE)) {
-    return Lane::MIDDLE;
-  }
-
-  return actualLane;
-}
+The method [getNewLane()](https://github.com/KnollFrank/CarND-Path-Planning-Project/blob/43f9a2e1f6289d8c01256a43bf1e2411dbe2ed4c/src/pathPlanner.h#L258) returns the adjacent lane to which the ego car can switch from its actual lane:
 
 ```
+ 1: Lane PathPlanner::getNewLane(bool tooClose, const Lane& actualLane) {
+ 2:   if (!tooClose) {
+ 3:     return actualLane;
+ 4:   }
+ 5: 
+ 6:   auto canSwitchFromLaneToLane = [&](const Lane& from, const Lane& to) {
+ 7:     return actualLane == from && canSwitch2Lane(to);
+ 8:   };
+ 9: 
+10:   if (canSwitchFromLaneToLane(Lane::LEFT, Lane::MIDDLE)) {
+11:     return Lane::MIDDLE;
+12:   }
+13: 
+14:   if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)
+15:       && canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
+16: 
+17:     return getMoreFreeLeftOrRightLane();
+18:   }
+19: 
+20:   if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::LEFT)) {
+21:     return Lane::LEFT;
+22:   }
+23: 
+24:   if (canSwitchFromLaneToLane(Lane::MIDDLE, Lane::RIGHT)) {
+25:     return Lane::RIGHT;
+26:   }
+27: 
+28:   if (canSwitchFromLaneToLane(Lane::RIGHT, Lane::MIDDLE)) {
+29:     return Lane::MIDDLE;
+30:   }
+31: 
+32:   return actualLane;
+33: }
+
+```
+
+When a lane switch from the middle lane to both the
+left and right lane is possible then the lane which is *more free* is preferred (see lines 14 - 18).
 
 TODO: Bibliotheken nennen:
 - alglib für kubische Splines.
